@@ -1,17 +1,27 @@
 import { getProductsAction } from '@/actions/product-actions';
-import { DeleteProductButton } from '@/components/admin/delete-product-button';
-import { ProductImage } from '@/components/admin/product-image';
+import { ProductsList } from '@/components/admin/products-list';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Edit, Package, PlusCircle } from 'lucide-react';
+import { PaginationControls } from '@/components/ui/pagination';
+import { Package, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default async function AdminProductsPage() {
-  const result = await getProductsAction({ limit: 1000, sort: 'newest' });
+interface AdminProductsPageProps {
+  searchParams?: {
+    page?: string;
+    limit?: string;
+  };
+}
+
+export default async function AdminProductsPage({ searchParams }: AdminProductsPageProps) {
+  const page = Number(searchParams?.page) || 1;
+  const limit = Number(searchParams?.limit) || 12;
+
+  const result = await getProductsAction({ page, limit, sort: 'newest' });
   const products = result.products || [];
 
   const stats = {
-    total: products.length,
+    total: result.totalCount,
     categories: [...new Set(products.map(p => p.category))].length,
     brands: [...new Set(products.map(p => p.brand))].length,
     lowStock: products.filter(p => p.stock < 10).length,
@@ -112,52 +122,16 @@ export default async function AdminProductsPage() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center gap-4 p-4 border dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                >
-                  {/* Product Image */}
-                  <ProductImage
-                    src={product.thumbnail || product.images?.[0] || ''}
-                    alt={product.title}
-                    className="h-16 w-16 object-cover rounded border dark:border-slate-700"
-                  />
-
-                  {/* Product Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold dark:text-white truncate">
-                      {product.title}
-                    </h3>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-slate-600 dark:text-slate-400">
-                      <span>${product?.price?.toFixed(2)}</span>
-                      <span>•</span>
-                      <span>Stock: {product.stock}</span>
-                      <span>•</span>
-                      <span>{product.brand}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                    >
-                      <Link href={`/admin/products/${product.id}/edit`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <DeleteProductButton productId={product.id} productTitle={product.title} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ProductsList products={products} />
           )}
         </CardContent>
       </Card>
+      <PaginationControls
+        currentPage={result.page}
+        totalPages={result.totalPages}
+        hasNextPage={result.hasMore}
+        hasPreviousPage={result.page > 1}
+      />
     </div>
   );
 }

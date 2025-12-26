@@ -38,7 +38,7 @@ export async function getProductsAction(
     inStock,
     sort = 'featured',
     page = 1,
-    limit = 8,
+    limit = 12,
   } = options;
 
   const where: Prisma.ProductWhereInput = {
@@ -187,125 +187,112 @@ export async function getFiltersAction() {
 
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import { productFormSchema, ProductFormValues } from '@/lib/schemas/product-schema';
 import { z } from 'zod';
-
-// Product validation schema
-const productSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  price: z.number().positive('Price must be positive'),
-  discount: z.number().min(0).max(100).optional(),
-  stock: z.number().int().min(0, 'Stock must be non-negative'),
-  brand: z.string().min(1, 'Brand is required'),
-  category: z.string().min(1, 'Category is required'),
-  rating: z.number().min(0).max(5).optional(),
-  reviewCount: z.number().int().min(0).optional(),
-  thumbnail: z.string().url().optional().nullable(),
-  images: z.array(z.string().url()).min(1, 'At least one image is required'),
-})
-
-type ProductInput = z.infer<typeof productSchema>
 
 // Helper to check admin access
 async function requireAdmin() {
-  const session = await auth()
+  const session = await auth();
   if (!session?.user || (session.user as any).role !== 'admin') {
-    throw new Error('Unauthorized: Admin access required')
+    throw new Error('Unauthorized: Admin access required');
   }
-  return session
+  return session;
 }
 
 /**
  * Create new product (admin only)
  */
-export async function createProductAction(data: ProductInput) {
+export async function createProductAction(data: ProductFormValues) {
   try {
-    await requireAdmin()
+    await requireAdmin();
 
-    const validated = productSchema.parse(data)
-    const { images, ...productData } = validated
+    const validated = productFormSchema.parse(data);
+    const { images, ...productData } = validated;
 
     const product = await prisma.product.create({
       data: {
         ...productData,
         discount: productData.discount || 0,
-        rating: productData.rating || 0,
-        reviewCount: productData.reviewCount || 0,
         images: {
-          create: images.map(url => ({ url })),
+          create: images?.map((url) => ({ url })) || [],
         },
+        thumbnail: images?.[0],
       },
       include: {
         images: true,
       },
-    })
+    });
 
-    revalidatePath('/admin/products')
-    revalidatePath('/products')
+    revalidatePath('/admin/products');
+    revalidatePath('/products');
 
     return {
       success: true,
       data: product,
       message: 'Product created successfully',
-    }
+    };
   } catch (error) {
-    console.error('Error creating product:', error)
+    console.error('Error creating product:', error);
     if (error instanceof z.ZodError) {
+      // Return the first validation error message
       return {
         success: false,
-        error: error.errors[0].message,
-      }
+        error: error.errors[0]?.message || 'Invalid data provided',
+      };
     }
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create product',
-    }
+    };
   }
 }
 
 /**
  * Update product (admin only)
  */
-export async function updateProductAction(id: string, data: Partial<ProductInput>) {
+export async function updateProductAction(id: string, data: Partial<ProductFormValues>) {
   try {
-    await requireAdmin()
+    await requireAdmin();
 
-    const { images, ...productData } = data
+    const { images, ...productData } = data;
 
     // Update product
     const product = await prisma.product.update({
       where: { id },
-      data: productData,
-    })
+      data: {
+        ...productData,
+        thumbnail: images?.[0],
+      },
+    });
 
     // Update images if provided
     if (images && images.length > 0) {
       // Delete existing images
       await prisma.productImage.deleteMany({
         where: { productId: id },
-      })
+      });
 
       // Create new images
       await prisma.productImage.createMany({
-        data: images.map(url => ({ url, productId: id })),
-      })
+        data: images.map((url) => ({ url, productId: id })),
+      });
     }
 
-    revalidatePath('/admin/products')
-    revalidatePath(`/admin/products/${id}`)
-    revalidatePath('/products')
+    revalidatePath('/admin/products');
+    revalidatePath(`/admin/products/${id}`);
+    revalidatePath('/products');
 
     return {
       success: true,
       data: product,
       message: 'Product updated successfully',
-    }
+    };
   } catch (error) {
-    console.error('Error updating product:', error)
+    console.error('Error updating product:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update product',
-    }
+    };
   }
 }
 
@@ -333,5 +320,43 @@ export async function deleteProductAction(id: string) {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete product',
     }
+  }
+}
+
+/**
+ * Delete multiple products (admin only)
+ */
+export async function deleteMultipleProductsAction(ids: string[]) {
+  try {
+    await requireAdmin();
+
+    if (ids.length === 0) {
+      return {
+        success: false,
+        error: 'No product IDs provided',
+      };
+    }
+
+    const deleteResult = await prisma.product.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    revalidatePath('/admin/products');
+    revalidatePath('/products');
+
+    return {
+      success: true,
+      message: `${deleteResult.count} products deleted successfully`,
+    };
+  } catch (error) {
+    console.error('Error deleting multiple products:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete products',
+    };
   }
 }

@@ -21,6 +21,7 @@ import { Product } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface ProductFormProps {
   product?: Product | null;
@@ -34,9 +35,8 @@ export const ProductForm = ({
   isSubmitting = false,
 }: ProductFormProps) => {
   const [useUrlInput, setUseUrlInput] = useState(true);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imageUrl, setImageUrl] = useState(product?.images?.[0] || '');
+  const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -47,58 +47,57 @@ export const ProductForm = ({
       stock: product?.stock || 0,
       brand: product?.brand || '',
       category: product?.category || '',
-      discount: product?.discount || undefined, // ✅ Added discount
+      discount: product?.discount || undefined,
     },
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
     if (files.length === 0) return;
 
-    const validFiles = files.filter(file => {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`${file.name} is too large. Max size is 5MB.`);
-        return false;
-      }
-      return true;
-    });
+    setIsUploading(true);
+    const uploadedUrls: string[] = [];
 
-    const previews = validFiles.map(file => URL.createObjectURL(file));
-    setImagePreviews(prev => [...prev, ...previews]);
-    setImageFiles(prev => [...prev, ...validFiles]);
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} is too large. Max size is 5MB.`);
+        continue;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          uploadedUrls.push(result.url);
+        } else {
+          toast.error(`Failed to upload ${file.name}: ${result.error}`);
+        }
+      } catch (error) {
+        toast.error(`An error occurred while uploading ${file.name}`);
+      }
+    }
+
+    setImageUrls(prev => [...prev, ...uploadedUrls]);
+    setIsUploading(false);
   };
 
   const removeImage = (index: number) => {
-    URL.revokeObjectURL(imagePreviews[index]);
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleFormSubmit = async (values: ProductFormValues) => {
-    let images: string[] = [];
-
-    if (!useUrlInput && imageFiles.length > 0) {
-      const imagePromises = imageFiles.map((file: File) => {
-        return new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      });
-
-      images = await Promise.all(imagePromises);
-    } else if (useUrlInput && imageUrl) {
-      images = [imageUrl];
-    } else {
-      images = ['https://via.placeholder.com/400x400?text=No+Image'];
-    }
-
     const finalValues = {
       ...values,
-      images,
-      imageUrl: images[0],
+      images: imageUrls,
+      imageUrl: imageUrls[0],
     };
 
     await onSubmit(finalValues);
@@ -117,7 +116,7 @@ export const ProductForm = ({
               <FormControl>
                 <Input
                   placeholder='e.g. Quantum QLED 65" TV'
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   {...field}
                 />
               </FormControl>
@@ -137,7 +136,7 @@ export const ProductForm = ({
                 <Textarea
                   placeholder='Describe the product features and benefits...'
                   rows={4}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   {...field}
                 />
               </FormControl>
@@ -160,7 +159,7 @@ export const ProductForm = ({
                     step='0.01'
                     min='0'
                     placeholder='e.g. 1299.99'
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
                     {...field}
                     value={field.value === 0 ? '' : field.value}
                     onChange={(e) => {
@@ -185,7 +184,7 @@ export const ProductForm = ({
                     type='number'
                     min='0'
                     placeholder='e.g. 25'
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
                     {...field}
                     value={field.value === 0 ? '' : field.value}
                     onChange={(e) => {
@@ -211,7 +210,7 @@ export const ProductForm = ({
                 <FormControl>
                   <Input
                     placeholder='e.g. AuroVision'
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
                     {...field}
                   />
                 </FormControl>
@@ -229,7 +228,7 @@ export const ProductForm = ({
                 <FormControl>
                   <Input
                     placeholder='e.g. TVs'
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
                     {...field}
                   />
                 </FormControl>
@@ -249,6 +248,7 @@ export const ProductForm = ({
               variant={useUrlInput ? 'default' : 'outline'}
               size="sm"
               onClick={() => setUseUrlInput(true)}
+              disabled={isUploading}
             >
               <ImageIcon className="h-4 w-4 mr-2" />
               Image URL
@@ -258,6 +258,7 @@ export const ProductForm = ({
               variant={!useUrlInput ? 'default' : 'outline'}
               size="sm"
               onClick={() => setUseUrlInput(false)}
+              disabled={isUploading}
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload Files
@@ -269,14 +270,14 @@ export const ProductForm = ({
               <Input
                 type="url"
                 placeholder="https://example.com/image.jpg"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                disabled={isSubmitting}
+                value={imageUrls[0] || ''}
+                onChange={(e) => setImageUrls([e.target.value])}
+                disabled={isSubmitting || isUploading}
               />
-              {imageUrl && (
+              {imageUrls[0] && (
                 <div className="mt-2">
                   <img 
-                    src={imageUrl} 
+                    src={imageUrls[0]} 
                     alt="Preview" 
                     className="h-32 w-32 object-cover rounded-lg border dark:border-slate-700"
                     onError={(e) => {
@@ -295,29 +296,40 @@ export const ProductForm = ({
                   accept="image/*"
                   multiple
                   onChange={handleImageUpload}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   className="hidden"
                 />
                 <label 
                   htmlFor="images"
                   className="cursor-pointer flex flex-col items-center gap-2"
                 >
-                  <Upload className="h-10 w-10 text-slate-400" />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
-                    Click to upload or drag and drop
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    PNG, JPG, WEBP up to 5MB each
-                  </span>
+                  {isUploading ? (
+                    <>
+                      <Loader2 className='h-10 w-10 text-slate-400 animate-spin' />
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                        Uploading...
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-10 w-10 text-slate-400" />
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                        Click to upload or drag and drop
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        PNG, JPG, WEBP up to 5MB each
+                      </span>
+                    </>
+                  )}
                 </label>
               </div>
 
-              {imagePreviews.length > 0 && (
+              {imageUrls.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {imagePreviews.map((preview, index) => (
+                  {imageUrls.map((url, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={preview}
+                        src={url}
                         alt={`Preview ${index + 1}`}
                         className="h-24 w-full object-cover rounded-lg border dark:border-slate-700"
                       />
@@ -327,7 +339,7 @@ export const ProductForm = ({
                         size="icon"
                         className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => removeImage(index)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isUploading}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -343,7 +355,7 @@ export const ProductForm = ({
         <div className='flex gap-4 pt-4'>
           <Button
             type='submit'
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploading}
             className='min-w-[120px]'
           >
             {isSubmitting ? (
