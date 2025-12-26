@@ -15,22 +15,36 @@ import {
 } from '../slices/wishlistSlice';
 import { AppDispatch, RootState } from '../store';
 import { showToast } from './uiThunks';
+import { fetchProductById } from './productThunks';
+import { Action } from '@reduxjs/toolkit';
+import { ThunkAction } from 'redux-thunk';
+
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
+>;
 
 /**
  * Add item to cart with stock validation
  */
-export const addToCart = (item: Omit<CartItem, 'cartItemId' | 'image'>) => (
+export const addToCart = (item: Omit<CartItem, 'cartItemId' | 'image'>): AppThunk<Promise<{ success: boolean }>> => async (
   dispatch: AppDispatch,
   getState: () => RootState
 ) => {
-  const { products } = getState().products;
-  const { cart } = getState().cart;
+  let product = getState().products.products.find((p) => p.id === item.id);
 
-  const product = products.find((p) => p.id === item.id);
+  if (!product) {
+    product = await dispatch(fetchProductById(item.id));
+  }
+  
   if (!product) {
     dispatch(showToast('Product not found.', 'error'));
     return { success: false };
   }
+
+  const { cart } = getState().cart;
 
   // Resolve selected options with defaults
   const selectedOptions =

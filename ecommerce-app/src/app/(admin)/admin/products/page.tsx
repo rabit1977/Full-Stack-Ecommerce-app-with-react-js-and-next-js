@@ -7,7 +7,7 @@ import { Edit, Package, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function AdminProductsPage() {
-  const result = await getProductsAction({});
+  const result = await getProductsAction({ limit: 1000, sort: 'newest' });
   const products = result.products || [];
 
   const stats = {

@@ -160,3 +160,40 @@ export const deleteProduct = (productId: string) => (
     return { success: false, message: 'Failed to delete product' };
   }
 };
+
+import { getProductByIdAction } from '@/actions/product-actions';
+
+/**
+ * Fetch a single product by ID and add to store if not present
+ */
+export const fetchProductById = (productId: string) => async (
+  dispatch: AppDispatch,
+  getState: () => RootState
+): Promise<Product | null> => {
+  try {
+    const { products } = getState().products;
+    let product = products.find((p) => p.id === productId);
+
+    if (product) {
+      return product;
+    }
+
+    dispatch(setLoading(true));
+    product = await getProductByIdAction(productId);
+
+    if (product) {
+      dispatch(addProductAction(product));
+      dispatch(clearError());
+      return product;
+    } else {
+      dispatch(setError('Product not found'));
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    dispatch(setError('Failed to fetch product'));
+    return null;
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
