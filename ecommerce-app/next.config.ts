@@ -29,13 +29,13 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cdn.shopify.com',
+        hostname: 'i.rtings.com',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname:  "images.samsung.com",
+        hostname: 'images.samsung.com',
         port: '',
         pathname: '/**',
       },
@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'i.rtings.com',
+        hostname: 'www.dagimarket.com',
         port: '',
         pathname: '/**',
       },

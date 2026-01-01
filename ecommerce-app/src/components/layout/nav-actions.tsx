@@ -26,7 +26,8 @@ import {
   Package,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Navigation actions component with theme toggle, cart, wishlist, and user menu
@@ -37,13 +38,19 @@ import { useCallback, useMemo } from 'react';
  * - User dropdown menu with role-based links
  * - Optimized re-renders with memoization
  * - Accessible markup
+ * - Fix for hydration mismatch errors by delaying render of persisted state dependent UI
  */
 export const NavActions = () => {
+  const [hasMounted, setHasMounted] = useState(false);
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user.user);
   const cart = useAppSelector((state) => state.cart.cart);
   const wishlist = useAppSelector((state) => state.wishlist.itemIds);
   const theme = useAppSelector((state) => state.ui.theme);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Memoized cart item count
   const cartItemCount = useMemo(() => {
@@ -67,6 +74,18 @@ export const NavActions = () => {
   const handleLogout = useCallback(() => {
     dispatch(logout());
   }, [dispatch]);
+
+  // Render a skeleton loader until the component has mounted on the client
+  if (!hasMounted) {
+    return (
+      <div className='flex items-center gap-2'>
+        <Skeleton className='h-8 w-8 rounded-full' />
+        <Skeleton className='h-8 w-8 rounded-full' />
+        <Skeleton className='h-8 w-8 rounded-full' />
+        <Skeleton className='h-8 w-24 rounded-md' />
+      </div>
+    );
+  }
 
   return (
     <div className='flex items-center gap-1'>
@@ -175,7 +194,7 @@ export const NavActions = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Button asChild size='sm' className='px-3 sm:px-4 ml-2  *:'>
+        <Button asChild size='sm' className='px-3 sm:px-4 ml-2'>
           <Link href='/auth'>
             <User className='h-4 w-4' />
             <span className='hidden sm:inline'>Login</span>

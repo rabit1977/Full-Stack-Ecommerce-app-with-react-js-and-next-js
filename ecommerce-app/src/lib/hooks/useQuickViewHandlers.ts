@@ -1,6 +1,7 @@
 import { toggleWishlistAction } from '@/actions/wishlist-actions';
 import { useAppDispatch } from '@/lib/store/hooks';
 import { addToCart } from '@/lib/store/slices/cartSlice';
+import { setWishlist } from '@/lib/store/slices/wishlistSlice';
 import { Product } from '@/lib/types';
 import { useCallback } from 'react';
 import {
@@ -69,9 +70,12 @@ export const useQuickViewHandlers = (
     setValidationError,
   ]);
 
-  const handleToggleWishlist = useCallback(() => {
+  const handleToggleWishlist = useCallback(async () => {
     if (!product) return;
-    dispatch(toggleWishlistAction(product.id));
+    const result = await toggleWishlistAction(product.id);
+    if (result.success && result.wishlist) {
+      dispatch(setWishlist(result.wishlist));
+    }
   }, [product, dispatch]);
 
   const handleOptionChange = useCallback(
