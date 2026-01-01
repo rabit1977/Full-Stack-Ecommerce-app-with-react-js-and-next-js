@@ -360,3 +360,31 @@ export async function deleteMultipleProductsAction(ids: string[]) {
     };
   }
 }
+
+/**
+ * Get multiple products by their IDs
+ */
+export async function getProductsByIdsAction(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const products = await prisma.product.findMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+    include: { images: true },
+  });
+
+  // Map Prisma result to frontend Product type
+  const mappedProducts: Product[] = products.map((p) => ({
+    ...p,
+    images: p.images.map((img) => img.url),
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+  }));
+
+  return mappedProducts;
+}

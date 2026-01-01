@@ -7,12 +7,6 @@ import {
   saveForLater as saveForLaterAction,
   updateCartQuantity as updateCartQuantityAction,
 } from '../slices/cartSlice';
-import {
-  clearWishlist as clearWishlistAction,
-  toggleWishlistItem as toggleWishlistAction,
-  addToWishlist as addToWishlistAction,
-  removeFromWishlist as removeFromWishlistAction,
-} from '../slices/wishlistSlice';
 import { AppDispatch, RootState } from '../store';
 import { showToast } from './uiThunks';
 import { fetchProductById } from './productThunks';
@@ -176,64 +170,5 @@ export const removeFromSaved = (cartItemId: string) => (
 ) => {
   dispatch(removeFromSavedAction(cartItemId));
   dispatch(showToast('Item removed.', 'info'));
-  return { success: true };
-};
-
-/**
- * Toggle product in wishlist
- */
-export const toggleWishlist = (productId: string) => (
-  dispatch: AppDispatch,
-  getState: () => RootState
-) => {
-  const { itemIds } = getState().wishlist;
-  const isInWishlist = itemIds.includes(productId);
-
-  dispatch(toggleWishlistAction(productId));
-  dispatch(
-    showToast(
-      isInWishlist ? 'Removed from wishlist' : 'Added to wishlist',
-      'info'
-    )
-  );
-  
-  return { success: true, wasInWishlist: isInWishlist };
-};
-
-/**
- * Add product to wishlist (explicit add)
- */
-export const addToWishlist = (productId: string) => (
-  dispatch: AppDispatch,
-  getState: () => RootState
-) => {
-  const { itemIds } = getState().wishlist;
-  
-  if (itemIds.includes(productId)) {
-    return { success: false, message: 'Already in wishlist' };
-  }
-
-  dispatch(addToWishlistAction(productId));
-  dispatch(showToast('Added to wishlist', 'success'));
-  return { success: true };
-};
-
-/**
- * Remove product from wishlist (explicit remove)
- */
-export const removeFromWishlist = (productId: string) => (
-  dispatch: AppDispatch
-) => {
-  dispatch(removeFromWishlistAction(productId));
-  dispatch(showToast('Removed from wishlist', 'info'));
-  return { success: true };
-};
-
-/**
- * Clear entire wishlist
- */
-export const clearWishlist = () => (dispatch: AppDispatch) => {
-  dispatch(clearWishlistAction());
-  dispatch(showToast('Wishlist cleared', 'info'));
   return { success: true };
 };

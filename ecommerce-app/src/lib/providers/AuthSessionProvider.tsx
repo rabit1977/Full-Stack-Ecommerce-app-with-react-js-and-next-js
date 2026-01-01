@@ -5,13 +5,14 @@ import { setUser } from '@/lib/store/slices/userSlice';
 import { User } from '@/lib/types';
 import { SessionProvider, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
+import { setWishlist } from '../store/slices/wishlistSlice';
 
-export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionProvider>
-      {children}
-    </SessionProvider>
-  );
+export function AuthSessionProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <SessionProvider>{children}</SessionProvider>;
 }
 
 export function AuthSync() {
@@ -22,17 +23,18 @@ export function AuthSync() {
     if (status === 'authenticated' && session?.user && session.user.email) {
       // Sync NextAuth session to Redux state
       const user: User = {
-          id: (session.user as any).id || session.user.email, // Use ID from session or fallback to email
-          email: session.user.email,
-          name: session.user.name || 'User',
-          role: (session.user as any).role || 'customer', // Get role from session
-          cart: [],
-          wishlist: [],
-          savedForLater: [],
-          helpfulReviews: [],
-          createdAt: new Date().toISOString(),
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name || 'User',
+        role: session.user.role || 'customer',
+        wishlist: session.user.wishlist || [],
+        // These are not on the session, initialize as empty
+        cart: [],
+        savedForLater: [],
+        helpfulReviews: [],
       };
       dispatch(setUser(user));
+      dispatch(setWishlist(user.wishlist));
     }
   }, [session, status, dispatch]);
 

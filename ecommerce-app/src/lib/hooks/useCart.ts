@@ -1,21 +1,26 @@
-import { useAppSelector } from './useAppSelector';
-import { useAppDispatch } from './useAppDispatch';
+import { toggleWishlistAction } from '@/actions/wishlist-actions';
 import {
   addToCart,
-  updateCartQuantity,
-  removeFromCart,
-  saveForLater,
   moveToCart,
+  removeFromCart,
   removeFromSaved,
-  toggleWishlist,
+  saveForLater,
+  updateCartQuantity,
 } from '@/lib/store/thunks/cartThunks';
-import { useCallback } from 'react';
 import { CartItem } from '@/lib/types';
+import { useCallback, useTransition } from 'react';
+import { showToast } from '../store/thunks/uiThunks';
+import { useAppDispatch } from './useAppDispatch';
+import { useAppSelector } from './useAppSelector';
+import { setWishlist } from '../store/slices/wishlistSlice';
 
 export const useCart = () => {
   const dispatch = useAppDispatch();
   const { cart, savedForLater } = useAppSelector((state) => state.cart);
-  const wishlistItems = useAppSelector((state) => state.wishlist.itemIds);
+  const { itemIds: wishlistItems, isInitialized } = useAppSelector(
+    (state) => state.wishlist
+  );
+  const [isToggling, startTransition] = useTransition();
 
   const handleAddToCart = useCallback(
     (item: Omit<CartItem, 'cartItemId' | 'image'>) => {
@@ -61,15 +66,33 @@ export const useCart = () => {
 
   const handleToggleWishlist = useCallback(
     (productId: string) => {
-      dispatch(toggleWishlist(productId));
+      startTransition(async () => {
+        const wasInWishlist = wishlistItems.includes(productId);
+        const result = await toggleWishlistAction(productId);
+        if (result.success) {
+          dispatch(setWishlist(result.wishlist));
+          dispatch(
+            showToast(
+              wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist',
+              'info'
+            )
+          );
+        } else {
+          dispatch(
+            showToast(result.error || 'Failed to update wishlist.', 'error')
+          );
+        }
+      });
     },
-    [dispatch]
+    [dispatch, wishlistItems]
   );
 
   return {
     cart,
     savedForLater,
     wishlistItems,
+    isWishlistInitialized: isInitialized,
+    isTogglingWishlist: isToggling,
     addToCart: handleAddToCart,
     updateCartQuantity: handleUpdateCartQuantity,
     removeFromCart: handleRemoveFromCart,

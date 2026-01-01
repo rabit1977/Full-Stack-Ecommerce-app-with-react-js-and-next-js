@@ -217,43 +217,24 @@ const productsSlice = createSlice({
         return;
       }
 
-      const existingReviews = product.reviews || [];
-      let newReviews: Review[];
+      const existingReviews = product.reviews ? [...product.reviews] : [];
+      const reviewIndex = existingReviews.findIndex((r) => r.id === reviewData.id);
 
-      if (reviewData.id) {
+      if (reviewIndex !== -1) {
         // Update existing review
-        const reviewExists = existingReviews.some(
-          (r) => r.id === reviewData.id
-        );
-        if (reviewExists) {
-          newReviews = existingReviews.map((r) =>
-            r.id === reviewData.id ? ({ ...r, ...reviewData } as Review) : r
-          );
-        } else {
-          state.error = `Review with ID ${reviewData.id} not found`;
-          return;
-        }
+        existingReviews[reviewIndex] = { ...existingReviews[reviewIndex], ...reviewData } as Review;
       } else {
         // Add new review
-        const newReview: Review = {
-          id: `review_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-          author: reviewData.author,
-          rating: reviewData.rating,
-          title: reviewData.title,
-          comment: reviewData.comment,
-          date: new Date().toISOString(),
-          helpful: 0,
-        };
-        newReviews = [newReview, ...existingReviews];
+        existingReviews.unshift(reviewData as Review);
       }
 
       // Recalculate product rating
-      const totalRating = newReviews.reduce((sum, r) => sum + r.rating, 0);
-      product.reviews = newReviews;
-      product.reviewCount = newReviews.length;
+      const totalRating = existingReviews.reduce((sum, r) => sum + r.rating, 0);
+      product.reviews = existingReviews;
+      product.reviewCount = existingReviews.length;
       product.rating =
-        newReviews.length > 0
-          ? parseFloat((totalRating / newReviews.length).toFixed(1))
+        existingReviews.length > 0
+          ? parseFloat((totalRating / existingReviews.length).toFixed(1))
           : 0;
 
       state.error = null;

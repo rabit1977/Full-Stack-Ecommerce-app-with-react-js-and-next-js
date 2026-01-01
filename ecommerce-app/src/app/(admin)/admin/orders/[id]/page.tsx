@@ -50,6 +50,7 @@ import {
   Download,
   Printer
 } from 'lucide-react';
+import { deleteOrderAction } from '@/actions/order-actions';
 import { toast } from 'sonner';
 import { Order } from '@/lib/types';
 
@@ -164,10 +165,17 @@ function OrderDetailsContent({ orderId }: { orderId: string }) {
     // Implement invoice download logic
   };
 
-  const handleDelete = () => {
-    toast.success('Order deleted');
-    router.push('/admin/orders');
-    // Implement delete logic
+  const handleDelete = async () => {
+    if (!order) return;
+    startTransition(async () => {
+      try {
+        await deleteOrderAction(order.id);
+        toast.success('Order has been deleted.');
+        router.push('/admin/orders');
+      } catch (error) {
+        toast.error('Failed to delete order.');
+      }
+    });
   };
 
   if (!order) {

@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from '../store';
-import { addOrder, updateOrder } from '../slices/orderSlice';
+import { addOrder, setOrders, updateOrder } from '../slices/orderSlice';
 import { 
   addReview as addReviewAction, 
   deleteReview as deleteReviewAction, 
@@ -11,6 +11,7 @@ import { clearCart } from '../slices/cartSlice';
 import { toggleHelpfulReview as toggleHelpfulReviewAction } from '../slices/userSlice';
 import { showToast } from './uiThunks';
 import { Order, ReviewPayload } from '@/lib/types';
+import { getMyOrdersAction } from '@/actions/order-actions';
 
 /**
  * Generate unique order ID with random component for better uniqueness
@@ -270,3 +271,46 @@ const formatOrderId = (orderId: string): string => {
 // Legacy export for backward compatibility
 export const updateOrderStatusInStore = (orderId: string, newStatus: Order['status']) => 
   (dispatch: AppDispatch) => dispatch(updateOrderStatus({ orderId, newStatus }));
+
+/**
+ * Fetch all orders for the current user
+ */
+export const fetchOrders = createAsyncThunk<
+  void,
+  void,
+  { dispatch: AppDispatch; state: RootState }
+>(
+  'order/fetchOrders',
+  async (_, { dispatch }) => {
+    try {
+      const result = await getMyOrdersAction();
+      if (result.success && result.data) {
+        // Convert non-serializable Date objects to strings and map items
+        const serializableOrders = result.data.map(order => {
+          const { createdAt, updatedAt, items, ...rest } = order;
+          const isoCreatedAt = createdAt.toISOString();
+          return {
+            ...rest,
+            createdAt: isoCreatedAt,
+            updatedAt: updatedAt.toISOString(),
+            date: isoCreatedAt, // Also set the date field
+            items: items.map(item => ({
+              id: item.productId,
+              cartItemId: item.id, // Use OrderItem id as cartItemId
+              title: item.product.title,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.product.thumbnail,
+            })),
+          };
+        });
+        dispatch(setOrders(serializableOrders as any));
+      } else {
+        dispatch(showToast(result.error || 'Failed to fetch orders.', 'error'));
+      }
+    } catch (error) {
+      dispatch(showToast('Failed to fetch orders. Please try again.', 'error'));
+      throw error;
+    }
+  }
+);

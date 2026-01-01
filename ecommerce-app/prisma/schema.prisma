@@ -1,6 +1,6 @@
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -15,10 +15,12 @@ model User {
   image         String?
   password      String?
   role          String    @default("customer")
+  bio           String?
   accounts      Account[]
   sessions      Session[]
   orders        Order[]
   reviews       Review[]
+  wishlistItems WishlistItem[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -74,6 +76,7 @@ model Product {
   images      ProductImage[]
   reviews     Review[]
   orderItems  OrderItem[]
+  wishlistedBy WishlistItem[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -116,6 +119,20 @@ model Review {
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   rating    Int
+  title     String
   comment   String
   createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
 }

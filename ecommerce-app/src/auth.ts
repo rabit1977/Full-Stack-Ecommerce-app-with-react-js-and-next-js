@@ -11,18 +11,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials) {
-        const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
-          .safeParse(credentials);
+        try {
+          const parsedCredentials = z
+            .object({ email: z.string().email(), password: z.string().min(6) })
+            .safeParse(credentials);
 
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
-          const user = await prisma.user.findUnique({ where: { email } });
-          if (!user || !user.password) return null;
-          const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (passwordsMatch) return user;
+          if (parsedCredentials.success) {
+            const { email, password } = parsedCredentials.data;
+            const user = await prisma.user.findUnique({ where: { email } });
+            if (!user || !user.password) return null;
+            const passwordsMatch = await bcrypt.compare(password, user.password);
+            if (passwordsMatch) return user;
+          }
+          return null;
+        } catch (error) {
+          console.error("Error during authorize function:", error);
+          // Returning null prevents the server from crashing and fails the login
+          return null;
         }
-        return null;
       },
     }),
   ],

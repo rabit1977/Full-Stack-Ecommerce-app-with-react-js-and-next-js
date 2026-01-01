@@ -3,7 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Stars } from '@/components/ui/stars';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { addToCart, toggleWishlist } from '@/lib/store/thunks/cartThunks';
+import { addToCart } from '@/lib/store/thunks/cartThunks';
+import { toggleWishlist } from '@/lib/store/thunks/wishlistThunks';
 import { CartItem, Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';

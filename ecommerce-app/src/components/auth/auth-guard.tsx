@@ -1,9 +1,10 @@
 'use client';
 
-import { useAppSelector } from '@/lib/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { fetchOrders } from '@/lib/store/thunks/orderThunks';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -28,6 +29,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 }) => {
   const { user } = useAppSelector((state) => state.user);
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -43,6 +45,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 
       // User is authenticated
       if (user) {
+        dispatch(fetchOrders());
         setIsChecking(false);
         return;
       }
@@ -62,7 +65,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
         clearTimeout(timeoutId);
       }
     };
-  }, [user, router, redirectTo]);
+  }, [user, router, redirectTo, dispatch]);
 
   // Show loading state while checking authentication
   if (isChecking) {

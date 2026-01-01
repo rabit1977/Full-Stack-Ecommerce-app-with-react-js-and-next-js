@@ -132,6 +132,14 @@ const orderSlice = createSlice({
       state.selectedOrder = action.payload.selectedOrder;
       saveOrdersToStorage(state.orders);
     },
+
+    /**
+     * Set all orders
+     */
+    setOrders: (state, action: PayloadAction<Order[]>) => {
+      state.orders = action.payload;
+      saveOrdersToStorage(state.orders);
+    },
   },
 });
 
@@ -143,6 +151,7 @@ export const {
   updateOrderStatus,
   deleteOrder,
   setOrderState,
+  setOrders,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;

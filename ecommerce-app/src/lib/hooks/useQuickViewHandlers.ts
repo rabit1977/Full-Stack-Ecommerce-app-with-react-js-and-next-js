@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
+import { toggleWishlistAction } from '@/actions/wishlist-actions';
 import { useAppDispatch } from '@/lib/store/hooks';
 import { addToCart } from '@/lib/store/slices/cartSlice';
-import { toggleWishlist } from '@/lib/store/thunks/cartThunks';
 import { Product } from '@/lib/types';
+import { useCallback } from 'react';
 import {
-  getCartItemImage,
   generateCartItemId,
+  getCartItemImage,
   getSafeImageUrl,
   validateRequiredOptions,
 } from '../utils/quickview';
@@ -25,8 +25,11 @@ export const useQuickViewHandlers = (
     if (!product) return;
 
     // Validate all required options are selected
-    const validation = validateRequiredOptions(product.options, selectedOptions);
-    
+    const validation = validateRequiredOptions(
+      product.options,
+      selectedOptions
+    );
+
     if (!validation.isValid) {
       const missingOptionsText = validation.missingOptions.join(', ');
       setValidationError(`Please select: ${missingOptionsText}`);
@@ -56,11 +59,19 @@ export const useQuickViewHandlers = (
     setAdding(false);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
-  }, [product, quantity, selectedOptions, dispatch, setAdding, setAdded, setValidationError]);
+  }, [
+    product,
+    quantity,
+    selectedOptions,
+    dispatch,
+    setAdding,
+    setAdded,
+    setValidationError,
+  ]);
 
   const handleToggleWishlist = useCallback(() => {
     if (!product) return;
-    dispatch(toggleWishlist(product.id));
+    dispatch(toggleWishlistAction(product.id));
   }, [product, dispatch]);
 
   const handleOptionChange = useCallback(

@@ -1,20 +1,22 @@
 'use client';
 
+import { createOrderAction } from '@/actions/order-actions';
 import AuthGuard from '@/components/auth/auth-guard';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { CheckoutSteps } from '@/components/checkout/checkout-steps';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { placeOrder } from '@/lib/store/thunks/managementThunks';
+import { clearCart } from '@/lib/store/slices/cartSlice';
+import { showToast } from '@/lib/store/thunks/uiThunks';
 import { CartItem } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@radix-ui/react-accordion';
 import { Loader2, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -185,57 +187,42 @@ const CheckoutPage = () => {
 
   // Order placement
   const handlePlaceOrder = useCallback(async () => {
-    const orderDetails = {
-      items: cart,
-      total,
-      subtotal,
-      shippingCost,
-      taxes,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      discountAmount: 0,
-      shippingAddress: {
-        name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
-        street: shippingInfo.address,
-        city: shippingInfo.city,
-        state: shippingInfo.state,
-        zip: shippingInfo.zip,
-        country: 'USA',
-      },
-      billingAddress: {
-        name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
-        street: shippingInfo.address,
-        city: shippingInfo.city,
-        state: shippingInfo.state,
-        zip: shippingInfo.zip,
-        country: 'USA',
-      },
-      paymentMethod: 'Credit Card',
-      shippingMethod,
-      status: 'Pending' as const,
-    };
+    startTransition(async () => {
+      const orderDetails = {
+        items: cart.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        total,
+        shippingAddress: {
+          name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+          street: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.state,
+          zip: shippingInfo.zip,
+          country: 'USA',
+        },
+        paymentMethod: 'Credit Card',
+      };
 
-    try {
-      const result = await dispatch(placeOrder(orderDetails)).unwrap();
-      if (result) {
-        startTransition(() => {
-          router.push(`/order-confirmation?orderId=${result}`);
-        });
+      try {
+        const result = await createOrderAction(orderDetails);
+        if (result.success && result.orderId) {
+          dispatch(clearCart());
+          dispatch(showToast('Order placed successfully!', 'success'));
+          router.push(`/order-confirmation?orderId=${result.orderId}`);
+        } else {
+          dispatch(
+            showToast(result.error || 'Failed to place order.', 'error')
+          );
+        }
+      } catch (error) {
+        console.error('Order placement failed:', error);
+        dispatch(showToast('An unexpected error occurred.', 'error'));
       }
-    } catch (error) {
-      console.error('Order placement failed:', error);
-    }
-  }, [
-    cart,
-    total,
-    subtotal,
-    shippingCost,
-    taxes,
-    shippingInfo,
-    shippingMethod,
-    dispatch,
-    router,
-  ]);
+    });
+  }, [cart, total, shippingInfo, dispatch, router]);
 
   // Empty cart check
   if (cart.length === 0) {

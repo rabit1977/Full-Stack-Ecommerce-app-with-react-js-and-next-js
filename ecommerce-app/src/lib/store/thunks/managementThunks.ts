@@ -66,6 +66,7 @@ export const placeOrder = createAsyncThunk<
   }
 );
 
+import { addOrUpdateReviewAction } from '@/actions/review-actions';
 /**
  * Add or update a product review
  */
@@ -77,15 +78,28 @@ export const addReview = createAsyncThunk<
   'product/addReview',
   async ({ productId, reviewData }, { dispatch }) => {
     try {
-      dispatch(addReviewAction({ productId, reviewData }));
-      
-      const message = reviewData.id 
-        ? 'Review updated successfully!' 
-        : 'Thank you for your review!';
-      
-      dispatch(showToast(message, 'success'));
+      const result = await addOrUpdateReviewAction(productId, reviewData);
+
+      if (result.success && result.review) {
+        const finalReviewData = {
+          ...reviewData,
+          id: result.review.id,
+          date: result.review.createdAt.toString(),
+          helpful: 0,
+        };
+        dispatch(addReviewAction({ productId, reviewData: finalReviewData }));
+        
+        const message = reviewData.id 
+          ? 'Review updated successfully!' 
+          : 'Thank you for your review!';
+        
+        dispatch(showToast(message, 'success'));
+      } else {
+        throw new Error(result.error || 'Failed to submit review.');
+      }
     } catch (error) {
-      dispatch(showToast('Failed to submit review. Please try again.', 'error'));
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit review. Please try again.';
+      dispatch(showToast(errorMessage, 'error'));
       throw error;
     }
   }

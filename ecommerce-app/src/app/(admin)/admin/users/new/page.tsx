@@ -5,26 +5,29 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserForm, CreateUserFormValues } from '@/components/admin/user-form';
 import { Button } from '@/components/ui/button';
-import { useAppDispatch } from '@/lib/store/hooks';
-import { createUserFromAdmin } from '@/lib/store/thunks/authThunks';
+import { createUserAction } from '@/actions/auth-actions';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 
 export default function NewUserPage() {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const dispatch = useAppDispatch();
 
   const handleSubmit = async (values: CreateUserFormValues) => {
     startTransition(async () => {
       try {
-        const result = await dispatch(
-          createUserFromAdmin(values.name, values.email, values.password, values.role)
+        const result = await createUserAction(
+          values.name,
+          values.email,
+          values.password,
+          values.role as 'admin' | 'customer'
         );
-        
+
         if (result.success) {
-          toast.success('User created successfully');
+          toast.success(result.message || 'User created successfully');
           router.push('/admin/users');
+          // Optionally, revalidate the path if you're caching user lists
+          // revalidatePath('/admin/users');
         } else {
           toast.error(result.message || 'Failed to create user');
         }

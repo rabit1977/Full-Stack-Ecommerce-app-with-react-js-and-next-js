@@ -13,9 +13,11 @@ interface AdminProductsPageProps {
   };
 }
 
-export default async function AdminProductsPage({ searchParams }: AdminProductsPageProps) {
-  const page = Number(searchParams?.page) || 1;
-  const limit = Number(searchParams?.limit) || 12;
+export default async function AdminProductsPage({
+  searchParams = {},
+}: AdminProductsPageProps) {
+  const page = Number(searchParams.page) || 1;
+  const limit = Number(searchParams.limit) || 12;
 
   const result = await getProductsAction({ page, limit, sort: 'newest' });
   const products = result.products || [];

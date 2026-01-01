@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'www.dagimarket.com',
+        hostname:  "images.samsung.com",
         port: '',
         pathname: '/**',
       },
@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'admin.ledikom.mk',
+        hostname: 'i.rtings.com',
         port: '',
         pathname: '/**',
       },

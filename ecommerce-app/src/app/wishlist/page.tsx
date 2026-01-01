@@ -1,58 +1,86 @@
 'use client';
 
+import { getProductsByIdsAction } from '@/actions/product-actions';
+import { clearWishlistAction } from '@/actions/wishlist-actions';
 import AuthGuard from '@/components/auth/auth-guard';
 import { Button } from '@/components/ui/button';
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import {
-    addToCart,
-    clearWishlist,
-    toggleWishlist,
-} from '@/lib/store/thunks/cartThunks';
+import { useCart } from '@/lib/hooks/useCart';
+import { useAppDispatch } from '@/lib/store/hooks';
+import { setWishlist } from '@/lib/store/slices/wishlistSlice';
+import { addToCart } from '@/lib/store/thunks/cartThunks';
 import { Product } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
-import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
+import { Heart, Loader2, ShoppingCart, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const WishlistPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { itemIds: wishlist } = useAppSelector((state) => state.wishlist);
-  const { products } = useAppSelector((state) => state.products);
+  const { wishlistItems, toggleWishlist, isWishlistInitialized } = useCart();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const wishlistedProducts = useMemo(
-    () => products.filter((p: Product) => (wishlist || []).includes(p.id)),
-    [wishlist, products]
-  );
+  useEffect(() => {
+    const fetchWishlistProducts = async () => {
+      if (!isWishlistInitialized) return;
+
+      setIsLoading(true);
+      if (wishlistItems.length > 0) {
+        const fetchedProducts = await getProductsByIdsAction(wishlistItems);
+        // Filter out any products that might not have been found
+        const validProducts = fetchedProducts.filter(p => p !== null) as Product[];
+        setProducts(validProducts);
+      } else {
+        setProducts([]);
+      }
+      setIsLoading(false);
+    };
+
+    fetchWishlistProducts();
+  }, [wishlistItems, isWishlistInitialized]);
+
   const viewProduct = (productId: string) => {
     router.push(`/products/${productId}`);
   };
 
-  const handleAddToCart = (productId: string) => {
-    const product = products.find((p: Product) => p.id === productId);
-    if (product) {
-      dispatch(
-        addToCart({
-          id: product.id,
-          quantity: 1,
-          title: product.title,
-          price: product.price,
-        })
-      );
-      dispatch(toggleWishlist(product.id));
-    }
+  const handleAddToCart = (product: Product) => {
+    dispatch(
+      addToCart({
+        id: product.id,
+        quantity: 1,
+        title: product.title,
+        price: product.price,
+      })
+    );
+    // Optionally remove from wishlist after adding to cart
+    toggleWishlist(product.id);
   };
 
-  const handleClearWishlist = () => {
-    dispatch(clearWishlist());
-  };
+  const handleClearWishlist = useCallback(async () => {
+    const result = await clearWishlistAction();
+    if (result.success) {
+      dispatch(setWishlist([]));
+    }
+  }, [dispatch]);
+
+  if (isLoading || !isWishlistInitialized) {
+    return (
+      <div className='container mx-auto px-4 py-16 text-center'>
+        <Loader2 className='mx-auto h-24 w-24 animate-spin text-slate-300 dark:text-slate-700' />
+        <h2 className='mt-6 text-2xl font-bold dark:text-white'>
+          Loading Wishlist...
+        </h2>
+      </div>
+    )
+  }
 
   return (
     <AuthGuard>
-      {wishlistedProducts.length === 0 ? (
+      {products.length === 0 ? (
         <div className='container mx-auto px-4 py-16 text-center'>
           <Heart className='mx-auto h-24 w-24 text-slate-300 dark:text-slate-700' />
           <h2 className='mt-6 text-2xl font-bold dark:text-white'>
@@ -78,8 +106,8 @@ const WishlistPage = () => {
                   Your Wishlist
                 </h1>
                 <span className='text-slate-600 dark:text-slate-300'>
-                  {wishlistedProducts.length} item
-                  {wishlistedProducts.length !== 1 ? 's' : ''}
+                  {products.length} item
+                  {products.length !== 1 ? 's' : ''}
                 </span>
               </div>
               <Button variant='outline' onClick={handleClearWishlist}>
@@ -89,7 +117,7 @@ const WishlistPage = () => {
             </div>
 
             <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-              {wishlistedProducts.map((product: Product) => (
+              {products.map((product: Product) => (
                 <div
                   key={product.id}
                   className='border rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col dark:bg-slate-900 dark:border-slate-800'
@@ -125,7 +153,7 @@ const WishlistPage = () => {
                     </p>
                     <div className='mt-4 pt-4 border-t flex flex-col gap-2  dark:border-slate-800'>
                       <Button
-                        onClick={() => handleAddToCart(product.id)}
+                        onClick={() => handleAddToCart(product)}
                         className='w-full'
                       >
                         <ShoppingCart className='h-4 w-4 mr-2' />
@@ -133,7 +161,7 @@ const WishlistPage = () => {
                       </Button>
                       <Button
                         variant='outline'
-                        onClick={() => dispatch(toggleWishlist(product.id))}
+                        onClick={() => toggleWishlist(product.id)}
                         className='w-full'
                       >
                         <Trash2 className='h-4 w-4 mr-2' />
@@ -152,3 +180,4 @@ const WishlistPage = () => {
 };
 
 export default WishlistPage;
+

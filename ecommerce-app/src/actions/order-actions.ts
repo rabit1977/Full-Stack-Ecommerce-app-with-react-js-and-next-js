@@ -161,9 +161,14 @@ export async function deleteOrderAction(id: string) {
   try {
     await requireAdmin()
 
-    await prisma.order.delete({
-      where: { id },
-    })
+    await prisma.$transaction(async (tx) => {
+      await tx.orderItem.deleteMany({
+        where: { orderId: id },
+      });
+      await tx.order.delete({
+        where: { id },
+      });
+    });
 
     revalidatePath('/admin/orders')
 
@@ -225,5 +230,108 @@ export async function getOrderStatsAction() {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch order statistics',
     }
+  }
+}
+
+/**
+ * Get all orders for the current user
+ */
+export async function getMyOrdersAction() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+  const userId = session.user.id
+
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                title: true,
+                thumbnail: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
+    return {
+      success: true,
+      data: orders,
+    }
+  } catch (error) {
+    console.error('Error fetching user orders:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch orders',
+    }
+  }
+}
+
+/**
+ * Create a new order
+ */
+export async function createOrderAction(details: {
+  items: { id: string; quantity: number; price: number }[]
+  total: number
+  shippingAddress: any
+  paymentMethod: string
+}) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' }
+  }
+  const userId = session.user.id
+
+  try {
+    const result = await prisma.$transaction(async tx => {
+      const order = await tx.order.create({
+        data: {
+          userId,
+          total: details.total,
+          status: 'Pending',
+          shippingAddress: JSON.stringify(details.shippingAddress),
+          paymentMethod: details.paymentMethod,
+          items: {
+            create: details.items.map(item => ({
+              productId: item.id,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          },
+        },
+      })
+
+      for (const item of details.items) {
+        await tx.product.update({
+          where: { id: item.id },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        })
+      }
+
+      return order
+    })
+
+    revalidatePath('/account/orders')
+
+    return { success: true, orderId: result.id }
+  } catch (error) {
+    console.error('Failed to create order:', error)
+    return { success: false, error: 'Failed to create order.' }
   }
 }
