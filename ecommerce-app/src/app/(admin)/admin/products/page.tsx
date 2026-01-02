@@ -7,17 +7,19 @@ import { Package, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface AdminProductsPageProps {
-  searchParams?: {
+  searchParams: Promise<{
     page?: string;
     limit?: string;
-  };
+  }>;
 }
 
 export default async function AdminProductsPage({
-  searchParams = {},
+  searchParams,
 }: AdminProductsPageProps) {
-  const page = Number(searchParams.page) || 1;
-  const limit = Number(searchParams.limit) || 12;
+  // Await searchParams in Next.js 15
+  const params = await searchParams;
+  const page = Number(params?.page) || 1;
+  const limit = Number(params?.limit) || 12;
 
   const result = await getProductsAction({ page, limit, sort: 'newest' });
   const products = result.products || [];
