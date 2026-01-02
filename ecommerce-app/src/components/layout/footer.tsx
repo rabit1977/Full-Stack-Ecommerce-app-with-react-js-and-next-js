@@ -78,6 +78,7 @@ const socialLinks: SocialLink[] = [
 export function Footer() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isPending, startTransition] = useTransition();
 
   /**
@@ -92,8 +93,9 @@ export function Footer() {
    * Handle newsletter subscription
    */
   const handleSubscribe = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
+      setSuccess('');
 
       if (!email.trim()) {
         setError('Email is required');
@@ -105,14 +107,29 @@ export function Footer() {
         return;
       }
 
-      startTransition(() => {
-        // Simulate API call
-        setTimeout(() => {
-          console.log('Newsletter subscription:', email);
+      startTransition(async () => {
+        try {
+          const response = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            setError(data.error || 'Something went wrong');
+            return;
+          }
+
+          setSuccess(data.message);
           setEmail('');
           setError('');
-          // You can add toast notification here
-        }, 500);
+        } catch (err) {
+          setError('Something went wrong');
+        }
       });
     },
     [email, validateEmail]
@@ -247,6 +264,11 @@ export function Footer() {
                 {error && (
                   <p id='email-error' className='text-sm text-red-500'>
                     {error}
+                  </p>
+                )}
+                {success && (
+                  <p id='email-success' className='text-sm text-green-500'>
+                    {success}
                   </p>
                 )}
               </div>

@@ -1,6 +1,10 @@
 import type { NextConfig } from 'next';
+import('dotenv').then(dotenv => dotenv.config());
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
+  },
   images: {
     remotePatterns: [
       {
