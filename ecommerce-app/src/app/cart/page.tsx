@@ -17,13 +17,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { clearCart } from '@/lib/store/slices/cartSlice';
-import { ArrowLeft, Package, ShoppingCart, Trash2 } from 'lucide-react';
+import { ArrowLeft, Package, ShoppingCart, Trash2, Tag, X, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Suspense, useMemo, useTransition } from 'react';
+import { Suspense, useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+
+// Mock coupon data - replace with API call
+const VALID_COUPONS = {
+  'SAVE10': { discount: 0.10, type: 'percentage', description: '10% off' },
+  'SAVE20': { discount: 0.20, type: 'percentage', description: '20% off' },
+  'FLAT15': { discount: 15, type: 'fixed', description: '$15 off' },
+  'WELCOME': { discount: 0.15, type: 'percentage', description: '15% off for new customers' },
+} as const;
 
 /**
  * Cart skeleton loader
@@ -51,8 +60,8 @@ function EmptyCart() {
   const router = useRouter();
 
   return (
-    <div className='container  mx-auto px-4'>
-      <div className='flex flex-col items-center py-30 min-h-[calc(100lvh-440px)]   text-center space-y-6'>
+    <div className='container mx-auto px-4'>
+      <div className='flex flex-col items-center py-30 min-h-[calc(100lvh-440px)] text-center space-y-6'>
         <div className='relative'>
           <div className='absolute inset-0 bg-slate-100 dark:bg-slate-800 rounded-full blur-3xl opacity-50' />
           <ShoppingCart className='relative h-24 w-24 text-slate-300 dark:text-slate-600' />
@@ -81,32 +90,117 @@ function EmptyCart() {
 }
 
 /**
+ * Coupon input component
+ */
+function CouponInput({ 
+  onApplyCoupon 
+}: { 
+  onApplyCoupon: (code: string) => void 
+}) {
+  const [couponCode, setCouponCode] = useState('');
+  const [isApplying, setIsApplying] = useState(false);
+
+  const handleApply = async () => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+
+    setIsApplying(true);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    onApplyCoupon(couponCode.toUpperCase());
+    setIsApplying(false);
+  };
+
+  return (
+    <div className='flex gap-2'>
+      <div className='relative flex-1'>
+        <Tag className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400' />
+        <Input
+          placeholder='Enter coupon code'
+          value={couponCode}
+          onChange={(e) => setCouponCode(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+          className='pl-9'
+          disabled={isApplying}
+        />
+      </div>
+      <Button 
+        onClick={handleApply} 
+        disabled={isApplying || !couponCode.trim()}
+        className='whitespace-nowrap'
+      >
+        {isApplying ? 'Applying...' : 'Apply'}
+      </Button>
+    </div>
+  );
+}
+
+/**
  * Cart page content
  */
 function CartContent() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isPending, startTransition] = useTransition();
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const { cart, savedForLater } = useAppSelector((state) => state.cart);
 
-  // Calculate totals
-  const { subtotal, taxes, shipping, total, itemCount } = useMemo(() => {
+  // Calculate totals with coupon
+  const { subtotal, taxes, shipping, discount, total, itemCount } = useMemo(() => {
     const subtotal = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    const shipping = subtotal > 50 ? 0 : 5.0; // Free shipping over $50
-    const taxes = subtotal * 0.08; // 8% tax
-    const total = subtotal + shipping + taxes;
+    
+    // Calculate discount
+    let discount = 0;
+    if (appliedCoupon && VALID_COUPONS[appliedCoupon as keyof typeof VALID_COUPONS]) {
+      const coupon = VALID_COUPONS[appliedCoupon as keyof typeof VALID_COUPONS];
+      if (coupon.type === 'percentage') {
+        discount = subtotal * coupon.discount;
+      } else {
+        discount = coupon.discount;
+      }
+    }
+
+    const discountedSubtotal = subtotal - discount;
+    const shipping = discountedSubtotal > 50 ? 0 : 5.0; // Free shipping over $50
+    const taxes = discountedSubtotal * 0.08; // 8% tax
+    const total = discountedSubtotal + shipping + taxes;
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-    return { subtotal, taxes, shipping, total, itemCount };
-  }, [cart]);
+    return { subtotal, taxes, shipping, discount, total, itemCount };
+  }, [cart, appliedCoupon]);
+
+  // Handle coupon application
+  const handleApplyCoupon = (code: string) => {
+    if (VALID_COUPONS[code as keyof typeof VALID_COUPONS]) {
+      setAppliedCoupon(code);
+      const coupon = VALID_COUPONS[code as keyof typeof VALID_COUPONS];
+      toast.success(
+        <div className='flex items-center gap-2'>
+          <Check className='h-4 w-4' />
+          <span>Coupon applied! You saved {coupon.description}</span>
+        </div>
+      );
+    } else {
+      toast.error('Invalid coupon code');
+    }
+  };
+
+  // Handle coupon removal
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    toast.success('Coupon removed');
+  };
 
   // Handle clear cart
   const handleClearCart = () => {
     startTransition(() => {
       dispatch(clearCart());
+      setAppliedCoupon(null);
       toast.success('Cart cleared successfully');
     });
   };
@@ -166,16 +260,16 @@ function CartContent() {
         </div>
 
         {/* Free Shipping Banner */}
-        {subtotal > 0 && subtotal < 50 && (
+        {subtotal > 0 && (subtotal - discount) < 50 && (
           <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 dark:bg-blue-950 dark:border-blue-900'>
             <p className='text-sm text-blue-800 dark:text-blue-200'>
               <span className='font-semibold'>Almost there!</span> Add $
-              {(50 - subtotal).toFixed(2)} more to get free shipping!
+              {(50 - (subtotal - discount)).toFixed(2)} more to get free shipping!
             </p>
           </div>
         )}
 
-        {subtotal >= 50 && (
+        {(subtotal - discount) >= 50 && (
           <div className='bg-green-50 border border-green-200 rounded-lg p-4 mb-8 dark:bg-green-950 dark:border-green-900'>
             <p className='text-sm text-green-800 dark:text-green-200 font-medium'>
               🎉 You&apos;ve qualified for free shipping!
@@ -185,11 +279,12 @@ function CartContent() {
 
         <div className='grid lg:grid-cols-3 gap-8'>
           {/* Cart Items */}
-          <div className='lg:col-span-2 '>
+          <div className='lg:col-span-2 space-y-6'>
+            {/* Cart Items Card */}
             <Card>
-              <CardHeader className=' border-b'>
+              <CardHeader className='border-b'>
                 <CardTitle className='flex items-center gap-2'>
-                  <ShoppingCart className='h-5 w-5 ' />
+                  <ShoppingCart className='h-5 w-5' />
                   Cart Items
                 </CardTitle>
               </CardHeader>
@@ -201,12 +296,57 @@ function CartContent() {
                 </ul>
               </CardContent>
             </Card>
+
+            {/* Coupon Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2 text-base'>
+                  <Tag className='h-4 w-4' />
+                  Have a Coupon?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {appliedCoupon ? (
+                  <div className='flex items-center justify-between p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-900 rounded-lg'>
+                    <div className='flex items-center gap-3'>
+                      <div className='h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center'>
+                        <Check className='h-5 w-5 text-green-600 dark:text-green-400' />
+                      </div>
+                      <div>
+                        <p className='font-semibold text-green-800 dark:text-green-200'>
+                          {appliedCoupon}
+                        </p>
+                        <p className='text-sm text-green-600 dark:text-green-400'>
+                          {VALID_COUPONS[appliedCoupon as keyof typeof VALID_COUPONS].description}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      onClick={handleRemoveCoupon}
+                      className='text-green-600 hover:text-green-700 hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900'
+                    >
+                      <X className='h-4 w-4' />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <CouponInput onApplyCoupon={handleApplyCoupon} />
+                    <div className='text-xs text-slate-500 dark:text-slate-400'>
+                      Try: SAVE10, SAVE20, FLAT15, WELCOME
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Cart Summary Sidebar */}
           <div className='lg:col-span-1'>
             <CartSummary
               subtotal={subtotal}
+              discount={discount}
               shipping={shipping}
               taxes={taxes}
               total={total}

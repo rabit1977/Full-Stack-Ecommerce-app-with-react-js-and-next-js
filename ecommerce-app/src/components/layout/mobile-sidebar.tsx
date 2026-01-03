@@ -2,22 +2,22 @@
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useOnClickOutside } from '@/lib/hooks/useOnClickOutside';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { setIsMenuOpen } from '@/lib/store/slices/uiSlice';
 import { logout } from '@/lib/store/thunks/authThunks';
-import { useOnClickOutside } from '@/lib/hooks/useOnClickOutside';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { 
-  LogOut, 
-  User, 
-  X, 
-  Home, 
-  Package, 
-  Info, 
+import {
+  Home,
+  Info,
+  LogOut,
   Mail,
+  Package,
+  ShoppingBag,
+  User,
   UserCircle,
-  ShoppingBag
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,7 +34,13 @@ interface NavLinkProps {
 /**
  * Navigation link component with icon and active state
  */
-const NavLink = ({ href, icon: Icon, children, onClick, isActive }: NavLinkProps) => (
+const NavLink = ({
+  href,
+  icon: Icon,
+  children,
+  onClick,
+  isActive,
+}: NavLinkProps) => (
   <Link
     href={href}
     onClick={onClick}
@@ -52,7 +58,7 @@ const NavLink = ({ href, icon: Icon, children, onClick, isActive }: NavLinkProps
 
 /**
  * Mobile sidebar component with slide-in animation
- * 
+ *
  * Features:
  * - Smooth slide-in animation with Framer Motion
  * - Click outside to close
@@ -91,20 +97,26 @@ const MobileSidebar = () => {
   /**
    * Navigation links configuration
    */
-  const navLinks = useMemo(() => [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/products', icon: Package, label: 'All Products' },
-    { href: '/about', icon: Info, label: 'About Us' },
-    { href: '/contact', icon: Mail, label: 'Contact Us' },
-  ], []);
+  const navLinks = useMemo(
+    () => [
+      { href: '/', icon: Home, label: 'Home' },
+      { href: '/products', icon: Package, label: 'All Products' },
+      { href: '/about', icon: Info, label: 'About Us' },
+      { href: '/contact', icon: Mail, label: 'Contact Us' },
+    ],
+    []
+  );
 
   /**
    * Check if link is active
    */
-  const isActiveLink = useCallback((href: string): boolean => {
-    if (href === '/') return pathname === '/';
-    return pathname.startsWith(href);
-  }, [pathname]);
+  const isActiveLink = useCallback(
+    (href: string): boolean => {
+      if (href === '/') return pathname === '/';
+      return pathname.startsWith(href);
+    },
+    [pathname]
+  );
 
   /**
    * Get user initials for avatar
@@ -113,7 +125,7 @@ const MobileSidebar = () => {
     if (!user?.name) return '';
     return user.name
       .split(' ')
-      .map(n => n[0])
+      .map((n) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -190,7 +202,10 @@ const MobileSidebar = () => {
                   <Separator />
 
                   {/* Navigation Links */}
-                  <nav className='flex flex-col gap-1' aria-label='Main navigation'>
+                  <nav
+                    className='flex flex-col gap-1'
+                    aria-label='Main navigation'
+                  >
                     {navLinks.map((link) => (
                       <NavLink
                         key={link.href}
@@ -208,7 +223,10 @@ const MobileSidebar = () => {
                   {user && (
                     <>
                       <Separator />
-                      <nav className='flex flex-col gap-1' aria-label='User menu'>
+                      <nav
+                        className='flex flex-col gap-1'
+                        aria-label='User menu'
+                      >
                         <NavLink
                           href='/account'
                           icon={UserCircle}
@@ -233,7 +251,7 @@ const MobileSidebar = () => {
 
               {/* Footer (Logout) */}
               {user && (
-                <div className='border-t p-6'>
+                <div className='border-t p-6 mb-18'>
                   <Button
                     variant='outline'
                     className='w-full gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground'

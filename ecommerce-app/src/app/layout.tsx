@@ -1,11 +1,15 @@
 import ErrorBoundary from '@/components/error-boundary';
 import { Footer } from '@/components/layout/footer';
 import { Header } from '@/components/layout/header';
+import { MobileSidebar } from '@/components/layout/mobile-sidebar';
 import { ThemeManager } from '@/components/layout/theme-manager';
 import { QuickViewModal } from '@/components/product/quick-view-modal';
 import { Toast } from '@/components/toast';
 import { CommandPalette } from '@/components/ui/command-palette';
-import { AuthSessionProvider, AuthSync } from '@/lib/providers/AuthSessionProvider';
+import {
+  AuthSessionProvider,
+  AuthSync,
+} from '@/lib/providers/AuthSessionProvider';
 import { ReduxProvider } from '@/lib/providers/ReduxProvider';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
@@ -57,7 +61,7 @@ export default function RootLayout({
               <CommandPalette />
               <div className='min-h-screen bg-white font-sans text-slate-800 dark:bg-slate-900 dark:text-slate-200'>
                 <Header />
-                {/* <MobileSidebar /> */}
+                <MobileSidebar />
                 <main className='min-h-auto'>{children}</main>
                 <Footer />
                 <QuickViewModal />

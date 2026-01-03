@@ -1,13 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import {
   Briefcase,
@@ -20,9 +13,12 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { NavActions } from './nav-actions';
 import { SearchBar } from './search-bar';
+import { MobileSidebar } from './mobile-sidebar';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { setIsMenuOpen } from '@/lib/store/slices/uiSlice';
 
 interface NavLink {
   href: string;
@@ -49,7 +45,8 @@ const navLinks: NavLink[] = [
  */
 const Header = () => {
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch = useAppDispatch();
+  const isMenuOpen = useAppSelector((state) => state.ui.isMenuOpen);
 
   /**
    * Check if link is active
@@ -63,10 +60,10 @@ const Header = () => {
   );
 
   /**
-   * Close mobile menu
+   * Toggle mobile menu
    */
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
+  const toggleMobileMenu = () => {
+    dispatch(setIsMenuOpen(!isMenuOpen));
   };
 
   return (
@@ -118,7 +115,7 @@ const Header = () => {
                   {link.icon && (
                     <link.icon
                       className={cn(
-                        'mb-0.5 inline-block h-4 w-4  hover:text-foreground group flex-shrink-0 items-center justify-center',
+                        'mb-0.5 inline-block h-4 w-4 hover:text-foreground group flex-shrink-0 items-center justify-center',
                         isActive
                           ? 'text-foreground'
                           : 'text-muted-foreground group-hover:text-foreground'
@@ -141,53 +138,21 @@ const Header = () => {
           <NavActions />
 
           {/* Mobile Menu Button */}
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='lg:hidden'
-                aria-label='Open menu'
-              >
-                <Menu className='h-5 w-5' />
-              </Button>
-            </SheetTrigger>
-            <div>
-              <SheetContent side='right' className='w-[280px] sm:w-[350px] '>
-                <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
-                </SheetHeader>
-
-                {/* Mobile Navigation Links */}
-                <nav
-                  className='mt-8 flex flex-col gap-4'
-                  aria-label='Mobile navigation'
-                >
-                  {navLinks.map((link) => {
-                    const isActive = isActiveLink(link.href);
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={closeMobileMenu}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ',
-                          isActive
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                        )}
-                        aria-current={isActive ? 'page' : undefined}
-                      >
-                        {link.label}
-                      </Link>
-                    );
-                  })}
-                </nav>
-              </SheetContent>
-            </div>
-          </Sheet>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='lg:hidden'
+            onClick={toggleMobileMenu}
+            aria-label='Open menu'
+            aria-expanded={isMenuOpen}
+          >
+            <Menu className='h-5 w-5' />
+          </Button>
         </div>
       </div>
+
+      {/* Mobile Sidebar - renders based on Redux state */}
+      <MobileSidebar />
     </header>
   );
 };

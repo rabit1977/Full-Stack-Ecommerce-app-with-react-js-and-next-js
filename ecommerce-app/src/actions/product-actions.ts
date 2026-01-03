@@ -189,6 +189,7 @@ import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { productFormSchema, ProductFormValues } from '@/lib/schemas/product-schema';
 import { z } from 'zod';
+import { redirect } from 'next/navigation';
 
 // Helper to check admin access
 async function requireAdmin() {
@@ -250,52 +251,85 @@ export async function createProductAction(data: ProductFormValues) {
 /**
  * Update product (admin only)
  */
+/**
+ * Update product (admin only)
+ */
 export async function updateProductAction(id: string, data: Partial<ProductFormValues>) {
   try {
     await requireAdmin();
 
-    const { images, ...productData } = data;
+    const validatedData = productFormSchema.partial().parse(data);
+    const { images, ...productData } = validatedData;
 
-    // Update product
-    const product = await prisma.product.update({
+    // Separate Prisma-compatible fields from form fields
+    const {
+      title,
+      description,
+      price,
+      stock,
+      brand,
+      category,
+      discount,
+      rating,
+      reviewCount,
+    } = productData;
+
+    // Update product with only valid Prisma fields
+    await prisma.product.update({
       where: { id },
       data: {
-        ...productData,
-        thumbnail: images?.[0],
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+        ...(price !== undefined && { price }),
+        ...(stock !== undefined && { stock }),
+        ...(brand !== undefined && { brand }),
+        ...(category !== undefined && { category }),
+        ...(discount !== undefined && { discount }),
+        ...(rating !== undefined && { rating }),
+        ...(reviewCount !== undefined && { reviewCount }),
+        ...(images && images.length > 0 && { thumbnail: images[0] }),
       },
     });
 
     // Update images if provided
-    if (images && images.length > 0) {
+    if (images) {
       // Delete existing images
       await prisma.productImage.deleteMany({
         where: { productId: id },
       });
 
-      // Create new images
-      await prisma.productImage.createMany({
-        data: images.map((url) => ({ url, productId: id })),
-      });
+      // Create new images if there are any
+      if (images.length > 0) {
+        await prisma.productImage.createMany({
+          data: images.map((url) => ({ url, productId: id })),
+        });
+      }
     }
 
     revalidatePath('/admin/products');
     revalidatePath(`/admin/products/${id}`);
     revalidatePath('/products');
-
+    revalidatePath(`/products/${id}`);
+    
     return {
       success: true,
-      data: product,
       message: 'Product updated successfully',
     };
+
   } catch (error) {
     console.error('Error updating product:', error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.errors[0]?.message || 'Invalid data provided',
+      };
+    }
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update product',
     };
   }
 }
-
 /**
  * Delete product (admin only)
  */

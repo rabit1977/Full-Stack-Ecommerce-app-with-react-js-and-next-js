@@ -1,135 +1,97 @@
-'use client';
-
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { formatPrice } from '@/lib/utils/formatters';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { memo } from 'react';
 
 interface CartSummaryProps {
   subtotal: number;
-  shipping?: number;
-  taxes?: number;
   discount?: number;
+  shipping: number;
+  taxes: number;
   total: number;
-  isCollapsible?: boolean;
-  showCheckoutButton?: boolean;
-  onCheckout?: () => void;
 }
 
-/**
- * Cart summary component - displays order totals
- * Memoized to prevent unnecessary re-renders
- */
-const CartSummary = memo(
-  ({
-    subtotal,
-    shipping = 0,
-    taxes = 0,
-    discount = 0,
-    total,
-    isCollapsible = false,
-    showCheckoutButton = true,
-    onCheckout,
-  }: CartSummaryProps) => {
-    const router = useRouter();
+export function CartSummary({
+  subtotal,
+  discount = 0,
+  shipping,
+  taxes,
+  total,
+}: CartSummaryProps) {
+  const router = useRouter();
 
-    const handleCheckout = () => {
-      if (onCheckout) {
-        onCheckout();
-      } else {
-        router.push('/checkout');
-      }
-    };
-
-    return (
-      <div
-        className={cn(
-          'h-fit',
-          !isCollapsible &&
-            'rounded-lg border bg-white p-6 shadow-sm lg:sticky lg:top-24 dark:bg-slate-900 dark:border-slate-800'
-        )}
-      >
-        {!isCollapsible && (
-          <h2 className='text-lg font-semibold dark:text-white mb-6'>
-            Order Summary
-          </h2>
-        )}
-
-        <div
-          className={cn(
-            'space-y-3',
-            !isCollapsible &&
-              'border-b border-slate-200 dark:border-slate-800 pb-4'
-          )}
-        >
-          {/* Subtotal */}
-          <div className='flex items-center justify-between'>
-            <p className='text-sm text-slate-600 dark:text-slate-300'>
-              Subtotal
-            </p>
-            <p className='text-sm font-medium dark:text-white'>
-              {formatPrice(subtotal)}
-            </p>
-          </div>
-
-          {/* Shipping */}
-          {shipping > 0 && (
-            <div className='flex items-center justify-between'>
-              <p className='text-sm text-slate-600 dark:text-slate-300'>
-                Shipping
-              </p>
-              <p className='text-sm font-medium dark:text-white'>
-                {formatPrice(shipping)}
-              </p>
-            </div>
-          )}
-
-          {/* Discount */}
-          {discount > 0 && (
-            <div className='flex items-center justify-between text-green-600 dark:text-green-400'>
-              <p className='text-sm font-medium'>Discount</p>
-              <p className='text-sm font-medium'>-{formatPrice(discount)}</p>
-            </div>
-          )}
-
-          {/* Taxes */}
-          {taxes > 0 && (
-            <div className='flex items-center justify-between'>
-              <p className='text-sm text-slate-600 dark:text-slate-300'>
-                Estimated Tax
-              </p>
-              <p className='text-sm font-medium dark:text-white'>
-                {formatPrice(taxes)}
-              </p>
-            </div>
-          )}
+  return (
+    <Card className='sticky top-24'>
+      <CardHeader>
+        <CardTitle>Order Summary</CardTitle>
+      </CardHeader>
+      <CardContent className='space-y-4'>
+        {/* Subtotal */}
+        <div className='flex justify-between text-sm'>
+          <span className='text-slate-600 dark:text-slate-400'>Subtotal</span>
+          <span className='font-medium dark:text-white'>
+            ${subtotal.toFixed(2)}
+          </span>
         </div>
 
+        {/* Discount */}
+        {discount > 0 && (
+          <div className='flex justify-between text-sm'>
+            <span className='text-slate-600 dark:text-slate-400'>
+              Discount
+            </span>
+            <span className='font-medium text-green-600 dark:text-green-400'>
+              -${discount.toFixed(2)}
+            </span>
+          </div>
+        )}
+
+        {/* Shipping */}
+        <div className='flex justify-between text-sm'>
+          <span className='text-slate-600 dark:text-slate-400'>Shipping</span>
+          <span className='font-medium dark:text-white'>
+            {shipping === 0 ? (
+              <span className='text-green-600 dark:text-green-400'>Free</span>
+            ) : (
+              `$${shipping.toFixed(2)}`
+            )}
+          </span>
+        </div>
+
+        {/* Taxes */}
+        <div className='flex justify-between text-sm'>
+          <span className='text-slate-600 dark:text-slate-400'>
+            Taxes (8%)
+          </span>
+          <span className='font-medium dark:text-white'>
+            ${taxes.toFixed(2)}
+          </span>
+        </div>
+
+        <Separator />
+
         {/* Total */}
-        <div className='pt-4 flex items-center justify-between'>
-          <p className='text-base font-semibold dark:text-white'>Total</p>
-          <p className='text-xl font-bold dark:text-white'>
-            {formatPrice(total)}
-          </p>
+        <div className='flex justify-between text-lg font-bold'>
+          <span className='dark:text-white'>Total</span>
+          <span className='dark:text-white'>${total.toFixed(2)}</span>
         </div>
 
         {/* Checkout Button */}
-        {!isCollapsible && showCheckoutButton && (
-          <Button
-            size='lg'
-           className=' w-full mt-6 '
-            onClick={handleCheckout}
-            disabled={subtotal === 0}
-          >
-            Proceed to Checkout
-          </Button>
-        )}
-      </div>
-    );
-  }
-);
+        <Button
+          size='lg'
+          className='w-full'
+          onClick={() => router.push('/checkout')}
+        >
+          <ShoppingBag className='h-4 w-4 mr-2' />
+          Proceed to Checkout
+        </Button>
 
-CartSummary.displayName = 'CartSummary';
-
-export { CartSummary };
+        {/* Additional Info */}
+        <div className='text-xs text-center text-slate-500 dark:text-slate-400'>
+          Secure checkout · Free returns · 30-day guarantee
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
