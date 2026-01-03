@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 interface NavLinkProps {
   href: string;
@@ -65,6 +65,7 @@ const NavLink = ({
  * - Active link highlighting
  * - User profile section
  * - Proper logout handling
+ * - Body scroll lock when open
  * - Accessibility attributes
  */
 const MobileSidebar = () => {
@@ -73,6 +74,45 @@ const MobileSidebar = () => {
   const user = useAppSelector((state) => state.user.user);
   const isMenuOpen = useAppSelector((state) => state.ui.isMenuOpen);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Lock body scroll when menu is open
+   */
+  useEffect(() => {
+    if (isMenuOpen) {
+      // Get current scroll position
+      const scrollY = window.scrollY;
+      
+      // Save original body styles
+      const originalOverflow = document.body.style.overflow;
+      
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
+      
+      // Store scroll position for restoration
+      document.body.dataset.scrollY = scrollY.toString();
+    } else {
+      // Restore scroll and styles
+      const scrollY = document.body.dataset.scrollY;
+      
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY));
+      }
+      
+      delete document.body.dataset.scrollY;
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+      delete document.body.dataset.scrollY;
+    };
+  }, [isMenuOpen]);
 
   /**
    * Close menu handler
@@ -153,14 +193,14 @@ const MobileSidebar = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className='fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-background shadow-2xl lg:hidden'
+            className='fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-background shadow-2xl lg:hidden overflow-hidden'
             role='dialog'
             aria-modal='true'
             aria-label='Mobile navigation menu'
           >
             <div className='flex h-full flex-col'>
               {/* Header */}
-              <div className='flex items-center justify-between border-b px-6 py-4'>
+              <div className='flex items-center justify-between border-b px-6 py-4 flex-shrink-0'>
                 <h2 className='text-lg font-semibold'>Menu</h2>
                 <Button
                   variant='ghost'
@@ -251,7 +291,7 @@ const MobileSidebar = () => {
 
               {/* Footer (Logout) */}
               {user && (
-                <div className='border-t p-6 mb-18'>
+                <div className='border-t p-6 flex-shrink-0'>
                   <Button
                     variant='outline'
                     className='w-full gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground'
