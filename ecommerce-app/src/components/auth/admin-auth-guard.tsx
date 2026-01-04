@@ -60,33 +60,47 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({
     }
 
     // User is an admin - access granted
-  }, [status, session, router, hasChecked, authRedirectTo, unauthorizedRedirectTo]);
+  }, [
+    status,
+    session,
+    router,
+    hasChecked,
+    authRedirectTo,
+    unauthorizedRedirectTo,
+  ]);
 
   // Show loading state while checking
   if (status === 'loading' || !hasChecked) {
-    return fallback || (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-16 w-16 animate-spin text-slate-400 mx-auto" />
-          <p className="text-slate-600 dark:text-slate-400 font-medium">
-            Verifying admin access...
-          </p>
+    return (
+      fallback || (
+        <div className='flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900'>
+          <div className='text-center space-y-4'>
+            <Loader2 className='h-16 w-16 animate-spin text-slate-400 mx-auto' />
+            <p className='text-slate-600 dark:text-slate-400 font-medium'>
+              Verifying admin access...
+            </p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 
   // If we're still checking or redirecting, show loading
-  if (status === 'unauthenticated' || (session?.user && (session.user as any).role !== 'ADMIN')) {
-    return fallback || (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-16 w-16 animate-spin text-slate-400 mx-auto" />
-          <p className="text-slate-600 dark:text-slate-400 font-medium">
-            Redirecting...
-          </p>
+  if (
+    status === 'unauthenticated' ||
+    (session?.user && (session.user as any).role !== 'ADMIN')
+  ) {
+    return (
+      fallback || (
+        <div className='flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900'>
+          <div className='text-center space-y-4'>
+            <Loader2 className='h-16 w-16 animate-spin text-slate-400 mx-auto' />
+            <p className='text-slate-600 dark:text-slate-400 font-medium'>
+              Redirecting...
+            </p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 

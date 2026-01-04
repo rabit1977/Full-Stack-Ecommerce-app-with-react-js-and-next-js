@@ -1,9 +1,9 @@
 'use server';
 
+import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 import { UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 
 // Helper to check admin access
@@ -15,7 +15,11 @@ async function requireAdmin() {
   return session;
 }
 
-export async function signupAction(name: string, email: string, password: string) {
+export async function signupAction(
+  name: string,
+  email: string,
+  password: string
+) {
   // Validate input
   if (!email || !password || !name) {
     return { success: false, message: 'Missing fields' };
@@ -51,7 +55,12 @@ export async function signupAction(name: string, email: string, password: string
   }
 }
 
-export async function createUserAction(name: string, email: string, password: string, role: UserRole) {
+export async function createUserAction(
+  name: string,
+  email: string,
+  password: string,
+  role: UserRole
+) {
   try {
     await requireAdmin();
 
@@ -98,7 +107,10 @@ export async function getUsersAction() {
   }
 }
 
-export async function updateUserAction(id: string, data: { name?: string; email?: string; role?: UserRole }) {
+export async function updateUserAction(
+  id: string,
+  data: { name?: string; email?: string; role?: UserRole }
+) {
   try {
     await requireAdmin();
 
