@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "postinstall": "prisma genereate"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
