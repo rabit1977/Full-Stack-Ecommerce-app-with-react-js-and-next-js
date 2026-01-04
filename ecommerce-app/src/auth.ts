@@ -23,6 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             const passwordsMatch = await bcrypt.compare(password, user.password);
             if (passwordsMatch) return user;
           }
+          
           return null;
         } catch (error) {
           console.error("Error during authorize function:", error);
