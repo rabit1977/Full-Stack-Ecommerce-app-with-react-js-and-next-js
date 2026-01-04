@@ -1,10 +1,8 @@
 import type { NextConfig } from 'next';
-import('dotenv').then(dotenv => dotenv.config());
+
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
-  },
+  serverExternalPackages: ['@prisma/client', 'bcryptjs'],
   images: {
     remotePatterns: [
       {
@@ -27,7 +25,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname:  "i.dell.com",
+        hostname: 'i.dell.com',
         port: '',
         pathname: '/**',
       },

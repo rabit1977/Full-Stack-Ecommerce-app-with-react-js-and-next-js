@@ -338,7 +338,7 @@ export const NavActions = () => {
                 <span className='dark:text-white'>My Orders</span>
               </Link>
 
-              {user.role === 'admin' && (
+              {user.role === 'ADMIN' && (
                 <>
                   <Separator className='my-2' />
                   <Link

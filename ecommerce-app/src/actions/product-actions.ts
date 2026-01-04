@@ -1,4 +1,4 @@
-'use server'
+'use server';
 
 import { prisma } from '@/lib/db';
 import { Product, SortKey } from '@/lib/types';
@@ -37,55 +37,58 @@ export async function getProductsAction(
     minRating,
     inStock,
     sort = 'featured',
-    page = 1,
-    limit = 12,
+    page: rawPage, // 1. Rename incoming variable to "raw"
+    limit: rawLimit, // 2. Rename incoming variable to "raw"
   } = options;
+
+  // 3. FORCE CONVERSION: Turn Strings into Numbers immediately
+  // This prevents the "Invalid Invocation" crash
+  const page = Number(rawPage) || 1;
+  const limit = Number(rawLimit) || 12;
 
   const where: Prisma.ProductWhereInput = {
     AND: [],
   };
-
   const andarr = where.AND as Prisma.ProductWhereInput[];
 
-  // Search query
+  // --- Search Logic ---
   if (query) {
     andarr.push({
       OR: [
-        { title: { contains: query } },
-        { description: { contains: query } },
-        { brand: { contains: query } },
-        { category: { contains: query } },
+        { title: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+        { brand: { contains: query, mode: 'insensitive' } },
+        { category: { contains: query, mode: 'insensitive' } },
       ],
     });
   }
 
-  // Categories
+  // --- Filters ---
   if (categories) {
-    const categoryList = categories.split(',').map((c) => c.trim()).filter(Boolean);
-    if (categoryList.length > 0) {
-      andarr.push({ category: { in: categoryList } });
-    }
+    const list = categories
+      .split(',')
+      .map((c) => c.trim())
+      .filter(Boolean);
+    if (list.length) andarr.push({ category: { in: list } });
   }
 
-  // Brands
   if (brands) {
-    const brandList = brands.split(',').map((b) => b.trim()).filter(Boolean);
-    if (brandList.length > 0) {
-      andarr.push({ brand: { in: brandList } });
-    }
+    const list = brands
+      .split(',')
+      .map((b) => b.trim())
+      .filter(Boolean);
+    if (list.length) andarr.push({ brand: { in: list } });
   }
 
-  // Price
-  if (minPrice !== undefined) andarr.push({ price: { gte: minPrice } });
-  if (maxPrice !== undefined) andarr.push({ price: { lte: maxPrice } });
+  // Force price/rating to Numbers too
+  if (minPrice !== undefined) andarr.push({ price: { gte: Number(minPrice) } });
+  if (maxPrice !== undefined) andarr.push({ price: { lte: Number(maxPrice) } });
+  if (minRating !== undefined)
+    andarr.push({ rating: { gte: Number(minRating) } });
 
-  // Rating
-  if (minRating !== undefined) andarr.push({ rating: { gte: minRating } });
-
-  // Stock
   if (inStock) andarr.push({ stock: { gt: 0 } });
 
-  // Sorting
+  // --- Sorting ---
   let orderBy: Prisma.ProductOrderByWithRelationInput = {};
   switch (sort) {
     case 'price-asc':
@@ -103,47 +106,56 @@ export async function getProductsAction(
     case 'popularity':
       orderBy = { reviewCount: 'desc' };
       break;
-    case 'featured':
     default:
-      orderBy = { rating: 'desc' }; // Default featured logic
+      orderBy = { rating: 'desc' };
       break;
   }
 
+  // 4. Calculate Skip (Now safe because page/limit are real numbers)
   const skip = (page - 1) * limit;
 
-  const [products, totalCount] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-      include: {
-        images: true, // Need to map this back to string[] for frontend
-      },
-    }),
-    prisma.product.count({ where }),
-  ]);
+  try {
+    const [products, totalCount] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit, // <--- This was crashing because it was a string
+        include: {
+          images: true,
+        },
+      }),
+      prisma.product.count({ where }),
+    ]);
 
-  const totalPages = Math.ceil(totalCount / limit);
+    const totalPages = Math.ceil(totalCount / limit);
 
-  // Map Prisma result to frontend Product type
-  const mappedProducts: Product[] = products.map((p) => ({
-    ...p,
-    images: p.images.map((img) => img.url),
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  }));
-
-  return {
-    products: mappedProducts,
-    totalCount,
-    page,
-    totalPages,
-    hasMore: page < totalPages,
-  };
+    return {
+      products: products.map((p) => ({
+        ...p,
+        images: p.images.map((img) => img.url),
+        createdAt: p.createdAt.toISOString(),
+        updatedAt: p.updatedAt.toISOString(),
+      })),
+      totalCount,
+      page,
+      totalPages,
+      hasMore: page < totalPages,
+    };
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return {
+      products: [],
+      totalCount: 0,
+      page: 1,
+      totalPages: 0,
+      hasMore: false,
+    };
+  }
 }
-
-export async function getProductByIdAction(id: string): Promise<Product | null> {
+export async function getProductByIdAction(
+  id: string
+): Promise<Product | null> {
   const product = await prisma.product.findUnique({
     where: { id },
     include: { images: true },
@@ -186,15 +198,17 @@ export async function getFiltersAction() {
 // ============================================
 
 import { auth } from '@/auth';
+import {
+  productFormSchema,
+  ProductFormValues,
+} from '@/lib/schemas/product-schema';
 import { revalidatePath } from 'next/cache';
-import { productFormSchema, ProductFormValues } from '@/lib/schemas/product-schema';
 import { z } from 'zod';
-import { redirect } from 'next/navigation';
 
 // Helper to check admin access
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== 'admin') {
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required');
   }
   return session;
@@ -243,7 +257,8 @@ export async function createProductAction(data: ProductFormValues) {
     }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create product',
+      error:
+        error instanceof Error ? error.message : 'Failed to create product',
     };
   }
 }
@@ -254,7 +269,10 @@ export async function createProductAction(data: ProductFormValues) {
 /**
  * Update product (admin only)
  */
-export async function updateProductAction(id: string, data: Partial<ProductFormValues>) {
+export async function updateProductAction(
+  id: string,
+  data: Partial<ProductFormValues>
+) {
   try {
     await requireAdmin();
 
@@ -310,12 +328,11 @@ export async function updateProductAction(id: string, data: Partial<ProductFormV
     revalidatePath(`/admin/products/${id}`);
     revalidatePath('/products');
     revalidatePath(`/products/${id}`);
-    
+
     return {
       success: true,
       message: 'Product updated successfully',
     };
-
   } catch (error) {
     console.error('Error updating product:', error);
     if (error instanceof z.ZodError) {
@@ -326,7 +343,8 @@ export async function updateProductAction(id: string, data: Partial<ProductFormV
     }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to update product',
+      error:
+        error instanceof Error ? error.message : 'Failed to update product',
     };
   }
 }
@@ -335,25 +353,26 @@ export async function updateProductAction(id: string, data: Partial<ProductFormV
  */
 export async function deleteProductAction(id: string) {
   try {
-    await requireAdmin()
+    await requireAdmin();
 
     await prisma.product.delete({
       where: { id },
-    })
+    });
 
-    revalidatePath('/admin/products')
-    revalidatePath('/products')
+    revalidatePath('/admin/products');
+    revalidatePath('/products');
 
     return {
       success: true,
       message: 'Product deleted successfully',
-    }
+    };
   } catch (error) {
-    console.error('Error deleting product:', error)
+    console.error('Error deleting product:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete product',
-    }
+      error:
+        error instanceof Error ? error.message : 'Failed to delete product',
+    };
   }
 }
 
@@ -390,7 +409,8 @@ export async function deleteMultipleProductsAction(ids: string[]) {
     console.error('Error deleting multiple products:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete products',
+      error:
+        error instanceof Error ? error.message : 'Failed to delete products',
     };
   }
 }
@@ -398,7 +418,9 @@ export async function deleteMultipleProductsAction(ids: string[]) {
 /**
  * Get multiple products by their IDs
  */
-export async function getProductsByIdsAction(ids: string[]): Promise<Product[]> {
+export async function getProductsByIdsAction(
+  ids: string[]
+): Promise<Product[]> {
   if (ids.length === 0) {
     return [];
   }

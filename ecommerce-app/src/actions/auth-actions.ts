@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache';
 // Helper to check admin access
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== 'admin') {
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required');
   }
   return session;
@@ -40,8 +40,8 @@ export async function signupAction(name: string, email: string, password: string
         name,
         email,
         password: hashedPassword,
-        // Default role is "customer" from schema
-        role: email === 'rabit@gmail.com' ? 'admin' : 'customer', // Simple admin auto-grant for testing
+        // Default role is "CUSTOMER" from schema
+        role: email === 'rabit@gmail.com' ? 'ADMIN' : 'CUSTOMER',
       },
     });
     return { success: true };

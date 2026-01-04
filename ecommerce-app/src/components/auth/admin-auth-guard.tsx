@@ -53,7 +53,7 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({
 
     // User is authenticated but not an admin
     const userRole = (session.user as any).role;
-    if (userRole !== 'admin') {
+    if (userRole !== 'ADMIN') {
       toast.error('You do not have permission to access this page.');
       router.replace(unauthorizedRedirectTo);
       return;
@@ -77,7 +77,7 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({
   }
 
   // If we're still checking or redirecting, show loading
-  if (status === 'unauthenticated' || (session?.user && (session.user as any).role !== 'admin')) {
+  if (status === 'unauthenticated' || (session?.user && (session.user as any).role !== 'ADMIN')) {
     return fallback || (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="text-center space-y-4">

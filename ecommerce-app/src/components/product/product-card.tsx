@@ -112,7 +112,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
           <Button
             size='icon'
             variant='secondary'
-            className='h-7 w-7 rounded-full shadow-lg backdrop-blur-sm opacity-0 transition-all duration-300 group-hover:opacity-100'
+            className='h-7 w-7 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 '
             onClick={handleQuickView}
             aria-label='Quick view'
           >

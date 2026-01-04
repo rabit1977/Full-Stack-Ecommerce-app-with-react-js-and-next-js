@@ -138,7 +138,7 @@ function UserDetailsContent({ userId }: { userId: string }) {
                     {user.email}
                   </CardDescription>
                 </div>
-                <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                <Badge variant={user.role === 'ADMIN' ? 'default' : 'secondary'}>
                   {user.role}
                 </Badge>
               </div>

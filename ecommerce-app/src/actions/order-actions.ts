@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 // Helper to check admin access
 async function requireAdmin() {
   const session = await auth()
-  if (!session?.user || (session.user as any).role !== 'admin') {
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required')
   }
   return session
@@ -99,7 +99,7 @@ export async function getOrderByIdAction(id: string) {
     }
 
     // Check if user is admin or order owner
-    const isAdmin = (session?.user as any)?.role === 'admin'
+    const isAdmin = (session?.user as any)?.role === 'ADMIN'
     const isOwner = session?.user && (session.user as any).id === order.userId
 
     if (!isAdmin && !isOwner) {
