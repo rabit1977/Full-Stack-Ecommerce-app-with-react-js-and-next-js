@@ -3,10 +3,10 @@ import { Suspense } from 'react';
 import { ProductDetailContent } from './ProductDetailContent';
 import { ProductDetailSkeleton } from './ProductDetailSkeleton';
 
-const ProductDetailPage = () => {
+const ProductDetailPage = ({ params }: { params: { id: string } }) => {
   return (
     <Suspense fallback={<ProductDetailSkeleton />}>
-      <ProductDetailContent />
+      <ProductDetailContent productId={params.id} />
     </Suspense>
   );
 };

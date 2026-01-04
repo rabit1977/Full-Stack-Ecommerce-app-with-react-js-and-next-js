@@ -1,5 +1,3 @@
-
-
 export interface AppState {
   user: User | null;
   users: User[];
@@ -54,7 +52,7 @@ export interface User {
   name: string;
   email: string;
   password?: string; // Should not be stored in client-side state long-term
-  role?: 'admin' | 'customer'; // New property for user role
+  role?: 'ADMIN' | 'USER' | 'CUSTOMER'; // New property for user role (matches Prisma enum)
   bio?: string;
   cart: CartItem[];
   savedForLater: CartItem[];
@@ -75,7 +73,7 @@ export interface Product {
   category: string;
   images: string[];
   rating: number;
-  thumbnail?: string;
+  thumbnail?: string | null;
   reviewCount: number;
   reviews?: Review[];
   options?: ProductOption[];

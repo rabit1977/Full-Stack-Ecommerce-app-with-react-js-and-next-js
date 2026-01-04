@@ -18,24 +18,12 @@ export default function CreateUserPage() {
         values.role as any
       );
       if (result.success) {
-        toast({
-          title: 'Success',
-          description: 'User created successfully.',
-        });
-        // revalidatePath('/admin/users'); // Not available on client, will handle differently
+        toast.success('User created successfully.');
       } else {
-        toast({
-          title: 'Error',
-          description: result.message || 'An unknown error occurred.',
-          variant: 'destructive',
-        });
+        toast.error(result.message || 'An unknown error occurred.');
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create user.',
-        variant: 'destructive',
-      });
+      toast.error('Failed to create user.');
     } finally {
       setIsSubmitting(false);
     }

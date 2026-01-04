@@ -74,7 +74,7 @@ const MobileOrderSummary = memo(
               <ul className='space-y-4 mb-4'>
                 {cart.map((item) => (
                   <li key={item.cartItemId} className='flex items-center gap-4'>
-                    <div className='w-16 h-16 flex-shrink-0 relative rounded-md overflow-hidden border dark:border-slate-700'>
+                    <div className='w-16 h-16 flex shrink-0 relative rounded-md overflow-hidden border dark:border-slate-700'>
                       <Image
                         src={item.image}
                         alt={item.title}
@@ -101,8 +101,6 @@ const MobileOrderSummary = memo(
                 shipping={shippingCost}
                 taxes={taxes}
                 total={total}
-                isCollapsible
-                showCheckoutButton={false}
               />
             </div>
           </AccordionContent>
@@ -522,7 +520,7 @@ const CheckoutPage = () => {
                             key={item.cartItemId}
                             className='flex items-center gap-4'
                           >
-                            <div className='w-16 h-16 flex-shrink-0 relative rounded-md overflow-hidden border dark:border-slate-700'>
+                            <div className='w-16 h-16 flex shrink-0 relative rounded-md overflow-hidden border dark:border-slate-700'>
                               <Image
                                 src={item.image}
                                 alt={item.title || 'Product Image'}
@@ -584,7 +582,6 @@ const CheckoutPage = () => {
                 shipping={shippingCost}
                 taxes={taxes}
                 total={total}
-                showCheckoutButton={false}
               />
             </div>
           </div>

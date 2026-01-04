@@ -23,6 +23,7 @@ export const productFormSchema = z.object({
   imageUrl: z.string().optional(),
   discount: z.number().min(0).max(100).optional(),
   tags: z.array(z.string()).optional(),
+  thumbnail: z.string().optional(),
   options: z.any().optional(), // Using 'any' for flexibility with custom JSON options
 });
 

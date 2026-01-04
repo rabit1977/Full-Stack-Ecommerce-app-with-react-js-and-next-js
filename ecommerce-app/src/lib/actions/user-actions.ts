@@ -1,129 +1,59 @@
-import { userFormSchema } from '@/lib/schemas/user-schema';
-import { User } from '@/lib/types';
+// lib/actions/user-actions.ts
+'use server';
+
+import { UserRole } from '@prisma/client';
+import { prisma } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
+import { hash } from 'bcryptjs';
+
+interface UpdateUserData {
+  name: string;
+  email: string;
+  role: UserRole; // ✅ Changed from 'admin' | 'customer' to UserRole
+  password?: string;
+}
 
 /**
- * Action result type
+ * Update user by ID
  */
-type ActionResult<T = void> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
-
-/**
- * Constants
- */
-const USERS_KEY = 'users';
-
-/**
- * Get users from localStorage
- */
-const getUsers = (): User[] => {
-  if (typeof window === 'undefined') return [];
-
+export async function updateUser(userId: string, data: UpdateUserData) {
   try {
-    const item = localStorage.getItem(USERS_KEY);
-    return item ? JSON.parse(item) : [];
-  } catch (error) {
-    console.error(`Error reading ${USERS_KEY} from localStorage:`, error);
-    return [];
-  }
-};
-
-/**
- * Save users to localStorage
- */
-const saveUsers = (users: User[]): boolean => {
-  if (typeof window === 'undefined') return false;
-
-  try {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    return true;
-  } catch (error) {
-    console.error(`Error writing ${USERS_KEY} to localStorage:`, error);
-    return false;
-  }
-};
-
-/**
- * Update an existing user
- */
-export async function updateUser(
-  userId: string,
-  data: { name: string; email: string; role: 'admin' | 'customer'; password?: string }
-): Promise<ActionResult<User>> {
-  try {
-    // Validate input
-    const validatedFields = userFormSchema.safeParse(data);
-
-    if (!validatedFields.success) {
-      return {
-        success: false,
-        error: validatedFields.error.issues[0]?.message || 'Invalid fields!',
-      };
-    }
-
-    const { name, email, role, password } = validatedFields.data;
-
-    // Get users from localStorage
-    const users = getUsers();
-    const userIndex = users.findIndex((u) => u.id === userId);
-
-    if (userIndex === -1) {
-      return {
-        success: false,
-        error: 'User not found!',
-      };
-    }
-
     // Check if email is already taken by another user
-    const emailExists = users.some(
-      (u) => u.email === email && u.id !== userId
-    );
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
 
-    if (emailExists) {
+    if (existingUser && existingUser.id !== userId) {
       return {
         success: false,
-        error: 'Email is already in use by another user!',
+        error: 'An account with this email already exists.',
       };
     }
 
-    // Update user while preserving other fields
-    const updatedUser: User = {
-      ...users[userIndex],
-      name,
-      email,
-      role,
-      updatedAt: new Date().toISOString(),
+    // Prepare update data
+    const updateData: any = {
+      name: data.name,
+      email: data.email,
+      role: data.role,
     };
 
-    // Only update password if provided
-    if (password && password.trim() !== '') {
-      updatedUser.password = password;
+    // Only hash and update password if provided
+    if (data.password && data.password.trim() !== '') {
+      updateData.password = await hash(data.password, 10);
     }
 
-    users[userIndex] = updatedUser;
+    // Update user in database
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
 
-    // Save users to localStorage
-    const saved = saveUsers(users);
-
-    if (!saved) {
-      return {
-        success: false,
-        error: 'Failed to save user data.',
-      };
-    }
-
-    // Also update current user if it's the same user
-    const currentUserStr = localStorage.getItem('currentUser');
-    if (currentUserStr) {
-      const currentUser = JSON.parse(currentUserStr);
-      if (currentUser.id === userId) {
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-      }
-    }
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${userId}`);
 
     return {
       success: true,
-      data: updatedUser,
+      user: updatedUser,
     };
   } catch (error) {
     console.error('Error updating user:', error);
@@ -135,36 +65,145 @@ export async function updateUser(
 }
 
 /**
- * Delete a user
+ * Create new user
  */
-export async function deleteUser(userId: string): Promise<ActionResult> {
+export async function createUser(data: {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole; // ✅ Changed to UserRole
+}) {
   try {
-    const users = getUsers();
-    const index = users.findIndex((u) => u.id === userId);
+    // Check if email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
 
-    if (index === -1) {
+    if (existingUser) {
       return {
         success: false,
-        error: 'User not found!',
+        error: 'An account with this email already exists.',
       };
     }
 
-    users.splice(index, 1);
-    const saved = saveUsers(users);
+    // Hash password
+    const hashedPassword = await hash(data.password, 10);
 
-    if (!saved) {
-      return {
-        success: false,
-        error: 'Failed to save changes.',
-      };
-    }
+    // Create user
+    const newUser = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password: hashedPassword,
+        role: data.role,
+      },
+    });
 
-    return { success: true };
+    revalidatePath('/admin/users');
+
+    return {
+      success: true,
+      user: newUser,
+    };
+  } catch (error) {
+    console.error('Error creating user:', error);
+    return {
+      success: false,
+      error: 'Failed to create user. Please try again.',
+    };
+  }
+}
+
+/**
+ * Delete user by ID
+ */
+export async function deleteUser(userId: string) {
+  try {
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    revalidatePath('/admin/users');
+
+    return {
+      success: true,
+    };
   } catch (error) {
     console.error('Error deleting user:', error);
     return {
       success: false,
       error: 'Failed to delete user. Please try again.',
+    };
+  }
+}
+
+/**
+ * Get all users (admin only)
+ */
+export async function getAllUsers() {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      success: true,
+      users,
+    };
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return {
+      success: false,
+      error: 'Failed to fetch users.',
+      users: [],
+    };
+  }
+}
+
+/**
+ * Get user by ID
+ */
+export async function getUserById(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        bio: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not found.',
+      };
+    }
+
+    return {
+      success: true,
+      user,
+    };
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return {
+      success: false,
+      error: 'Failed to fetch user.',
     };
   }
 }

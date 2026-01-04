@@ -1,3 +1,4 @@
+import { UserRole } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import type { NextAuthConfig } from 'next-auth';
 
@@ -10,7 +11,8 @@ export const authConfig = {
       if (user) {
         // This block runs only on sign-in
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role as UserRole;
+        token.bio = user.bio;
         // On sign-in, fetch the wishlist from the DB
         try {
           const wishlistItems = await prisma.wishlistItem.findMany({
@@ -34,20 +36,30 @@ export const authConfig = {
       if (session.user && token.id) {
         session.user.id = token.id as string;
 
-        // Fetch the latest role from the database on every session check
+        // Fetch the latest role and bio from the database on every session check
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { role: true },
+            select: { role: true, bio: true },
           });
-          session.user.role = dbUser?.role || (token.role as string);
+
+          let userRole: UserRole = 'USER';
+          if (dbUser?.role) {
+            userRole = dbUser.role;
+          } else if (token.role) {
+            userRole = token.role as UserRole;
+          }
+          session.user.role = userRole;
+          
+          session.user.bio = dbUser?.bio || (token.bio as string | null) || null;
         } catch (error) {
-          console.error('Error fetching user role from database:', error);
-          // Fallback to cached role if DB query fails
-          session.user.role = token.role as string;
+          console.error('Error fetching user data from database:', error);
+          // Fallback to cached data if DB query fails
+          session.user.role = (token.role as UserRole) || 'USER';
+          session.user.bio = (token.bio as string | null) || null;
         }
 
-        session.user.wishlist = token.wishlist as string[];
+        session.user.wishlist = (token.wishlist as string[]) || [];
       }
       return session;
     },

@@ -1,10 +1,10 @@
 import { toggleWishlistAction } from '@/actions/wishlist-actions';
-import { AppThunk } from './cartThunks';
 import { setWishlist } from '../slices/wishlistSlice';
+import { AppDispatch } from '../store';
 
 export const toggleWishlist = (
   productId: string
-): AppThunk => async (dispatch) => {
+) => async (dispatch: AppDispatch) => {
   const result = await toggleWishlistAction(productId);
   if (result.success && result.wishlist) {
     dispatch(setWishlist(result.wishlist));

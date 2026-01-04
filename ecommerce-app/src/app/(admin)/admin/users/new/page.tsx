@@ -1,13 +1,13 @@
 // app/admin/users/new/page.tsx
 'use client';
 
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { UserForm, CreateUserFormValues } from '@/components/admin/user-form';
-import { Button } from '@/components/ui/button';
 import { createUserAction } from '@/actions/auth-actions';
-import { toast } from 'sonner';
+import { CreateUserFormValues, UserForm } from '@/components/admin/user-form';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
 
 export default function NewUserPage() {
   const [isPending, startTransition] = useTransition();
@@ -20,7 +20,7 @@ export default function NewUserPage() {
           values.name,
           values.email,
           values.password,
-          values.role as 'admin' | 'customer'
+          values.role as 'ADMIN' | 'CUSTOMER'
         );
 
         if (result.success) {
@@ -39,22 +39,22 @@ export default function NewUserPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Header */}
-      <div className="space-y-4">
+      <div className='space-y-4'>
         <Button
-          variant="ghost"
+          variant='ghost'
           onClick={() => router.push('/admin/users')}
-          className="hover:bg-slate-100 dark:hover:bg-slate-800"
+          className='hover:bg-slate-100 dark:hover:bg-slate-800'
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ArrowLeft className='h-4 w-4 mr-2' />
           Back to Users
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight dark:text-white">
+          <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
             Add New User
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">
+          <p className='text-slate-600 dark:text-slate-400 mt-2'>
             Create a new customer or admin account
           </p>
         </div>

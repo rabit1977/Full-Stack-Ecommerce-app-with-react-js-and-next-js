@@ -252,7 +252,7 @@ export async function createProductAction(data: ProductFormValues) {
       // Return the first validation error message
       return {
         success: false,
-        error: error.errors[0]?.message || 'Invalid data provided',
+        error: error.issues[0]?.message || 'Invalid data provided',
       };
     }
     return {
@@ -280,17 +280,8 @@ export async function updateProductAction(
     const { images, ...productData } = validatedData;
 
     // Separate Prisma-compatible fields from form fields
-    const {
-      title,
-      description,
-      price,
-      stock,
-      brand,
-      category,
-      discount,
-      rating,
-      reviewCount,
-    } = productData;
+    const { title, description, price, stock, brand, category, discount } =
+      productData;
 
     // Update product with only valid Prisma fields
     await prisma.product.update({
@@ -303,8 +294,6 @@ export async function updateProductAction(
         ...(brand !== undefined && { brand }),
         ...(category !== undefined && { category }),
         ...(discount !== undefined && { discount }),
-        ...(rating !== undefined && { rating }),
-        ...(reviewCount !== undefined && { reviewCount }),
         ...(images && images.length > 0 && { thumbnail: images[0] }),
       },
     });
@@ -338,7 +327,7 @@ export async function updateProductAction(
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors[0]?.message || 'Invalid data provided',
+        error: error.issues[0]?.message || 'Invalid data provided',
       };
     }
     return {

@@ -26,7 +26,7 @@ export function AuthSync() {
         id: session.user.id,
         email: session.user.email,
         name: session.user.name || 'User',
-        role: session.user.role || 'customer',
+        role: session.user.role || 'CUSTOMER',
         wishlist: session.user.wishlist || [],
         // These are not on the session, initialize as empty
         cart: [],

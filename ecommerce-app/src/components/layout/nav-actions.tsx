@@ -47,7 +47,7 @@ const CartPopupItem = ({ item }: { item: any }) => {
   return (
     <div className='group flex gap-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg px-2 transition-colors'>
       {/* Product Image */}
-      <div className='relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border bg-slate-100 dark:bg-slate-800'>
+      <div className='relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-slate-100 dark:bg-slate-800'>
         <Image
           src={item.image || '/placeholder.png'}
           alt={item.title}
@@ -141,7 +141,7 @@ const CartHoverPopup = ({ cartItemCount }: { cartItemCount: number }) => {
       </div>
 
       {/* Cart Items - Scrollable */}
-      <ScrollArea className='max-h-[300px]'>
+      <ScrollArea className='max-h-75'>
         <div className='px-4 divide-y dark:divide-slate-800'>
           {cart.map((item) => (
             <CartPopupItem key={item.cartItemId} item={item} />

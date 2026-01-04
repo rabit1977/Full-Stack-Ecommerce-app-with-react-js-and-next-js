@@ -31,10 +31,7 @@ export default function NewProductPage() {
           brand: values.brand,
           category: values.category,
           images: values.images,
-          thumbnail: values.imageUrl || values.images[0],
           discount: values.discount || 0,
-          rating: 0,
-          reviewCount: 0,
         });
 
         if (result.success) {

@@ -1,5 +1,7 @@
 import { signupAction } from '@/actions/auth-actions';
+import { clearWishlistAction } from '@/actions/wishlist-actions';
 import { User } from '@/lib/types';
+import { UserRole } from '@prisma/client';
 import { signIn, signOut } from 'next-auth/react';
 import { clearCart } from '../slices/cartSlice';
 import { clearOrders } from '../slices/orderSlice';
@@ -9,10 +11,9 @@ import {
   setUser,
   setUsers,
 } from '../slices/userSlice';
+import { clearWishlist } from '../slices/wishlistSlice';
 import { AppDispatch, RootState } from '../store';
 import { showToast } from './uiThunks';
-import { clearWishlist } from '../slices/wishlistSlice';
-import { clearWishlistAction } from '@/actions/wishlist-actions';
 
 // Type for thunk results
 interface ThunkResult {
@@ -92,7 +93,7 @@ export const updateUserFromAdmin =
     values: {
       name: string;
       email: string;
-      role: 'admin' | 'customer';
+      role: UserRole; // ✅ Changed from 'admin' | 'customer' to UserRole
       password?: string;
     }
   ) =>
@@ -117,7 +118,7 @@ export const updateUserFromAdmin =
       ...users[userIndex],
       name: values.name,
       email: values.email,
-      role: values.role,
+      role: values.role, // ✅ Directly use the role - it's already the correct type
       ...(values.password && { password: values.password }),
     };
 
@@ -161,7 +162,12 @@ export const deleteUserFromAdmin =
  * Create user from admin panel
  */
 export const createUserFromAdmin =
-  (name: string, email: string, password: string, role: 'admin' | 'customer') =>
+  (
+    name: string,
+    email: string,
+    password: string,
+    role: UserRole // ✅ Changed to UserRole
+  ) =>
   (dispatch: AppDispatch, getState: () => RootState): ThunkResult => {
     const { users } = getState().user;
 
@@ -178,7 +184,7 @@ export const createUserFromAdmin =
       name,
       email,
       password,
-      role,
+      role: role, // ✅ Directly use the role
       cart: [],
       savedForLater: [],
       wishlist: [],

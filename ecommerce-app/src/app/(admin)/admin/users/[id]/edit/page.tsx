@@ -3,26 +3,12 @@
 import { use, Suspense, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { UserForm } from '@/components/admin/user-form';
+import { UserForm, EditUserFormValues } from '@/components/admin/user-form';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { updateUserFromAdmin } from '@/lib/store/thunks/authThunks';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
-import * as z from 'zod';
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z
-    .string()
-    .min(6, { message: 'Password must be at least 6 characters.' })
-    .optional()
-    .or(z.literal('')),
-  role: z.enum(['admin', 'customer'], { message: 'Please select a role.' }),
-});
-
-export type EditUserFormValues = z.infer<typeof formSchema>;
 
 interface EditUserPageProps {
   params: Promise<{ id: string }>;
@@ -60,7 +46,8 @@ function EditUserContent({ userId }: { userId: string }) {
   const handleSubmit = async (values: EditUserFormValues) => {
     startTransition(async () => {
       try {
-        const result = await dispatch(updateUserFromAdmin(userId, values));
+        // Regular thunk - pass arguments separately
+        const result = dispatch(updateUserFromAdmin(userId, values));
         
         if (result.success) {
           toast.success('User updated successfully');
@@ -68,7 +55,7 @@ function EditUserContent({ userId }: { userId: string }) {
         } else {
           toast.error(result.message || 'Failed to update user');
         }
-      } catch (error) {
+      } catch (error: any) {
         toast.error('An error occurred while updating the user');
         console.error('Update user error:', error);
       }

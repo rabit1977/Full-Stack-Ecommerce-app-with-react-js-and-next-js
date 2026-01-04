@@ -109,7 +109,7 @@ export async function getUsersAction() {
 
 export async function updateUserAction(
   id: string,
-  data: { name?: string; email?: string; role?: UserRole }
+  data: { name?: string; email?: string; role?: UserRole; bio?: string }
 ) {
   try {
     await requireAdmin();
@@ -141,5 +141,42 @@ export async function deleteUserAction(id: string) {
     return { success: true, message: 'User deleted successfully.' };
   } catch (error) {
     return { success: false, message: 'Failed to delete user' };
+  }
+}
+
+
+export async function updateProfileAction(
+  data: { name?: string; email?: string; bio?: string; }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      throw new Error('Unauthorized: User not logged in');
+    }
+    const userId = session.user.id;
+
+    // If email is being changed, check if it's already taken
+    if (data.email) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email: data.email,
+          id: { not: userId }, // Check for other users with this email
+        },
+      });
+      if (existingUser) {
+        return { success: false, message: 'Email is already in use by another account.' };
+      }
+    }
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+
+    revalidatePath('/account');
+
+    return { success: true, message: 'Profile updated successfully.', user };
+  } catch (error) {
+    return { success: false, message: 'Failed to update profile' };
   }
 }

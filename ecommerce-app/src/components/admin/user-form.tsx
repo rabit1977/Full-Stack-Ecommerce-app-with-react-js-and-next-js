@@ -1,8 +1,5 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -21,21 +18,32 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { User } from '@/lib/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { UserRole } from '@prisma/client';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 // Schema for creating new user (password required)
+// Match your Prisma UserRole enum values
 const createUserSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-  role: z.enum(['admin', 'customer'], { message: 'Please select a role.' }),
+  password: z
+    .string()
+    .min(6, { message: 'Password must be at least 6 characters.' }),
+  role: z.nativeEnum(UserRole, { message: 'Please select a role.' }),
 });
 
 // Schema for editing user (password optional)
 const editUserSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }).optional().or(z.literal('')),
-  role: z.enum(['admin', 'customer'], { message: 'Please select a role.' }),
+  password: z
+    .string()
+    .min(6, { message: 'Password must be at least 6 characters.' })
+    .optional()
+    .or(z.literal('')),
+  role: z.nativeEnum(UserRole, { message: 'Please select a role.' }),
 });
 
 // Export types
@@ -68,37 +76,22 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
       name: user?.name || '',
       email: user?.email || '',
       password: '',
-      role: user?.role || 'customer',
+      role: user?.role || UserRole.USER,
     },
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit as any)} className='space-y-8'>
         <FormField
           control={form.control}
-          name="name"
+          name='name'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} disabled={isSubmitting} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
                 <Input
-                  type="email"
-                  placeholder="john.doe@example.com"
+                  placeholder='John Doe'
                   {...field}
                   disabled={isSubmitting}
                 />
@@ -110,7 +103,26 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
 
         <FormField
           control={form.control}
-          name="password"
+          name='email'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type='email'
+                  placeholder='john.doe@example.com'
+                  {...field}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='password'
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -118,7 +130,7 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
               </FormLabel>
               <FormControl>
                 <Input
-                  type="password"
+                  type='password'
                   placeholder={
                     isEditing
                       ? 'Leave blank to keep current password'
@@ -135,7 +147,7 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
 
         <FormField
           control={form.control}
-          name="role"
+          name='role'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Role</FormLabel>
@@ -146,12 +158,13 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder='Select a role' />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="customer">Customer</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value={UserRole.USER}>User</SelectItem>
+                  <SelectItem value={UserRole.CUSTOMER}>Customer</SelectItem>
+                  <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -159,7 +172,7 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
           )}
         />
 
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type='submit' disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : user ? 'Save Changes' : 'Create User'}
         </Button>
       </form>
