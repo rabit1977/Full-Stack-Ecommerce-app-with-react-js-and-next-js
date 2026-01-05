@@ -12,7 +12,7 @@ import { Eye, Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { memo, useCallback, useMemo, useTransition } from 'react';
 import { toast } from 'sonner';
-import { ProductImageCarousel } from './product-image-carousel';
+import { ProductCartImage } from './product-image-carousel';
 
 interface ProductCardProps {
   product: Product;
@@ -98,7 +98,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
     >
       <div className='group relative h-full overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900'>
         {/* Image Carousel */}
-        <ProductImageCarousel product={product} />
+        <ProductCartImage product={product} />
 
         {/* Discount Badge */}
         {discount && (

@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/auth';
+import { CartItem } from '@/components/cart/cart-item';
 import { prisma } from '@/lib/db';
 import { UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
@@ -107,24 +108,63 @@ export async function getUsersAction() {
   }
 }
 
-export async function getUserByIdAction(id: string) {
+export async function getUserByIdAction(userId: string) {
   try {
     await requireAdmin();
 
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id: userId },
+      include: {
+        wishlistItems: {
+          select: { id: true },
+        },
+        orders: {
+          select: { id: true },
+        },
+        reviews: {
+          select: { id: true },
+        },
+        cartItems: {  
+          select: { id: true },
+        },
+      },
     });
 
     if (!user) {
-      return { success: false, message: 'User not found' };
+      return {
+        success: false,
+        message: 'User not found',
+        user: null,
+      };
     }
 
-    return { success: true, user };
+    // Return user with activity counts
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name || '',
+        email: user.email || '',
+        role: user.role,
+        bio: user.bio,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+        // Activity counts from database
+        cartCount: user.cartItems?.length || 0,
+        wishlistCount: user.wishlistItems?.length || 0,
+        ordersCount: user.orders?.length || 0,
+        reviewsCount: user.reviews?.length || 0,
+      },
+    };
   } catch (error) {
-    return { success: false, message: 'Failed to fetch user' };
+    console.error('Error fetching user:', error);
+    return {
+      success: false,
+      message: 'Failed to fetch user',
+      user: null,
+    };
   }
 }
-
 export async function updateUserAction(
   id: string,
   data: { name?: string; email?: string; role?: UserRole; bio?: string, password?: string }

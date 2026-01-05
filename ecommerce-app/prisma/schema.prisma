@@ -29,6 +29,7 @@ model User {
   orders        Order[]
   reviews       Review[]
   wishlistItems WishlistItem[]
+  cartItems     CartItem[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -79,13 +80,12 @@ model Product {
   category    String
   rating      Float    @default(0)
   reviewCount Int      @default(0)
-  thumbnail   String?
-  
+  thumbnail   String?  
   images      ProductImage[]
   reviews     Review[]
   orderItems  OrderItem[]
   wishlistedBy WishlistItem[]
-
+  cartItems   CartItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -120,6 +120,8 @@ model OrderItem {
   price     Float
 }
 
+
+
 model Review {
   id        String   @id @default(cuid())
   userId    String
@@ -141,6 +143,19 @@ model WishlistItem {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, productId])
 }

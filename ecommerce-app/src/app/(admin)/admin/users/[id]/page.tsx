@@ -50,10 +50,12 @@ function UserNotFound() {
 /**
  * User details page - Server Component
  */
-export default async function UserDetailsPage({ params }: UserDetailsPageProps) {
+export default async function UserDetailsPage({
+  params,
+}: UserDetailsPageProps) {
   // Await params in Next.js 15
   const { id } = await params;
-  
+
   // Fetch user from database
   const result = await getUserByIdAction(id);
 
@@ -179,35 +181,46 @@ export default async function UserDetailsPage({ params }: UserDetailsPageProps) 
             <CardContent className='space-y-4'>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
+                  <Heart className='h-4 w-4 text-slate-400' />
+                  <span className='text-sm text-slate-600 dark:text-slate-400'>
+                    Wishlist Items
+                  </span>
+                </div>
+                <span className='font-semibold dark:text-white'>
+                  {user.wishlistCount || 0}
+                </span>
+              </div>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-2'>
                   <ShoppingBag className='h-4 w-4 text-slate-400' />
+                  <span className='text-sm text-slate-600 dark:text-slate-400'>
+                    Total Orders
+                  </span>
+                </div>
+                <span className='font-semibold dark:text-white'>
+                  {user.ordersCount || 0}
+                </span>
+              </div>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-2'>
+                  <Mail className='h-4 w-4 text-slate-400' />
                   <span className='text-sm text-slate-600 dark:text-slate-400'>
                     Cart Items
                   </span>
                 </div>
                 <span className='font-semibold dark:text-white'>
-                  {user.cart?.length || 0}
+                  {user.cartCount || 0}
                 </span>
               </div>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
-                  <Heart className='h-4 w-4 text-slate-400' />
+                  <Mail className='h-4 w-4 text-slate-400' />
                   <span className='text-sm text-slate-600 dark:text-slate-400'>
-                    Wishlist
+                    Reviews Written
                   </span>
                 </div>
                 <span className='font-semibold dark:text-white'>
-                  {user.wishlist?.length || 0}
-                </span>
-              </div>
-              <div className='flex items-center justify-between'>
-                <div className='flex items-center gap-2'>
-                  <ShoppingBag className='h-4 w-4 text-slate-400' />
-                  <span className='text-sm text-slate-600 dark:text-slate-400'>
-                    Saved Items
-                  </span>
-                </div>
-                <span className='font-semibold dark:text-white'>
-                  {user.savedForLater?.length || 0}
+                  {user.reviewsCount || 0}
                 </span>
               </div>
             </CardContent>

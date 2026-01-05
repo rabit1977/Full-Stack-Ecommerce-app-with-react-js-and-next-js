@@ -1,11 +1,15 @@
 import { getProductByIdAction } from '@/actions/product-actions';
-import { ProductImageCarousel } from '@/components/product/product-image-carousel';
+import { ProductCartImage } from '@/components/product/product-image-carousel';
 import { RelatedProducts } from '@/components/product/related-products';
 import { ReviewsSection } from '@/components/product/reviews-section';
 import { notFound } from 'next/navigation';
 import { ProductPurchaseManager } from './ProductPurchaseManager';
 
-export async function ProductDetailContent({ productId }: { productId: string }) {
+export async function ProductDetailContent({
+  productId,
+}: {
+  productId: string;
+}) {
   const product = await getProductByIdAction(productId);
 
   if (!product) {
@@ -16,7 +20,7 @@ export async function ProductDetailContent({ productId }: { productId: string })
     <div className='container mx-auto px-4 py-8'>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         <div>
-          <ProductImageCarousel product={product} />
+          <ProductCartImage product={product} />
         </div>
         <div>
           <ProductPurchaseManager product={product} />

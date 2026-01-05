@@ -1,6 +1,5 @@
 import type { NextConfig } from 'next';
 
-
 const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcryptjs'],
   images: {
@@ -50,6 +49,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'www.dagimarket.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.andoo.com.au',
         port: '',
         pathname: '/**',
       },
