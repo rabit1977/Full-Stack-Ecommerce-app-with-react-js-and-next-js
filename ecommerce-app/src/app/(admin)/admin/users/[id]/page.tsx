@@ -1,5 +1,4 @@
-'use client';
-
+import { getUserByIdAction } from '@/actions/auth-actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,8 +9,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useAppSelector } from '@/lib/store/hooks';
 import { formatDateTime } from '@/lib/utils/formatters';
 import {
   ArrowLeft,
@@ -22,55 +19,17 @@ import {
   ShoppingBag,
   User as UserIcon,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { Suspense, use } from 'react';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 interface UserDetailsPageProps {
   params: Promise<{ id: string }>;
 }
 
 /**
- * User details skeleton
- */
-function UserDetailsSkeleton() {
-  return (
-    <div className='space-y-6'>
-      <Skeleton className='h-8 w-48' />
-      <div className='grid lg:grid-cols-3 gap-6'>
-        <div className='lg:col-span-2 space-y-6'>
-          <Card>
-            <CardHeader>
-              <Skeleton className='h-6 w-32' />
-              <Skeleton className='h-4 w-48 mt-2' />
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <Skeleton className='h-4 w-full' />
-              <Skeleton className='h-4 w-full' />
-              <Skeleton className='h-4 w-3/4' />
-            </CardContent>
-          </Card>
-        </div>
-        <div className='space-y-6'>
-          <Card>
-            <CardHeader>
-              <Skeleton className='h-5 w-24' />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className='h-16 w-full' />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
  * User not found component
  */
 function UserNotFound() {
-  const router = useRouter();
-
   return (
     <div className='flex flex-col items-center justify-center min-h-[50vh] space-y-4'>
       <UserIcon className='h-16 w-16 text-slate-300 dark:text-slate-600' />
@@ -78,26 +37,32 @@ function UserNotFound() {
       <p className='text-slate-600 dark:text-slate-400 text-center max-w-md'>
         The user you&apos;re looking for doesn&apos;t exist or has been removed.
       </p>
-      <Button onClick={() => router.push('/admin/users')}>
-        <ArrowLeft className='h-4 w-4 mr-2' />
-        Back to Users
+      <Button asChild>
+        <Link href='/admin/users'>
+          <ArrowLeft className='h-4 w-4 mr-2' />
+          Back to Users
+        </Link>
       </Button>
     </div>
   );
 }
 
 /**
- * User details content
+ * User details page - Server Component
  */
-function UserDetailsContent({ userId }: { userId: string }) {
-  const router = useRouter();
-  const user = useAppSelector((state) =>
-    state.user.users.find((u) => u.id === userId)
-  );
+export default async function UserDetailsPage({ params }: UserDetailsPageProps) {
+  // Await params in Next.js 15
+  const { id } = await params;
+  
+  // Fetch user from database
+  const result = await getUserByIdAction(id);
 
-  if (!user) {
-    return <UserNotFound />;
+  // Handle user not found
+  if (!result.success || !result.user) {
+    notFound();
   }
+
+  const user = result.user;
 
   return (
     <div className='space-y-6'>
@@ -105,20 +70,19 @@ function UserDetailsContent({ userId }: { userId: string }) {
       <div className='flex items-center justify-between'>
         <div className='space-y-1'>
           <div className='flex items-center gap-3'>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={() => router.push('/admin/users')}
-              className='hover:bg-slate-100 dark:hover:bg-slate-800'
-            >
-              <ArrowLeft className='h-5 w-5' />
+            <Button variant='ghost' size='icon' asChild>
+              <Link href='/admin/users'>
+                <ArrowLeft className='h-5 w-5' />
+              </Link>
             </Button>
             <h1 className='text-2xl font-bold dark:text-white'>User Details</h1>
           </div>
         </div>
-        <Button onClick={() => router.push(`/admin/users/${user.id}/edit`)}>
-          <Edit className='h-4 w-4 mr-2' />
-          Edit User
+        <Button asChild>
+          <Link href={`/admin/users/${user.id}/edit`}>
+            <Edit className='h-4 w-4 mr-2' />
+            Edit User
+          </Link>
         </Button>
       </div>
 
@@ -187,6 +151,20 @@ function UserDetailsContent({ userId }: { userId: string }) {
                   )}
                 </div>
               </div>
+
+              {user.bio && (
+                <>
+                  <Separator />
+                  <div>
+                    <p className='text-sm font-medium text-slate-600 dark:text-slate-400 mb-2'>
+                      Bio
+                    </p>
+                    <p className='text-sm text-slate-700 dark:text-slate-300'>
+                      {user.bio}
+                    </p>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -234,38 +212,8 @@ function UserDetailsContent({ userId }: { userId: string }) {
               </div>
             </CardContent>
           </Card>
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className='text-lg'>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-3'>
-              <Button
-                variant='outline'
-                className='w-full justify-start'
-                onClick={() => router.push(`/admin/users/${user.id}/edit`)}
-              >
-                <Edit className='h-4 w-4 mr-2' />
-                Edit User
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
-  );
-}
-
-/**
- * User details page with Suspense
- */
-export default function UserDetailsPage({ params }: UserDetailsPageProps) {
-  const { id } = use(params);
-
-  return (
-    <Suspense fallback={<UserDetailsSkeleton />}>
-      <UserDetailsContent userId={id} />
-    </Suspense>
   );
 }
