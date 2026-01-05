@@ -1,4 +1,4 @@
-import { signupAction } from '@/actions/auth-actions';
+import { createUserAction, deleteUserAction, signupAction, updateUserAction } from '@/actions/auth-actions';
 import { clearWishlistAction } from '@/actions/wishlist-actions';
 import { User } from '@/lib/types';
 import { UserRole } from '@prisma/client';
@@ -93,48 +93,40 @@ export const updateUserFromAdmin =
     values: {
       name: string;
       email: string;
-      role: UserRole; // ✅ Changed from 'admin' | 'customer' to UserRole
+      role: UserRole;
       password?: string;
     }
   ) =>
-  (dispatch: AppDispatch, getState: () => RootState): ThunkResult => {
+  async (dispatch: AppDispatch, getState: () => RootState): Promise<ThunkResult> => {
     const { users, user: currentUser } = getState().user;
-    const userIndex = users.findIndex((u) => u.id === userId);
+    
+    try {
+      const result = await updateUserAction(userId, values);
 
-    if (userIndex === -1) {
-      dispatch(showToast('User not found.', 'error'));
-      return { success: false, message: 'User not found.' };
-    }
+      if (!result.success || !result.user) {
+        dispatch(showToast(result.message || 'Failed to update user.', 'error'));
+        return { success: false, message: result.message };
+      }
+      
+      const updatedUser = result.user;
 
-    // Check if email is already taken by another user
-    if (users.some((u) => u.email === values.email && u.id !== userId)) {
-      dispatch(
-        showToast('An account with this email already exists.', 'error')
+      const updatedUsers = users.map((u) =>
+        u.id === userId ? { ...u, ...updatedUser } : u
       );
-      return { success: false, message: 'Email already exists.' };
+
+      dispatch(setUsers(updatedUsers));
+
+      if (currentUser?.id === userId) {
+        dispatch(setUser({ ...currentUser, ...updatedUser }));
+      }
+
+      dispatch(showToast(`User ${values.name} updated successfully!`, 'success'));
+      return { success: true };
+
+    } catch (error) {
+      dispatch(showToast('An unexpected error occurred.', 'error'));
+      return { success: false, message: 'An unexpected error occurred.' };
     }
-
-    const updatedUser: User = {
-      ...users[userIndex],
-      name: values.name,
-      email: values.email,
-      role: values.role, // ✅ Directly use the role - it's already the correct type
-      ...(values.password && { password: values.password }),
-    };
-
-    const updatedUsers = [...users];
-    updatedUsers[userIndex] = updatedUser;
-
-    dispatch(setUsers(updatedUsers));
-
-    // If updating current logged-in user, update them too
-    if (currentUser?.id === userId) {
-      dispatch(setUser(updatedUser));
-    }
-
-    dispatch(showToast(`User ${values.name} updated successfully!`, 'success'));
-
-    return { success: true };
   };
 
 /**
@@ -142,7 +134,7 @@ export const updateUserFromAdmin =
  */
 export const deleteUserFromAdmin =
   (userId: string) =>
-  (dispatch: AppDispatch, getState: () => RootState): ThunkResult => {
+  async (dispatch: AppDispatch, getState: () => RootState): Promise<ThunkResult> => {
     const { users, user: currentUser } = getState().user;
 
     // Prevent deleting yourself
@@ -151,11 +143,23 @@ export const deleteUserFromAdmin =
       return { success: false, message: 'Cannot delete own account.' };
     }
 
-    const updatedUsers = users.filter((u) => u.id !== userId);
-    dispatch(setUsers(updatedUsers));
-    dispatch(showToast('User deleted successfully!', 'success'));
+    try {
+      const result = await deleteUserAction(userId);
 
-    return { success: true };
+      if (!result.success) {
+        dispatch(showToast(result.message || 'Failed to delete user.', 'error'));
+        return { success: false, message: result.message };
+      }
+
+      const updatedUsers = users.filter((u) => u.id !== userId);
+      dispatch(setUsers(updatedUsers));
+      dispatch(showToast('User deleted successfully!', 'success'));
+      return { success: true };
+
+    } catch (error) {
+      dispatch(showToast('An unexpected error occurred.', 'error'));
+      return { success: false, message: 'An unexpected error occurred.' };
+    }
   };
 
 /**
@@ -168,34 +172,27 @@ export const createUserFromAdmin =
     password: string,
     role: UserRole // ✅ Changed to UserRole
   ) =>
-  (dispatch: AppDispatch, getState: () => RootState): ThunkResult => {
-    const { users } = getState().user;
+  async (dispatch: AppDispatch, getState: () => RootState): Promise<ThunkResult> => {
+    
+    try {
+      const result = await createUserAction(name, email, password, role);
 
-    // Check if email already exists
-    if (users.some((u) => u.email === email)) {
-      dispatch(
-        showToast('An account with this email already exists.', 'error')
-      );
-      return { success: false, message: 'Email already exists.' };
+      if (!result.success || !result.user) {
+        dispatch(showToast(result.message || 'Failed to create user.', 'error'));
+        return { success: false, message: result.message };
+      }
+      
+      const newUser = result.user;
+
+      dispatch(addUser(newUser as User));
+      dispatch(showToast(`User ${name} created successfully!`, 'success'));
+
+      return { success: true };
+
+    } catch (error) {
+      dispatch(showToast('An unexpected error occurred.', 'error'));
+      return { success: false, message: 'An unexpected error occurred.' };
     }
-
-    const newUser: User = {
-      id: generateUserId(),
-      name,
-      email,
-      password,
-      role: role, // ✅ Directly use the role
-      cart: [],
-      savedForLater: [],
-      wishlist: [],
-      helpfulReviews: [],
-      createdAt: new Date().toISOString(),
-    };
-
-    dispatch(addUser(newUser));
-    dispatch(showToast(`User ${name} created successfully!`, 'success'));
-
-    return { success: true };
   };
 
 /**

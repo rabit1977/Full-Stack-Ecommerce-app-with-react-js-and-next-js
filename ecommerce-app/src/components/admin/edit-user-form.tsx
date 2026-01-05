@@ -1,7 +1,7 @@
 'use client';
 
+import { updateUserAction } from '@/actions/auth-actions';
 import { UserForm, EditUserFormValues } from '@/components/admin/user-form';
-import { updateUser } from '@/lib/actions/user-actions';
 import { User } from '@/lib/types';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
@@ -15,9 +15,9 @@ export function EditUserForm({ user }: EditUserFormProps) {
 
   const handleSubmit = (values: EditUserFormValues) => {
     startTransition(async () => {
-      const result = await updateUser(user.id, values);
+      const result = await updateUserAction(user.id, values);
       if (!result.success) {
-        toast.error(result.error || 'Failed to update user');
+        toast.error(result.message || 'Failed to update user');
       } else {
         toast.success('User updated successfully!');
       }

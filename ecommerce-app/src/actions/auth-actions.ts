@@ -107,16 +107,58 @@ export async function getUsersAction() {
   }
 }
 
+export async function getUserByIdAction(id: string) {
+  try {
+    await requireAdmin();
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      return { success: false, message: 'User not found' };
+    }
+
+    return { success: true, user };
+  } catch (error) {
+    return { success: false, message: 'Failed to fetch user' };
+  }
+}
+
 export async function updateUserAction(
   id: string,
-  data: { name?: string; email?: string; role?: UserRole; bio?: string }
+  data: { name?: string; email?: string; role?: UserRole; bio?: string, password?: string }
 ) {
   try {
     await requireAdmin();
 
+    // Check if email is already taken by another user
+    if (data.email) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email: data.email,
+          id: { not: id }, 
+        },
+      });
+      if (existingUser) {
+        return { success: false, message: 'Email is already in use by another account.' };
+      }
+    }
+    
+    const updateData: any = {
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      bio: data.bio
+    };
+
+    if (data.password && data.password.trim() !== '') {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
+
     const user = await prisma.user.update({
       where: { id },
-      data,
+      data: updateData,
     });
 
     revalidatePath('/admin/users');
