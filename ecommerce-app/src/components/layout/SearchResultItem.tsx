@@ -1,5 +1,5 @@
-import { Product } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
+import { Product } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -25,7 +25,7 @@ export const SearchResultItem = ({
         onKeyDown={(e) => onKeyDown(e, index)}
         className='flex items-center gap-3 rounded-md p-2 hover:bg-accent transition-colors focus:bg-accent focus:outline-none'
       >
-        <div className='relative h-12 w-12 flex-shrink-0 rounded-md overflow-hidden bg-muted'>
+        <div className='relative h-12 w-12 flex shrink-0 rounded-md overflow-hidden bg-muted'>
           <Image
             src={product.images?.[0] || '/images/placeholder.jpg'}
             alt={product.title}

@@ -16,8 +16,8 @@ import {
   deleteReview,
   toggleHelpfulReview,
 } from '@/lib/store/thunks/managementThunks';
-import { Review } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { Review } from '@/lib/types';
 import { Pencil, ThumbsUp, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AddReviewForm } from './add-review-form';
@@ -89,7 +89,7 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
               className='flex items-center gap-2'
               variant='outline'
               size='sm'
-              onClick={() => handleEditClick(userReview)}
+              onClick={() => userReview && handleEditClick(userReview)}
             >
               <Pencil className='mr-2 h-4 w-4' />
               Edit Your Review
@@ -125,7 +125,7 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
             const isUserReview = user && user.name === review.author;
             return (
               <div key={review.id} className='flex flex-col sm:flex-row gap-4'>
-                <div className='flex-shrink-0 w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-200'>
+                <div className='shrink-0 w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-200'>
                   {(review.author || '?').charAt(0).toUpperCase()}
                 </div>
                 <div className='flex-1'>

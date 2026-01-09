@@ -2,7 +2,7 @@
 
 import { updateUserAction } from '@/actions/auth-actions';
 import { UserForm, EditUserFormValues } from '@/components/admin/user-form';
-import { User } from '@/lib/types';
+import { User } from '@prisma/client';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 

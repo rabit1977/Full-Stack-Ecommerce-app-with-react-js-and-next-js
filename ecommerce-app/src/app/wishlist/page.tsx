@@ -132,14 +132,11 @@ const WishlistPage = () => {
                       sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
                     />
                   </div>
-                  <div className='p-4 flex flex-col flex-grow'>
+                  <div className='p-4 flex flex-col grow'>
                     <h3 className='font-semibold text-slate-800 dark:text-white'>
                       <Link
-                        href='#'
-                        onClick={(e) => {
-                          e.preventDefault();
-                          viewProduct(product.id);
-                        }}
+                        href={`/products/${product.id}`}
+                     
                         className='hover:underline hover:underline-offset-3   cursor-pointer'
                       >
                         {product.title}

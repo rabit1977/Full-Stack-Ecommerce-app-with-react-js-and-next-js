@@ -1,8 +1,45 @@
 'use server';
 
 import { prisma } from '@/lib/db';
-import { Product, SortKey } from '@/lib/types';
-import { Prisma } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
+
+/**
+ * Product with relations (for frontend)
+ */
+export type ProductWithRelations = Product & {
+  images: { id: string; url: string }[];
+  reviews: ({
+    user: { name: string | null };
+  } & {
+    id: string;
+    userId: string;
+    rating: number;
+    title: string;
+    comment: string;
+    helpful: number;
+    verifiedPurchase: boolean;
+    createdAt: Date;
+  })[];
+};
+
+/**
+ * Sort options
+ */
+export type SortKey =
+  | 'featured'
+  | 'price-asc'
+  | 'price-desc'
+  | 'rating'
+  | 'newest'
+  | 'popularity';
+const sortOptions: Record<SortKey, Prisma.ProductOrderByWithRelationInput> = {
+  featured: { rating: 'desc' },
+  'price-asc': { price: 'asc' },
+  'price-desc': { price: 'desc' },
+  rating: { rating: 'desc' },
+  newest: { createdAt: 'desc' },
+  popularity: { reviewCount: 'desc' },
+};
 
 export interface GetProductsOptions {
   query?: string;
@@ -25,9 +62,21 @@ export interface GetProductsResult {
   hasMore: boolean;
 }
 
-export async function getProductsAction(
-  options: GetProductsOptions = {}
-): Promise<GetProductsResult> {
+/**
+ * Get products with filters and pagination
+ */
+export async function getProductsAction(options: {
+  query?: string;
+  categories?: string;
+  brands?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  inStock?: boolean;
+  sort?: SortKey;
+  page?: number;
+  limit?: number;
+}) {
   const {
     query,
     categories,
@@ -37,23 +86,19 @@ export async function getProductsAction(
     minRating,
     inStock,
     sort = 'featured',
-    page: rawPage, // 1. Rename incoming variable to "raw"
-    limit: rawLimit, // 2. Rename incoming variable to "raw"
+    page = 1,
+    limit = 12,
   } = options;
-
-  // 3. FORCE CONVERSION: Turn Strings into Numbers immediately
-  // This prevents the "Invalid Invocation" crash
-  const page = Number(rawPage) || 1;
-  const limit = Number(rawLimit) || 12;
 
   const where: Prisma.ProductWhereInput = {
     AND: [],
   };
-  const andarr = where.AND as Prisma.ProductWhereInput[];
 
-  // --- Search Logic ---
+  const andArray = where.AND as Prisma.ProductWhereInput[];
+
+  // Search query
   if (query) {
-    andarr.push({
+    andArray.push({
       OR: [
         { title: { contains: query, mode: 'insensitive' } },
         { description: { contains: query, mode: 'insensitive' } },
@@ -63,55 +108,39 @@ export async function getProductsAction(
     });
   }
 
-  // --- Filters ---
+  // Categories filter
   if (categories) {
-    const list = categories
+    const categoryList = categories
       .split(',')
       .map((c) => c.trim())
       .filter(Boolean);
-    if (list.length) andarr.push({ category: { in: list } });
+    if (categoryList.length > 0) {
+      andArray.push({ category: { in: categoryList } });
+    }
   }
 
+  // Brands filter
   if (brands) {
-    const list = brands
+    const brandList = brands
       .split(',')
       .map((b) => b.trim())
       .filter(Boolean);
-    if (list.length) andarr.push({ brand: { in: list } });
+    if (brandList.length > 0) {
+      andArray.push({ brand: { in: brandList } });
+    }
   }
 
-  // Force price/rating to Numbers too
-  if (minPrice !== undefined) andarr.push({ price: { gte: Number(minPrice) } });
-  if (maxPrice !== undefined) andarr.push({ price: { lte: Number(maxPrice) } });
-  if (minRating !== undefined)
-    andarr.push({ rating: { gte: Number(minRating) } });
+  // Price range
+  if (minPrice !== undefined) andArray.push({ price: { gte: minPrice } });
+  if (maxPrice !== undefined) andArray.push({ price: { lte: maxPrice } });
 
-  if (inStock) andarr.push({ stock: { gt: 0 } });
+  // Rating filter
+  if (minRating !== undefined) andArray.push({ rating: { gte: minRating } });
 
-  // --- Sorting ---
-  let orderBy: Prisma.ProductOrderByWithRelationInput = {};
-  switch (sort) {
-    case 'price-asc':
-      orderBy = { price: 'asc' };
-      break;
-    case 'price-desc':
-      orderBy = { price: 'desc' };
-      break;
-    case 'rating':
-      orderBy = { rating: 'desc' };
-      break;
-    case 'newest':
-      orderBy = { createdAt: 'desc' };
-      break;
-    case 'popularity':
-      orderBy = { reviewCount: 'desc' };
-      break;
-    default:
-      orderBy = { rating: 'desc' };
-      break;
-  }
+  // Stock filter
+  if (inStock) andArray.push({ stock: { gt: 0 } });
 
-  // 4. Calculate Skip (Now safe because page/limit are real numbers)
+  const orderBy = sortOptions[sort] || sortOptions.featured;
   const skip = (page - 1) * limit;
 
   try {
@@ -120,9 +149,31 @@ export async function getProductsAction(
         where,
         orderBy,
         skip,
-        take: limit, // <--- This was crashing because it was a string
+        take: limit,
         include: {
-          images: true,
+          images: {
+            select: {
+              id: true,
+              url: true,
+            },
+          },
+          reviews: {
+            select: {
+              id: true,
+              userId: true,
+              rating: true,
+              title: true,
+              comment: true,
+              helpful: true,
+              verifiedPurchase: true,
+              createdAt: true,
+              user: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
         },
       }),
       prisma.product.count({ where }),
@@ -131,12 +182,7 @@ export async function getProductsAction(
     const totalPages = Math.ceil(totalCount / limit);
 
     return {
-      products: products.map((p) => ({
-        ...p,
-        images: p.images.map((img) => img.url),
-        createdAt: p.createdAt.toISOString(),
-        updatedAt: p.updatedAt.toISOString(),
-      })),
+      products: products as ProductWithRelations[],
       totalCount,
       page,
       totalPages,
@@ -144,31 +190,48 @@ export async function getProductsAction(
     };
   } catch (error) {
     console.error('Error fetching products:', error);
-    return {
-      products: [],
-      totalCount: 0,
-      page: 1,
-      totalPages: 0,
-      hasMore: false,
-    };
+    throw new Error('Failed to fetch products');
   }
 }
+
 export async function getProductByIdAction(
   id: string
-): Promise<Product | null> {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { images: true },
-  });
+): Promise<ProductWithRelations | null> {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        images: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+        reviews: {
+          select: {
+            id: true,
+            userId: true,
+            rating: true,
+            title: true,
+            comment: true,
+            helpful: true,
+            verifiedPurchase: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-  if (!product) return null;
-
-  return {
-    ...product,
-    images: product.images.map((img) => img.url),
-    createdAt: product.createdAt.toISOString(),
-    updatedAt: product.updatedAt.toISOString(),
-  };
+    return product as ProductWithRelations | null;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
+  }
 }
 
 export async function getFiltersAction() {
@@ -215,23 +278,37 @@ async function requireAdmin() {
 }
 
 /**
- * Create new product (admin only)
+ * Create product (admin only)
  */
-export async function createProductAction(data: ProductFormValues) {
+export async function createProductAction(data: {
+  title: string;
+  description: string;
+  price: number;
+  stock: number;
+  brand: string;
+  category: string;
+  images?: string[];
+  discount?: number;
+  tags?: string[];
+  features?: string[];
+  options?: any;
+  specifications?: any;
+}) {
   try {
-    await requireAdmin();
-
-    const validated = productFormSchema.parse(data);
-    const { images, ...productData } = validated;
+    const { images, ...productData } = data;
 
     const product = await prisma.product.create({
       data: {
         ...productData,
         discount: productData.discount || 0,
+        thumbnail: images?.[0] || null,
+        tags: productData.tags || [],
+        features: productData.features || [],
+        options: productData.options || null,
+        specifications: productData.specifications || null,
         images: {
           create: images?.map((url) => ({ url })) || [],
         },
-        thumbnail: images?.[0],
       },
       include: {
         images: true,
@@ -248,24 +325,12 @@ export async function createProductAction(data: ProductFormValues) {
     };
   } catch (error) {
     console.error('Error creating product:', error);
-    if (error instanceof z.ZodError) {
-      // Return the first validation error message
-      return {
-        success: false,
-        error: error.issues[0]?.message || 'Invalid data provided',
-      };
-    }
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to create product',
+      error: 'Failed to create product',
     };
   }
 }
-
-/**
- * Update product (admin only)
- */
 /**
  * Update product (admin only)
  */
@@ -404,32 +469,100 @@ export async function deleteMultipleProductsAction(ids: string[]) {
   }
 }
 
+/** * Get categories
+ */
+export async function getCategoriesAction(): Promise<string[]> {
+  try {
+    const categories = await prisma.product.findMany({
+      distinct: ['category'],
+      select: { category: true },
+    });
+    return categories.map((c) => c.category).sort();
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
+}
+
 /**
- * Get multiple products by their IDs
+ * Get brands
+ */
+export async function getBrandsAction(): Promise<string[]> {
+  try {
+    const brands = await prisma.product.findMany({
+      distinct: ['brand'],
+      select: { brand: true },
+    });
+    return brands.map((b) => b.brand).sort();
+  } catch (error) {
+    console.error('Error fetching brands:', error);
+    return [];
+  }
+}
+
+/**
+ * Get price range
+ */
+export async function getPriceRangeAction(): Promise<{
+  min: number;
+  max: number;
+}> {
+  try {
+    const result = await prisma.product.aggregate({
+      _min: { price: true },
+      _max: { price: true },
+    });
+
+    return {
+      min: result._min.price || 0,
+      max: result._max.price || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching price range:', error);
+    return { min: 0, max: 0 };
+  }
+}
+/**
+ * Get multiple products by IDs
  */
 export async function getProductsByIdsAction(
   ids: string[]
-): Promise<Product[]> {
-  if (ids.length === 0) {
+): Promise<ProductWithRelations[]> {
+  if (ids.length === 0) return [];
+
+  try {
+    const products = await prisma.product.findMany({
+      where: { id: { in: ids } },
+      include: {
+        images: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+        reviews: {
+          select: {
+            id: true,
+            userId: true,
+            rating: true,
+            title: true,
+            comment: true,
+            helpful: true,
+            verifiedPurchase: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return products as ProductWithRelations[];
+  } catch (error) {
+    console.error('Error fetching products by IDs:', error);
     return [];
   }
-
-  const products = await prisma.product.findMany({
-    where: {
-      id: {
-        in: ids,
-      },
-    },
-    include: { images: true },
-  });
-
-  // Map Prisma result to frontend Product type
-  const mappedProducts: Product[] = products.map((p) => ({
-    ...p,
-    images: p.images.map((img) => img.url),
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  }));
-
-  return mappedProducts;
 }

@@ -1,6 +1,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { setIsMenuOpen } from '@/lib/store/slices/uiSlice';
 import { cn } from '@/lib/utils';
 import {
   Briefcase,
@@ -14,11 +16,9 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
+import { MobileSidebar } from './mobile-sidebar';
 import { NavActions } from './nav-actions';
 import { SearchBar } from './search-bar';
-import { MobileSidebar } from './mobile-sidebar';
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { setIsMenuOpen } from '@/lib/store/slices/uiSlice';
 
 interface NavLink {
   href: string;
@@ -68,14 +68,14 @@ const Header = () => {
 
   return (
     <header
-      className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:bg-slate-950 dark:supports-[backdrop-filter]:bg-slate-900/80 dark:border-slate-800'
+      className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:bg-slate-950 dark:supports-  [backdrop-filter]:bg-slate-900/80 dark:border-slate-800'
       role='banner'
     >
       <div className='container mx-auto flex h-20 items-center justify-between gap-4 px-4'>
         {/* Logo */}
         <Link
           href='/'
-          className='flex flex-shrink-0 items-center gap-2 group'
+          className='flex shrink-0 items-center gap-2 group'
           aria-label='Electro home page'
         >
           <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors'>

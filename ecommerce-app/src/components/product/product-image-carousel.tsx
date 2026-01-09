@@ -1,8 +1,9 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Product } from '@/lib/types';
+
 import { cn } from '@/lib/utils';
+import { Product } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
@@ -17,13 +18,15 @@ export function ProductCartImage({ product }: ProductImageCarouselProps) {
 
   // Get all available images
   const images = useMemo(() => {
-    const productImages = product.images || [];
+    const productImages = product?.thumbnail ? [product.thumbnail] : [];
     const variantImages =
-      product.options?.[0]?.variants?.map((v) => v.image).filter(Boolean) || [];
+      Array.isArray(product.options) && product.options?.[0]?.variants
+        ? product.options[0].variants.map((v) => v.image).filter(Boolean)
+        : [];
 
     const allImages = [...productImages, ...variantImages];
     return allImages.length > 0 ? allImages : ['/images/placeholder.jpg'];
-  }, [product.images, product.options]);
+  }, [product.thumbnail, product.options]);
 
   const currentImage = images[activeImageIndex];
   const hasMultipleImages = images.length > 1;

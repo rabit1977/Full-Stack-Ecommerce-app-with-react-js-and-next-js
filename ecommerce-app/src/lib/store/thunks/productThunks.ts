@@ -1,6 +1,3 @@
-// File: lib/store/thunks/productThunks.ts
-// Simplified thunks that work with your existing productSlice
-
 import { Product, ProductOption } from '@/lib/types';
 import {
   addProduct as addProductAction,
@@ -183,9 +180,22 @@ export const fetchProductById =
       const fetchedProduct = await getProductByIdAction(productId);
 
       if (fetchedProduct) {
-        dispatch(addProductAction(fetchedProduct));
+        // Transform the fetched product to the frontend Product type
+        const transformedProduct: Product = {
+          ...fetchedProduct,
+          images: fetchedProduct.images.map((img) => img.url),
+          reviews: fetchedProduct.reviews.map((review) => ({
+            ...review,
+            author: review.user.name || 'Anonymous',
+            date: review.createdAt.toISOString(),
+          })),
+          createdAt: fetchedProduct.createdAt.toISOString(),
+          updatedAt: fetchedProduct.updatedAt.toISOString(),
+        };
+
+        dispatch(addProductAction(transformedProduct));
         dispatch(clearError());
-        return fetchedProduct;
+        return transformedProduct;
       } else {
         dispatch(setError('Product not found'));
         return null;

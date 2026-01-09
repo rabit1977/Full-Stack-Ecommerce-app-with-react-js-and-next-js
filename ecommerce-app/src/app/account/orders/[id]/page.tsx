@@ -6,6 +6,7 @@ import { CartItem } from '@/lib/types';
 import { formatOrderDate, formatPrice } from '@/lib/utils/formatters';
 import { CheckCircle, ChevronLeft, Package, Truck } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 
 const OrderDetailPage = () => {
@@ -82,8 +83,8 @@ const OrderDetailPage = () => {
                       step.status === 'complete'
                         ? 'bg-green-500 text-white'
                         : step.status === 'current'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
                     }`}
                   >
                     <Icon className='h-5 w-5' />
@@ -123,7 +124,7 @@ const OrderDetailPage = () => {
               <div className='divide-y dark:divide-slate-700'>
                 {order.items.map((item: CartItem) => (
                   <div key={item.cartItemId} className='flex py-4'>
-                    <div className='h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border dark:border-slate-700'>
+                    <div className='h-20 w-20 flex shrink-0 overflow-hidden rounded-md border dark:border-slate-700'>
                       <Image
                         src={item.image}
                         alt={item.title || 'Product Image'}
@@ -134,16 +135,12 @@ const OrderDetailPage = () => {
                     </div>
                     <div className='ml-4 flex-1'>
                       <h3 className='font-medium text-slate-900 dark:text-white'>
-                        <a
-                          href='#'
-                          onClick={(e) => {
-                            e.preventDefault();
-                            router.push(`/products/${item.id}`);
-                          }}
+                        <Link
+                          href={`/products/${item.id}`}
                           className='hover:underline'
                         >
                           {item.title}
-                        </a>
+                        </Link>
                       </h3>
                       <p className='text-sm text-slate-500 dark:text-slate-400'>
                         Quantity: {item.quantity}

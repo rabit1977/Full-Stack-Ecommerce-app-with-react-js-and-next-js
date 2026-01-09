@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Helper to check admin access
@@ -288,12 +289,9 @@ export async function getMyOrdersAction() {
   }
 }
 
-/**
- * Create a new order
- */
 export async function createOrderAction(details: {
-  items: { id: string; quantity: number; price: number }[];
-  total: number;
+  // Client only needs to send minimal info
+  items: { id: string; quantity: number }[];
   shippingAddress: any;
   paymentMethod: string;
 }) {
@@ -305,23 +303,71 @@ export async function createOrderAction(details: {
 
   try {
     const result = await prisma.$transaction(async (tx) => {
+      // 1. Get product details from DB to ensure data integrity
+      const productIds = details.items.map((item) => item.id);
+      const productsFromDb = await tx.product.findMany({
+        where: { id: { in: productIds } },
+      });
+
+      // Map DB products for quick lookup
+      const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
+
+      // 2. Validate cart items and calculate costs on the server
+      let subtotal = 0;
+      const orderItemsData = [];
+
+      for (const item of details.items) {
+        const product = productMap.get(item.id);
+
+        // Check if product exists and has enough stock
+        if (!product) {
+          throw new Error(`Product with ID ${item.id} not found.`);
+        }
+        if (product.stock < item.quantity) {
+          throw new Error(`Not enough stock for ${product.title}.`);
+        }
+
+        const price = product.price; // Use DB price
+        subtotal += price * item.quantity;
+
+        orderItemsData.push({
+          productId: item.id,
+          quantity: item.quantity,
+          price: price,
+          priceAtPurchase: price,
+          title: product.title,
+          thumbnail: product.thumbnail,
+        });
+      }
+
+      const shippingCost = 5.0; // Example: flat rate
+      const taxRate = 0.1; // Example: 10%
+      const tax = subtotal * taxRate;
+      const discount = 0.0; // Example
+      const grandTotal = subtotal + tax + shippingCost - discount;
+
+      // 3. Create the order
       const order = await tx.order.create({
         data: {
           userId,
-          total: details.total,
+          subtotal,
+          tax,
+          shippingCost,
+          discount,
+          grandTotal,
+          total: grandTotal, // Assuming 'total' is a legacy field for grandTotal
           status: 'Pending',
           shippingAddress: JSON.stringify(details.shippingAddress),
+          billingAddress: JSON.stringify(details.shippingAddress),
+          shippingMethod: 'standard',
           paymentMethod: details.paymentMethod,
           items: {
-            create: details.items.map((item) => ({
-              productId: item.id,
-              quantity: item.quantity,
-              price: item.price,
-            })),
+            create: orderItemsData,
           },
         },
       });
 
+      // 4. Decrement stock for each product
       for (const item of details.items) {
         await tx.product.update({
           where: { id: item.id },
@@ -333,14 +379,36 @@ export async function createOrderAction(details: {
         });
       }
 
+      // 5. Clear the user's cart
+      await tx.cartItem.deleteMany({
+        where: { userId: userId },
+      });
+
       return order;
     });
 
     revalidatePath('/account/orders');
+    revalidatePath('/cart');
 
     return { success: true, orderId: result.id };
   } catch (error) {
     console.error('Failed to create order:', error);
-    return { success: false, error: 'Failed to create order.' };
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Handle specific Prisma errors, e.g., foreign key violations
+      if (error.code === 'P2025') {
+        return {
+          success: false,
+          error:
+            'An item in your cart is no longer available. Please review your cart.',
+        };
+      }
+    } else if (error instanceof Error) {
+      // Handle custom errors thrown in the transaction
+      return { success: false, error: error.message };
+    }
+    return {
+      success: false,
+      error: 'Failed to create order. Please try again later.',
+    };
   }
 }

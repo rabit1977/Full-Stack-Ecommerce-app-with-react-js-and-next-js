@@ -15,6 +15,14 @@ enum UserRole {
   CUSTOMER
 }
 
+enum OrderStatus {
+  Pending
+  Processing
+  Shipped
+  Delivered
+  Cancelled
+} 
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -29,6 +37,7 @@ model User {
   orders        Order[]
   reviews       Review[]
   wishlistItems WishlistItem[]
+  helpfulReviews String[] @default([])
   cartItems     CartItem[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -82,6 +91,10 @@ model Product {
   reviewCount Int      @default(0)
   thumbnail   String?  
   images      ProductImage[]
+  options     Json?
+  features    String[]
+  specifications Json?
+  tags        String[]
   reviews     Review[]
   orderItems  OrderItem[]
   wishlistedBy WishlistItem[]
@@ -102,9 +115,16 @@ model Order {
   userId          String
   user            User        @relation(fields: [userId], references: [id])
   total           Float
-  status          String      @default("Pending")
+  subtotal       Float
+  tax             Float
+  shippingCost   Float
+  discount        Float
+  grandTotal      Float
+  status          OrderStatus @default(Pending)
   items           OrderItem[]
   shippingAddress String
+  billingAddress  Json
+  shippingMethod  Json
   paymentMethod   String
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -117,7 +137,10 @@ model OrderItem {
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
+  thumbnail String?
   price     Float
+  priceAtPurchase Float
+  title     String
 }
 
 
@@ -131,6 +154,8 @@ model Review {
   rating    Int
   title     String
   comment   String
+  helpful   Int      @default(0)
+  verifiedPurchase Boolean @default(false)
   createdAt DateTime @default(now())
 
   @@unique([userId, productId])
@@ -154,6 +179,7 @@ model CartItem {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int      @default(1)
+  selectedOptions Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

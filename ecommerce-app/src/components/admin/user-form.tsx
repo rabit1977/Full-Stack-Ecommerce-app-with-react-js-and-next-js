@@ -17,9 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { User } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserRole } from '@prisma/client';
+import { User, UserRole } from '@prisma/client';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -27,17 +26,17 @@ import * as z from 'zod';
 // Match your Prisma UserRole enum values
 const createUserSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
+  email: z.email({ message: 'Invalid email address.' }),
   password: z
     .string()
     .min(6, { message: 'Password must be at least 6 characters.' }),
-  role: z.nativeEnum(UserRole, { message: 'Please select a role.' }),
+  role: z.enum(UserRole, { message: 'Please select a role.' }),
 });
 
 // Schema for editing user (password optional)
 const editUserSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
+  email: z.email({ message: 'Invalid email address.' }),
   password: z
     .string()
     .min(6, { message: 'Password must be at least 6 characters.' })

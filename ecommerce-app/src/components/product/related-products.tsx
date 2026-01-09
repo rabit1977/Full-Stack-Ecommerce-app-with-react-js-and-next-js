@@ -2,7 +2,7 @@
 
 import { ProductCard } from '@/components/product/product-card';
 import { useProducts } from '@/lib/hooks/useProducts';
-import { Product } from '@/lib/types';
+import { Product } from '@prisma/client';
 
 interface RelatedProductsProps {
   currentProduct: Product;
