@@ -1,17 +1,16 @@
-
 'use client';
 
-import { useState, useTransition } from 'react';
-import { Product } from '@/lib/types';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { ProductImage } from './product-image';
-import Link from 'next/link';
-import { Edit, Trash2 } from 'lucide-react';
-import { DeleteProductButton } from './delete-product-button';
 import { deleteMultipleProductsAction } from '@/actions/product-actions';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Product } from '@/lib/types';
+import { Edit, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { DeleteProductButton } from './delete-product-button';
+import { ProductImage } from './product-image';
 
 interface ProductsListProps {
   products: Product[];
@@ -53,32 +52,34 @@ export function ProductsList({ products }: ProductsListProps) {
     });
   };
 
-  const isAllSelected = selectedIds.length > 0 && selectedIds.length === products.length;
-  const isSomeSelected = selectedIds.length > 0 && selectedIds.length < products.length;
+  const isAllSelected =
+    selectedIds.length > 0 && selectedIds.length === products.length;
+  const isSomeSelected =
+    selectedIds.length > 0 && selectedIds.length < products.length;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <div className='space-y-4'>
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
           <Checkbox
-            id="select-all"
+            id='select-all'
             checked={isAllSelected}
             onCheckedChange={handleSelectAll}
-            aria-label="Select all"
+            aria-label='Select all'
           />
-          <label htmlFor="select-all" className="text-sm font-medium">
+          <label htmlFor='select-all' className='text-sm font-medium'>
             Select All
           </label>
         </div>
 
         {selectedIds.length > 0 && (
           <Button
-            variant="destructive"
-            size="sm"
+            variant='destructive'
+            size='sm'
             onClick={handleDeleteSelected}
             disabled={isPending}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className='h-4 w-4 mr-2' />
             Delete Selected ({selectedIds.length})
           </Button>
         )}
@@ -87,23 +88,31 @@ export function ProductsList({ products }: ProductsListProps) {
       {products.map((product) => (
         <div
           key={product.id}
-          className="flex items-center gap-4 p-4 border dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+          className='flex items-center gap-4 p-4 border dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors'
         >
           <Checkbox
             checked={selectedIds.includes(product.id)}
-            onCheckedChange={(checked) => handleSelectRow(product.id, !!checked)}
+            onCheckedChange={(checked) =>
+              handleSelectRow(product.id, !!checked)
+            }
             aria-label={`Select product ${product.title}`}
           />
 
           <ProductImage
-            src={product.thumbnail || product.images?.[0] || ''}
+            src={
+              product.thumbnail?.trim()
+                ? product.thumbnail
+                : '/images/placeholder.jpg'
+            }
             alt={product.title}
-            className="h-16 w-16 object-cover rounded border dark:border-slate-700"
+            className='h-16 w-16 object-cover rounded border dark:border-slate-700'
           />
 
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold dark:text-white truncate">{product.title}</h3>
-            <div className="flex items-center gap-4 mt-1 text-sm text-slate-600 dark:text-slate-400">
+          <div className='flex-1 min-w-0'>
+            <h3 className='font-semibold dark:text-white truncate'>
+              {product.title}
+            </h3>
+            <div className='flex items-center gap-4 mt-1 text-sm text-slate-600 dark:text-slate-400'>
               <span>${product?.price?.toFixed(2)}</span>
               <span>•</span>
               <span>Stock: {product.stock}</span>
@@ -112,13 +121,16 @@ export function ProductsList({ products }: ProductsListProps) {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" asChild>
+          <div className='flex gap-2'>
+            <Button variant='outline' size='sm' asChild>
               <Link href={`/admin/products/${product.id}/edit`}>
-                <Edit className="h-4 w-4" />
+                <Edit className='h-4 w-4' />
               </Link>
             </Button>
-            <DeleteProductButton productId={product.id} productTitle={product.title} />
+            <DeleteProductButton
+              productId={product.id}
+              productTitle={product.title}
+            />
           </div>
         </div>
       ))}

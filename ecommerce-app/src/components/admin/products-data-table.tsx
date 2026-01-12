@@ -1,23 +1,23 @@
 'use client';
 
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { deleteProduct } from '@/lib/actions/product-actions';
 import { Product } from '@/lib/types';
@@ -68,7 +68,11 @@ export const ProductsDataTable = ({ products }: ProductsDataTableProps) => {
           width={64}
           height={64}
           priority
-          src={product.images?.[0] || '/images/placeholder.jpg'}
+          src={
+            product.thumbnail?.trim()
+              ? product.thumbnail
+              : '/images/placeholder.jpg'
+          }
         />
       ),
     },
@@ -157,4 +161,3 @@ export const ProductsDataTable = ({ products }: ProductsDataTableProps) => {
     </>
   );
 };
-

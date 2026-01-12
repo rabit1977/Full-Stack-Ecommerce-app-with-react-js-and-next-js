@@ -1,4 +1,5 @@
 import { formatPrice } from '@/lib/utils/formatters';
+import { getProductImage } from '@/lib/utils/product-images';
 import { Product } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,7 +28,7 @@ export const SearchResultItem = ({
       >
         <div className='relative h-12 w-12 flex shrink-0 rounded-md overflow-hidden bg-muted'>
           <Image
-            src={product.images?.[0] || '/images/placeholder.jpg'}
+            src={getProductImage(product)}
             alt={product.title}
             fill
             className='object-cover'
