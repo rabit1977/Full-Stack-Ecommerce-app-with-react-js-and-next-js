@@ -22,8 +22,8 @@ import {
 } from '@/components/ui/table';
 import { useAppDispatch } from '@/lib/store/hooks';
 import { updateOrderStatusInStore } from '@/lib/store/thunks/orderThunks';
-import { Order } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
+import { Order } from '@prisma/client';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useTransition } from 'react';
@@ -62,8 +62,10 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
           {orders.map((order) => (
             <TableRow key={order.id}>
               <TableCell className='font-medium'>{order.id}</TableCell>
-              <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-              <TableCell>{order.shippingAddress.name}</TableCell>
+              <TableCell>
+                {new Date(order.createdAt).toLocaleDateString()}
+              </TableCell>
+              <TableCell>{order.shippingAddress.slice(9, 20)}</TableCell>
               <TableCell className='hidden md:table-cell'>
                 {formatPrice(order.total)}
               </TableCell>
@@ -73,8 +75,8 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                     order.status === 'Pending'
                       ? 'secondary'
                       : order.status === 'Shipped'
-                      ? 'outline'
-                      : 'default'
+                        ? 'outline'
+                        : 'default'
                   }
                 >
                   {order.status}

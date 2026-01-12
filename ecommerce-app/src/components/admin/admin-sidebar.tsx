@@ -19,7 +19,7 @@ export const AdminSidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className='hidden lg:block w-64 flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r bg-white dark:border-slate-800 dark:bg-slate-900'>
+    <aside className='hidden lg:block w-64 shrink-0 sticky top-0 h-screen overflow-y-auto border-r bg-white dark:border-slate-800 dark:bg-slate-900'>
       <div className='flex h-full flex-col p-4'>
         <div className='mb-6 flex items-center gap-2 p-2'>
           <Package className='h-8 w-8 text-slate-900 dark:text-white' />

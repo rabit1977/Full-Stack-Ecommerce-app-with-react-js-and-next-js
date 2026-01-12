@@ -1,4 +1,5 @@
 import { getProductsAction } from '@/actions/product-actions';
+import { BulkDiscountManager } from '@/components/admin/bulk-discount-manager';
 import { ProductsList } from '@/components/admin/products-list';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -52,8 +53,9 @@ export default async function AdminProductsPage({
             Add Product
           </Link>
         </Button>
+        
       </div>
-
+      <BulkDiscountManager />
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card>

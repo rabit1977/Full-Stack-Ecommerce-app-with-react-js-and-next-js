@@ -3,7 +3,7 @@
 import { updateProductAction } from '@/actions/product-actions';
 import { ProductForm } from '@/components/admin/product-form';
 import { productFormSchema } from '@/lib/schemas/product-schema';
-import { Product } from '@/lib/types';
+import { Product } from '@prisma/client';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import * as z from 'zod';

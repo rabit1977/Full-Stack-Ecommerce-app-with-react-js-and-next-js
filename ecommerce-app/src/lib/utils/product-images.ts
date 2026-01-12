@@ -1,4 +1,4 @@
-import { Product } from "../types";
+import { Product } from '@prisma/client';
 
 // This function gets the best available image for a product
 // with a robust fallback to a placeholder.
@@ -8,9 +8,9 @@ export const getProductImage = (product: Product): string => {
     return product.options[0].variants[0].image;
   }
 
-  // 2. Fallback to the first image in the top-level images array
-  if (product.images?.[0]) {
-    return product.images[0];
+  // 2. Fallback to thumbnail
+  if (product.thumbnail) {
+    return product.thumbnail;
   }
 
   // 3. Final fallback to a generic placeholder

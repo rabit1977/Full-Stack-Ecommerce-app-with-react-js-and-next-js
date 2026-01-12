@@ -4,13 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/hooks/useCart';
 import { useUI } from '@/lib/hooks/useUI';
-import { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
+import { Product } from '@prisma/client';
 import { motion } from 'framer-motion';
 import { Eye, Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useTransition } from 'react';
+import { memo, useCallback, useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { ProductCartImage } from './product-image-carousel';
 
@@ -20,19 +20,26 @@ interface ProductCardProps {
 
 export const ProductCard = memo(({ product }: ProductCardProps) => {
   const { setQuickViewProductId } = useUI();
-  const { wishlistItems, toggleWishlist, addToCart } = useCart();
+  const { wishlistItems, toggleWishlist, addToCart, cart } = useCart();
   const [isPending, startTransition] = useTransition();
+
+  // Calculate current stock based on cart items
+  const currentStock = useMemo(() => {
+    const cartItem = cart.find(item => item.id === product.id);
+    const quantityInCart = cartItem?.quantity || 0;
+    return Math.max(0, product.stock - quantityInCart);
+  }, [product.id, product.stock, cart]);
 
   const isWished = useMemo(
     () => wishlistItems.includes(product.id),
     [wishlistItems, product.id]
   );
 
-  const isOutOfStock = useMemo(() => product.stock === 0, [product.stock]);
+  const isOutOfStock = useMemo(() => currentStock === 0, [currentStock]);
 
   const isLowStock = useMemo(
-    () => !isOutOfStock && product.stock < 10,
-    [isOutOfStock, product.stock]
+    () => !isOutOfStock && currentStock < 10,
+    [isOutOfStock, currentStock]
   );
 
   // Discount calculation
@@ -82,10 +89,12 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
           price: discount?.discountedPrice || product.price,
           quantity: 1,
         });
-        toast.success('Added to cart', { duration: 2000 });
+        toast.success(`Added to cart • ${currentStock - 1} left in stock`, { 
+          duration: 2000 
+        });
       });
     },
-    [product, isOutOfStock, discount, addToCart]
+    [product, isOutOfStock, discount, addToCart, currentStock]
   );
 
   return (
@@ -96,7 +105,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
       transition={{ duration: 0.3 }}
       className='w-full'
     >
-      <div className='group relative h-full overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900'>
+      <div className='group relative h-full overflow-hidden rounded-xl border bg-white transition-all duration-300 hover:shadow-xl dark:hover:shadow-slate-800 dark:border-slate-700 dark:bg-slate-900'>
         {/* Image Carousel */}
         <ProductCartImage product={product} />
 
@@ -112,7 +121,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
           <Button
             size='icon'
             variant='secondary'
-            className='h-7 w-7 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 '
+            className='h-7 w-7 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300'
             onClick={handleQuickView}
             aria-label='Quick view'
           >
@@ -178,7 +187,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
 
             {isLowStock && !isOutOfStock && (
               <Badge variant='secondary' className='text-xs'>
-                Only {product.stock} left
+                Only {currentStock} left
               </Badge>
             )}
           </div>

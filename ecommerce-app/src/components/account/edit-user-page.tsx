@@ -4,8 +4,7 @@ import { updateProfileAction } from '@/actions/auth-actions';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { EditUserForm, EditProfileFormValues } from './edit-user-form';
-import { User } from '@/lib/types';
+import { EditProfileFormValues, EditUserForm } from './edit-user-form';
 
 export default function EditUserPage() {
   const { data: session, status, update } = useSession();
@@ -19,11 +18,11 @@ export default function EditUserPage() {
         toast.success('Profile updated successfully.');
         // Manually trigger a session update to reflect the changes
         await update({
-            ...session,
-            user: {
-                ...session?.user,
-                name: result.user?.name,
-            }
+          ...session,
+          user: {
+            ...session?.user,
+            name: result.user?.name,
+          },
         });
       } else {
         toast.error(result.message || 'An unknown error occurred.');
@@ -42,20 +41,9 @@ export default function EditUserPage() {
   if (status === 'unauthenticated' || !session?.user) {
     return <div>Please sign in to view your profile.</div>;
   }
-  
-      // The User type from next-auth session is slightly different from our app's User type
-    // We need to ensure the object passed to the form matches what it expects.
-    const userForForm: User = {
-      id: session.user.id,
-      name: session.user.name || '',
-      email: session.user.email || '',
-      // These fields might not be on the session user, provide defaults
-      role: session.user.role || 'USER', 
-      bio: session.user.bio || '',
-      cart: [],
-      savedForLater: [],
-      wishlist: [],
-    };
+
+  // Use session user directly for the form
+  const userForForm = session.user;
 
   return (
     <div className='container mx-auto p-4'>

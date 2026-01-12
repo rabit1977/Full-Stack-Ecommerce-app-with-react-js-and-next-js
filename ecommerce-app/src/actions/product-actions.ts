@@ -560,6 +560,7 @@ export async function getProductsByIdsAction(
       },
     });
 
+    // Cast to get the raw product data which includes options as Json
     return products as ProductWithRelations[];
   } catch (error) {
     console.error('Error fetching products by IDs:', error);

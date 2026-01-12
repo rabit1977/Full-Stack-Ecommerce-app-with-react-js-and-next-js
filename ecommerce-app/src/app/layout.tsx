@@ -33,24 +33,8 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
-        {/* Inline script to prevent theme flash (FOUC) */}
-        {/* <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme');
-                  if (theme === 'light' || theme === 'dark') {
-                    document.documentElement.classList.add(theme);
-                  } else {
-                    var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                    document.documentElement.classList.add(systemTheme);
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        /> */}
+        <meta name='viewport' content='width=device-width, initial-scale=1' />
+        <link rel='icon' href='/favicon.ico' />
       </head>
       <body className={inter.className}>
         <ErrorBoundary>

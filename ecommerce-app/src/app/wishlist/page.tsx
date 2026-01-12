@@ -8,9 +8,9 @@ import { useCart } from '@/lib/hooks/useCart';
 import { useAppDispatch } from '@/lib/store/hooks';
 import { setWishlist } from '@/lib/store/slices/wishlistSlice';
 import { addToCart } from '@/lib/store/thunks/cartThunks';
-import { Product } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
+import { Product } from '@prisma/client';
 import { Heart, Loader2, ShoppingCart, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -32,7 +32,9 @@ const WishlistPage = () => {
       if (wishlistItems.length > 0) {
         const fetchedProducts = await getProductsByIdsAction(wishlistItems);
         // Filter out any products that might not have been found
-        const validProducts = fetchedProducts.filter(p => p !== null) as Product[];
+        const validProducts = fetchedProducts.filter(
+          (p) => p !== null
+        ) as Product[];
         setProducts(validProducts);
       } else {
         setProducts([]);
@@ -75,7 +77,7 @@ const WishlistPage = () => {
           Loading Wishlist...
         </h2>
       </div>
-    )
+    );
   }
 
   return (
@@ -122,21 +124,20 @@ const WishlistPage = () => {
                   key={product.id}
                   className='border rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col dark:bg-slate-900 dark:border-slate-800'
                 >
-                  <div className='h-48 w-full overflow-hidden relative'>
+                  <div className='h-48 w-full overflow-hidden relative bg-slate-100 dark:bg-slate-800'>
                     <Image
                       src={getProductImage(product)}
                       alt={product.title}
-                      width={300}
-                      height={300}
+                      fill
                       className='object-cover hover:scale-110 transition-transform duration-300'
-                      sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+                      sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
+                      priority={false}
                     />
                   </div>
                   <div className='p-4 flex flex-col grow'>
                     <h3 className='font-semibold text-slate-800 dark:text-white'>
                       <Link
                         href={`/products/${product.id}`}
-                     
                         className='hover:underline hover:underline-offset-3   cursor-pointer'
                       >
                         {product.title}
@@ -177,4 +178,3 @@ const WishlistPage = () => {
 };
 
 export default WishlistPage;
-

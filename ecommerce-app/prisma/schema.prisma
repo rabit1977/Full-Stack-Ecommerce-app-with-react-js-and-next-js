@@ -39,6 +39,7 @@ model User {
   wishlistItems WishlistItem[]
   helpfulReviews String[] @default([])
   cartItems     CartItem[]
+  savedForLater SavedForLater[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -99,6 +100,7 @@ model Product {
   orderItems  OrderItem[]
   wishlistedBy WishlistItem[]
   cartItems   CartItem[]
+  savedByUsers SavedForLater[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -182,6 +184,17 @@ model CartItem {
   selectedOptions Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model SavedForLater {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@unique([userId, productId])
 }

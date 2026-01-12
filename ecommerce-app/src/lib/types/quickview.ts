@@ -1,4 +1,4 @@
-import { Product } from '@/lib/types';
+import { Product } from '@prisma/client';
 
 export interface QuickViewState {
   quantity: number;
