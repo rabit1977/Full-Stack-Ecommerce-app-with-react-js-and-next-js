@@ -197,7 +197,7 @@ const CartHoverPopup = ({ cartItemCount }: { cartItemCount: number }) => {
 export const NavActions = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user.user);
+  const user = useAppSelector((state) => state.user.currentUser);
   const cart = useAppSelector((state) => state.cart.cart);
   const wishlist = useAppSelector((state) => state.wishlist.itemIds);
   const theme = useAppSelector((state) => state.ui.theme);
@@ -216,7 +216,7 @@ export const NavActions = () => {
 
   // Get user's first name
   const firstName = useMemo(() => {
-    return user?.name.split(' ')[0] || 'User';
+    return user?.name?.split(' ')[0] || 'User';
   }, [user]);
 
   // Handle theme toggle

@@ -27,7 +27,7 @@ export async function ProductDetailContent({
         </div>
       </div>
       <div className='mt-16'>
-        <ReviewsSection productId={product.id} />
+        <ReviewsSection productId={product.id} product={product} />
       </div>
       <div className='mt-16'>
         <RelatedProducts currentProduct={product} />

@@ -1,7 +1,3 @@
-// File: lib/store/slices/productSlice.ts
-// Enhanced with full CRUD operations while keeping your existing logic
-
-import { initialProducts } from '@/lib/constants/products';
 import { Product, Review, ReviewPayload } from '@/lib/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -11,97 +7,8 @@ interface ProductsState {
   error: string | null;
 }
 
-const PRODUCTS_STORAGE_KEY = 'products';
-
-/**
- * Load products from localStorage, merging with initial products
- */
-const loadProductsFromStorage = (): Product[] => {
-  if (typeof window === 'undefined') return initialProducts;
-
-  try {
-    const stored = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-    if (!stored) return initialProducts;
-
-    const storedProducts: Product[] = JSON.parse(stored);
-
-    // Merge stored products with initial products
-    // Keep user-generated reviews and stock updates
-    const mergedProducts = initialProducts.map((initialProduct) => {
-      const storedProduct = storedProducts.find(
-        (p) => p.id === initialProduct.id
-      );
-      if (storedProduct) {
-        return {
-          ...initialProduct,
-          reviews: storedProduct.reviews || initialProduct.reviews,
-          reviewCount: storedProduct.reviewCount || initialProduct.reviewCount,
-          rating: storedProduct.rating || initialProduct.rating,
-          stock:
-            storedProduct.stock !== undefined
-              ? storedProduct.stock
-              : initialProduct.stock,
-        };
-      }
-      return initialProduct;
-    });
-
-    // Add user-created products that aren't in initialProducts
-    const userCreatedProducts = storedProducts.filter(
-      (storedProduct) =>
-        !initialProducts.some((initial) => initial.id === storedProduct.id)
-    );
-
-    return [...mergedProducts, ...userCreatedProducts];
-  } catch (error) {
-    console.error('Error loading products from storage:', error);
-    return initialProducts;
-  }
-};
-
-/**
- * Save products to localStorage
- * Save full product data for user-created products
- * Only save essential data for initial products
- */
-const saveProductsToStorage = (products: Product[]): void => {
-  if (typeof window === 'undefined') return;
-
-  try {
-    const productsToSave = products.map((p) => {
-      // Check if this is a user-created product (not in initialProducts)
-      const isUserCreated = !initialProducts.some((initial) => initial.id === p.id);
-
-      if (isUserCreated) {
-        // Save full product data for user-created products
-        return p;
-      } else {
-        // Only save essential data for initial products
-        return {
-          id: p.id,
-          reviews: p.reviews,
-          reviewCount: p.reviewCount,
-          rating: p.rating,
-          stock: p.stock,
-        };
-      }
-    });
-
-    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(productsToSave));
-
-    // Dispatch custom event for cross-component sync
-    window.dispatchEvent(
-      new CustomEvent('productsUpdated', {
-        detail: { products },
-      })
-    );
-  } catch (error) {
-    console.error('Error saving products to storage:', error);
-  }
-};
-
 const initialState: ProductsState = {
-  products: loadProductsFromStorage(),
+  products: [],
   isLoading: false,
   error: null,
 };
@@ -133,17 +40,17 @@ const productsSlice = createSlice({
     },
 
     /**
-     * Replace all products
+     * Replace all products (fetched from database)
      */
     setProducts: (state, action: PayloadAction<Product[]>) => {
       state.products = action.payload;
       state.isLoading = false;
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
-     * Add a new product (for admin)
+     * Add a new product - typically done via Server Action
+     * This is kept for optimistic updates only
      */
     addProduct: (state, action: PayloadAction<Product>) => {
       const existingProduct = state.products.find(
@@ -157,11 +64,11 @@ const productsSlice = createSlice({
 
       state.products.push(action.payload);
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
-     * Update existing product (for admin)
+     * Update existing product
+     * Typically updated via Server Action, this is for optimistic updates
      */
     updateProduct: (
       state,
@@ -182,11 +89,11 @@ const productsSlice = createSlice({
       };
 
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
-     * Delete product (for admin)
+     * Delete product
+     * Typically deleted via Server Action, this is for optimistic updates
      */
     deleteProduct: (state, action: PayloadAction<string>) => {
       const productId = action.payload;
@@ -199,7 +106,6 @@ const productsSlice = createSlice({
 
       state.products = state.products.filter((p) => p.id !== productId);
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
@@ -218,11 +124,16 @@ const productsSlice = createSlice({
       }
 
       const existingReviews = product.reviews ? [...product.reviews] : [];
-      const reviewIndex = existingReviews.findIndex((r) => r.id === reviewData.id);
+      const reviewIndex = existingReviews.findIndex(
+        (r) => r.id === reviewData.id
+      );
 
       if (reviewIndex !== -1) {
         // Update existing review
-        existingReviews[reviewIndex] = { ...existingReviews[reviewIndex], ...reviewData } as Review;
+        existingReviews[reviewIndex] = {
+          ...existingReviews[reviewIndex],
+          ...reviewData,
+        } as Review;
       } else {
         // Add new review
         existingReviews.unshift(reviewData as Review);
@@ -238,7 +149,6 @@ const productsSlice = createSlice({
           : 0;
 
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
@@ -261,18 +171,22 @@ const productsSlice = createSlice({
         return;
       }
 
-      const reviewExists = product.reviews.some((r) => r.id === reviewId);
+      const reviewExists = product.reviews.some(
+        (r: Review) => r.id === reviewId
+      );
       if (!reviewExists) {
         state.error = `Review with ID ${reviewId} not found`;
         return;
       }
 
-      product.reviews = product.reviews.filter((r) => r.id !== reviewId);
+      product.reviews = product.reviews.filter(
+        (r: Review) => r.id !== reviewId
+      );
 
       // Recalculate rating
       if (product.reviews.length > 0) {
         const totalRating = product.reviews.reduce(
-          (sum, r) => sum + r.rating,
+          (sum: number, r: Review) => sum + r.rating,
           0
         );
         product.rating = parseFloat(
@@ -285,7 +199,6 @@ const productsSlice = createSlice({
       }
 
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
@@ -307,7 +220,7 @@ const productsSlice = createSlice({
         return;
       }
 
-      const review = product.reviews.find((r) => r.id === reviewId);
+      const review = product.reviews.find((r: Review) => r.id === reviewId);
 
       if (!review) {
         state.error = `Review with ID ${reviewId} not found`;
@@ -321,7 +234,6 @@ const productsSlice = createSlice({
       }
 
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
@@ -346,7 +258,6 @@ const productsSlice = createSlice({
 
       product.stock -= quantity;
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
@@ -366,21 +277,15 @@ const productsSlice = createSlice({
 
       product.stock = Math.max(0, stock);
       state.error = null;
-      saveProductsToStorage(state.products);
     },
 
     /**
-     * Reset products to initial state
+     * Reset products to empty state
      */
     resetProductsState: (state) => {
-      state.products = initialProducts;
+      state.products = [];
       state.isLoading = false;
       state.error = null;
-
-      // Clear storage
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(PRODUCTS_STORAGE_KEY);
-      }
     },
   },
 });

@@ -71,7 +71,7 @@ const NavLink = ({
 const MobileSidebar = () => {
   const dispatch = useAppDispatch();
   const pathname = usePathname();
-  const user = useAppSelector((state) => state.user.user);
+  const user = useAppSelector((state) => state.user.currentUser);
   const isMenuOpen = useAppSelector((state) => state.ui.isMenuOpen);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -82,27 +82,27 @@ const MobileSidebar = () => {
     if (isMenuOpen) {
       // Get current scroll position
       const scrollY = window.scrollY;
-      
+
       // Save original body styles
       const originalOverflow = document.body.style.overflow;
-      
+
       // Lock body scroll
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
-      
+
       // Store scroll position for restoration
       document.body.dataset.scrollY = scrollY.toString();
     } else {
       // Restore scroll and styles
       const scrollY = document.body.dataset.scrollY;
-      
+
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
-      
+
       if (scrollY) {
         window.scrollTo(0, parseInt(scrollY));
       }
-      
+
       delete document.body.dataset.scrollY;
     }
 

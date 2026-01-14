@@ -1,16 +1,15 @@
-import { createUserAction, deleteUserAction, signupAction, updateUserAction } from '@/actions/auth-actions';
+import {
+  createUserAction,
+  deleteUserAction,
+  signupAction,
+  updateUserAction,
+} from '@/actions/auth-actions';
 import { clearWishlistAction } from '@/actions/wishlist-actions';
-import { User } from '@/lib/types';
 import { UserRole } from '@prisma/client';
 import { signIn, signOut } from 'next-auth/react';
 import { clearCart } from '../slices/cartSlice';
 import { clearOrders } from '../slices/orderSlice';
-import {
-  addUser,
-  logout as logoutAction,
-  setUser,
-  setUsers,
-} from '../slices/userSlice';
+import { logout as logoutAction } from '../slices/userSlice';
 import { clearWishlist } from '../slices/wishlistSlice';
 import { AppDispatch, RootState } from '../store';
 import { showToast } from './uiThunks';
@@ -97,32 +96,19 @@ export const updateUserFromAdmin =
       password?: string;
     }
   ) =>
-  async (dispatch: AppDispatch, getState: () => RootState): Promise<ThunkResult> => {
-    const { users, user: currentUser } = getState().user;
-    
+  async (dispatch: AppDispatch): Promise<ThunkResult> => {
     try {
       const result = await updateUserAction(userId, values);
 
       if (!result.success || !result.user) {
-        dispatch(showToast(result.message || 'Failed to update user.', 'error'));
+        dispatch(
+          showToast(result.message || 'Failed to update user.', 'error')
+        );
         return { success: false, message: result.message };
       }
-      
-      const updatedUser = result.user;
 
-      const updatedUsers = users.map((u) =>
-        u.id === userId ? { ...u, ...updatedUser } : u
-      );
-
-      dispatch(setUsers(updatedUsers));
-
-      if (currentUser?.id === userId) {
-        dispatch(setUser({ ...currentUser, ...updatedUser }));
-      }
-
-      dispatch(showToast(`User ${values.name} updated successfully!`, 'success'));
+      dispatch(showToast(`User updated successfully!`, 'success'));
       return { success: true };
-
     } catch (error) {
       dispatch(showToast('An unexpected error occurred.', 'error'));
       return { success: false, message: 'An unexpected error occurred.' };
@@ -134,28 +120,19 @@ export const updateUserFromAdmin =
  */
 export const deleteUserFromAdmin =
   (userId: string) =>
-  async (dispatch: AppDispatch, getState: () => RootState): Promise<ThunkResult> => {
-    const { users, user: currentUser } = getState().user;
-
-    // Prevent deleting yourself
-    if (currentUser?.id === userId) {
-      dispatch(showToast('You cannot delete your own account.', 'error'));
-      return { success: false, message: 'Cannot delete own account.' };
-    }
-
+  async (dispatch: AppDispatch): Promise<ThunkResult> => {
     try {
       const result = await deleteUserAction(userId);
 
       if (!result.success) {
-        dispatch(showToast(result.message || 'Failed to delete user.', 'error'));
+        dispatch(
+          showToast(result.message || 'Failed to delete user.', 'error')
+        );
         return { success: false, message: result.message };
       }
 
-      const updatedUsers = users.filter((u) => u.id !== userId);
-      dispatch(setUsers(updatedUsers));
       dispatch(showToast('User deleted successfully!', 'success'));
       return { success: true };
-
     } catch (error) {
       dispatch(showToast('An unexpected error occurred.', 'error'));
       return { success: false, message: 'An unexpected error occurred.' };
@@ -172,23 +149,25 @@ export const createUserFromAdmin =
     password: string,
     role: UserRole // ✅ Changed to UserRole
   ) =>
-  async (dispatch: AppDispatch, getState: () => RootState): Promise<ThunkResult> => {
-    
+  async (
+    dispatch: AppDispatch,
+    getState: () => RootState
+  ): Promise<ThunkResult> => {
     try {
       const result = await createUserAction(name, email, password, role);
 
       if (!result.success || !result.user) {
-        dispatch(showToast(result.message || 'Failed to create user.', 'error'));
+        dispatch(
+          showToast(result.message || 'Failed to create user.', 'error')
+        );
         return { success: false, message: result.message };
       }
-      
+
       const newUser = result.user;
 
-      dispatch(addUser(newUser as User));
       dispatch(showToast(`User ${name} created successfully!`, 'success'));
 
       return { success: true };
-
     } catch (error) {
       dispatch(showToast('An unexpected error occurred.', 'error'));
       return { success: false, message: 'An unexpected error occurred.' };

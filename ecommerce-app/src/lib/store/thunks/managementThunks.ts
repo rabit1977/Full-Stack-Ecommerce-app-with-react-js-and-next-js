@@ -1,16 +1,20 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from '../store';
-import { addOrder } from '../slices/orderSlice';
-import { 
-  addReview as addReviewAction, 
-  deleteReview as deleteReviewAction, 
-  updateReviewHelpfulCount,
-  updateStock 
-} from '../slices/productSlice';
-import { clearCart } from '../slices/cartSlice';
-import { toggleHelpfulReview as toggleHelpfulReviewAction } from '../slices/userSlice';
-import { showToast } from './uiThunks';
+import {
+  addOrUpdateReviewAction,
+  deleteReviewAction as deleteReviewServerAction,
+  toggleReviewHelpfulAction,
+} from '@/actions/review-actions';
 import { Order, ReviewPayload } from '@/lib/types';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { clearCart } from '../slices/cartSlice';
+import { addOrder } from '../slices/orderSlice';
+import {
+  addReview as addReviewAction,
+  deleteReview as deleteReviewAction,
+  updateReviewHelpfulCount,
+  updateStock,
+} from '../slices/productSlice';
+import { AppDispatch, RootState } from '../store';
+import { showToast } from './uiThunks';
 
 /**
  * Generate unique order ID with random component for better uniqueness
@@ -28,45 +32,43 @@ export const placeOrder = createAsyncThunk<
   string, // Return type (order ID)
   Omit<Order, 'id' | 'date'>, // Argument type
   { dispatch: AppDispatch; state: RootState }
->(
-  'order/placeOrder',
-  async (orderDetails, { dispatch }) => {
-    try {
-      const newOrder: Order = {
-        id: generateOrderId(),
-        date: new Date().toISOString(),
-        ...orderDetails,
-      };
+>('order/placeOrder', async (orderDetails, { dispatch }) => {
+  try {
+    const newOrder: Order = {
+      id: generateOrderId(),
+      date: new Date().toISOString(),
+      ...orderDetails,
+    };
 
-      // Add order to state
-      dispatch(addOrder(newOrder));
+    // Add order to state
+    dispatch(addOrder(newOrder));
 
-      // Batch stock updates for better performance
-      const stockUpdates = newOrder.items.map(item => 
-        dispatch(updateStock({ 
-          productId: item.id, 
-          quantity: item.quantity 
-        }))
-      );
+    // Batch stock updates for better performance
+    const stockUpdates = newOrder.items.map((item) =>
+      dispatch(
+        updateStock({
+          productId: item.id,
+          quantity: item.quantity,
+        })
+      )
+    );
 
-      // Wait for all stock updates to complete
-      await Promise.all(stockUpdates);
+    // Wait for all stock updates to complete
+    await Promise.all(stockUpdates);
 
-      // Clear cart after successful order
-      dispatch(clearCart());
-      
-      // Show success message
-      dispatch(showToast('Order placed successfully!', 'success'));
-      
-      return newOrder.id;
-    } catch (error) {
-      dispatch(showToast('Failed to place order. Please try again.', 'error'));
-      throw error;
-    }
+    // Clear cart after successful order
+    dispatch(clearCart());
+
+    // Show success message
+    dispatch(showToast('Order placed successfully!', 'success'));
+
+    return newOrder.id;
+  } catch (error) {
+    dispatch(showToast('Failed to place order. Please try again.', 'error'));
+    throw error;
   }
-);
+});
 
-import { addOrUpdateReviewAction } from '@/actions/review-actions';
 /**
  * Add or update a product review
  */
@@ -74,36 +76,36 @@ export const addReview = createAsyncThunk<
   void,
   { productId: string; reviewData: ReviewPayload },
   { dispatch: AppDispatch }
->(
-  'product/addReview',
-  async ({ productId, reviewData }, { dispatch }) => {
-    try {
-      const result = await addOrUpdateReviewAction(productId, reviewData);
+>('product/addReview', async ({ productId, reviewData }, { dispatch }) => {
+  try {
+    const result = await addOrUpdateReviewAction(productId, reviewData as any);
 
-      if (result.success && result.review) {
-        const finalReviewData = {
-          ...reviewData,
-          id: result.review.id,
-          date: result.review.createdAt.toString(),
-          helpful: 0,
-        };
-        dispatch(addReviewAction({ productId, reviewData: finalReviewData }));
-        
-        const message = reviewData.id 
-          ? 'Review updated successfully!' 
-          : 'Thank you for your review!';
-        
-        dispatch(showToast(message, 'success'));
-      } else {
-        throw new Error(result.error || 'Failed to submit review.');
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to submit review. Please try again.';
-      dispatch(showToast(errorMessage, 'error'));
-      throw error;
+    if (result.success && result.review) {
+      const finalReviewData = {
+        ...reviewData,
+        id: result.review.id,
+        date: result.review.createdAt.toString(),
+        helpful: 0,
+      };
+      dispatch(addReviewAction({ productId, reviewData: finalReviewData }));
+
+      const message = reviewData.id
+        ? 'Review updated successfully!'
+        : 'Thank you for your review!';
+
+      dispatch(showToast(message, 'success'));
+    } else {
+      throw new Error(result.error || 'Failed to submit review.');
     }
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Failed to submit review. Please try again.';
+    dispatch(showToast(errorMessage, 'error'));
+    throw error;
   }
-);
+});
 
 /**
  * Delete a product review
@@ -112,21 +114,29 @@ export const deleteReview = createAsyncThunk<
   void,
   { productId: string; reviewId: string },
   { dispatch: AppDispatch }
->(
-  'product/deleteReview',
-  async ({ productId, reviewId }, { dispatch }) => {
-    try {
+>('product/deleteReview', async ({ productId, reviewId }, { dispatch }) => {
+  try {
+    const result = await deleteReviewServerAction(reviewId, productId);
+
+    if (result.success) {
       dispatch(deleteReviewAction({ productId, reviewId }));
       dispatch(showToast('Review deleted successfully', 'info'));
-    } catch (error) {
-      dispatch(showToast('Failed to delete review. Please try again.', 'error'));
-      throw error;
+    } else {
+      throw new Error(result.error || 'Failed to delete review.');
     }
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Failed to delete review. Please try again.';
+    dispatch(showToast(errorMessage, 'error'));
+    throw error;
   }
-);
+});
 
 /**
  * Toggle helpful status on a review
+ * Syncs with database via Server Action
  */
 export const toggleHelpfulReview = createAsyncThunk<
   void,
@@ -135,29 +145,46 @@ export const toggleHelpfulReview = createAsyncThunk<
 >(
   'product/toggleHelpfulReview',
   async ({ productId, reviewId }, { dispatch, getState, rejectWithValue }) => {
-    const { user } = getState().user;
-    
+    const { currentUser } = getState().user;
+
     // Check authentication
-    if (!user) {
+    if (!currentUser) {
       dispatch(showToast('You must be logged in to do that.', 'error'));
       return rejectWithValue('User not authenticated');
     }
 
     try {
-      const hasBeenMarkedHelpful = user.helpfulReviews?.includes(reviewId) ?? false;
-      const direction = hasBeenMarkedHelpful ? 'decrement' : 'increment';
+      const hasBeenMarkedHelpful =
+        currentUser.helpfulReviews?.includes(reviewId) ?? false;
 
-      // Update user's helpful reviews list
-      dispatch(toggleHelpfulReviewAction(reviewId));
-      
-      // Update the review's helpful count
-      dispatch(updateReviewHelpfulCount({
-        productId,
-        reviewId,
-        direction,
-      }));
+      // Call server action to update in database
+      const result = await toggleReviewHelpfulAction(reviewId);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update review');
+      }
+
+      const direction = result.isMarkedHelpful ? 'increment' : 'decrement';
+
+      // Update the review's helpful count in product state
+      dispatch(
+        updateReviewHelpfulCount({
+          productId,
+          reviewId,
+          direction,
+        })
+      );
+
+      const message = result.isMarkedHelpful
+        ? 'Marked as helpful'
+        : 'Removed from helpful';
+      dispatch(showToast(message, 'info'));
     } catch (error) {
-      dispatch(showToast('Failed to update review. Please try again.', 'error'));
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to update review. Please try again.';
+      dispatch(showToast(errorMessage, 'error'));
       throw error;
     }
   }
@@ -165,14 +192,18 @@ export const toggleHelpfulReview = createAsyncThunk<
 
 // Export legacy thunk functions for backward compatibility
 // These wrap the new async thunks for components that haven't been updated yet
-export const placeOrderLegacy = (orderDetails: Omit<Order, 'id' | 'date'>) => 
-  (dispatch: AppDispatch) => dispatch(placeOrder(orderDetails));
+export const placeOrderLegacy =
+  (orderDetails: Omit<Order, 'id' | 'date'>) => (dispatch: AppDispatch) =>
+    dispatch(placeOrder(orderDetails));
 
-export const addReviewLegacy = (productId: string, reviewData: ReviewPayload) => 
-  (dispatch: AppDispatch) => dispatch(addReview({ productId, reviewData }));
+export const addReviewLegacy =
+  (productId: string, reviewData: ReviewPayload) => (dispatch: AppDispatch) =>
+    dispatch(addReview({ productId, reviewData }));
 
-export const deleteReviewLegacy = (productId: string, reviewId: string) => 
-  (dispatch: AppDispatch) => dispatch(deleteReview({ productId, reviewId }));
+export const deleteReviewLegacy =
+  (productId: string, reviewId: string) => (dispatch: AppDispatch) =>
+    dispatch(deleteReview({ productId, reviewId }));
 
-export const toggleHelpfulReviewLegacy = (productId: string, reviewId: string) => 
-  (dispatch: AppDispatch) => dispatch(toggleHelpfulReview({ productId, reviewId }));
+export const toggleHelpfulReviewLegacy =
+  (productId: string, reviewId: string) => (dispatch: AppDispatch) =>
+    dispatch(toggleHelpfulReview({ productId, reviewId }));

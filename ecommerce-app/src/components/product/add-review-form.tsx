@@ -99,7 +99,7 @@ export const AddReviewForm = ({
           placeholder='Share your thoughts on this product...'
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          className='min-h-[100px] bg-white dark:bg-slate-900 dark:text-white'
+          className='min-h-25 bg-white dark:bg-slate-900 dark:text-white'
         />
         <div className='flex gap-2'>
           <Button

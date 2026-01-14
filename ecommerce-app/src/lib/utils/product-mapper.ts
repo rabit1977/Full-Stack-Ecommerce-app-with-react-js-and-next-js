@@ -1,12 +1,14 @@
 // lib/utils/product-mapper.ts
 // Utility to convert Prisma products to frontend format
 
-import { Product as PrismaProduct } from '@prisma/client';
 import { Product } from '@/lib/types';
+import { Product as PrismaProduct } from '@prisma/client';
 
 type PrismaProductWithRelations = PrismaProduct & {
-  images: { id: string; url: string; }[];
-  reviews: {
+  images: { id: string; url: string }[];
+  reviews: ({
+    user: { name: string | null };
+  } & {
     id: string;
     userId: string;
     rating: number;
@@ -15,7 +17,7 @@ type PrismaProductWithRelations = PrismaProduct & {
     helpful: number;
     verifiedPurchase: boolean;
     createdAt: Date;
-  }[];
+  })[];
 };
 
 /**
@@ -37,17 +39,21 @@ export function mapPrismaProductToFrontend(
     reviewCount: prismaProduct.reviewCount,
     thumbnail: prismaProduct.thumbnail,
     // Convert images to string array
-    images: prismaProduct.images.map(img => img.url),
+    images: prismaProduct.images.map((img) => img.url),
     // Convert JSON fields
-    options: prismaProduct.options ? JSON.parse(JSON.stringify(prismaProduct.options)) : undefined,
-    specifications: prismaProduct.specifications ? JSON.parse(JSON.stringify(prismaProduct.specifications)) : undefined,
+    options: prismaProduct.options
+      ? JSON.parse(JSON.stringify(prismaProduct.options))
+      : undefined,
+    specifications: prismaProduct.specifications
+      ? JSON.parse(JSON.stringify(prismaProduct.specifications))
+      : undefined,
     // Convert arrays
     features: prismaProduct.features || [],
     tags: prismaProduct.tags || [],
-    // Convert reviews
-    reviews: prismaProduct.reviews.map(review => ({
+    // Convert reviews with user name
+    reviews: prismaProduct.reviews.map((review) => ({
       id: review.id,
-      author: review.userId,
+      author: review.user?.name || 'Anonymous',
       rating: review.rating,
       title: review.title,
       comment: review.comment,

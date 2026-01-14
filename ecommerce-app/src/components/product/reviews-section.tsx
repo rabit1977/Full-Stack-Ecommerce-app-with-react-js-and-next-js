@@ -11,26 +11,31 @@ import {
 } from '@/components/ui/dialog';
 import { Stars } from '@/components/ui/stars';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { useAppDispatch } from '@/lib/store/hooks';
 import {
   deleteReview,
   toggleHelpfulReview,
 } from '@/lib/store/thunks/managementThunks';
+import { Product, Review } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Review } from '@/lib/types';
 import { Pencil, ThumbsUp, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AddReviewForm } from './add-review-form';
 
 interface ReviewsSectionProps {
   productId: string;
+  product?: Product;
 }
 
-const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
+const ReviewsSection = ({
+  productId,
+  product: propsProduct,
+}: ReviewsSectionProps) => {
   const { user } = useAuth();
   const dispatch = useAppDispatch();
-  const { products } = useAppSelector((state) => state.products);
-  const product = products.find((p) => p.id === productId);
+
+  // Use product from props (server-side) or default
+  const product = propsProduct;
 
   // Memoize reviews to stabilize dependency
   const reviews = useMemo(() => product?.reviews || [], [product?.reviews]);

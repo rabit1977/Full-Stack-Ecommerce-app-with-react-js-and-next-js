@@ -1,5 +1,6 @@
 'use client';
 
+import { deleteProductAction } from '@/actions/product-actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,9 +20,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { deleteProduct } from '@/lib/actions/product-actions';
-import { Product } from '@/lib/types';
+
 import { formatPrice } from '@/lib/utils/formatters';
+import { Product } from '@prisma/client';
 import { MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -46,9 +47,9 @@ export const ProductsDataTable = ({ products }: ProductsDataTableProps) => {
     if (!productToDelete) return;
 
     startTransition(async () => {
-      const result = await deleteProduct(productToDelete.id);
-      if (result && 'error' in result && result.error) {
-        toast.error(result.error);
+      const result = await deleteProductAction(productToDelete.id);
+      if (!result.success) {
+        toast.error(result.error || 'Failed to delete product');
       } else {
         toast.success(`Product "${productToDelete.title}" deleted.`);
       }

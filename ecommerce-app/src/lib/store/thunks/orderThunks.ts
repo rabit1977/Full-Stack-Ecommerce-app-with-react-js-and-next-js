@@ -1,17 +1,16 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from '../store';
-import { addOrder, setOrders, updateOrder } from '../slices/orderSlice';
-import { 
-  addReview as addReviewAction, 
-  deleteReview as deleteReviewAction, 
-  updateReviewHelpfulCount,
-  updateStock 
-} from '../slices/productSlice';
-import { clearCart } from '../slices/cartSlice';
-import { toggleHelpfulReview as toggleHelpfulReviewAction } from '../slices/userSlice';
-import { showToast } from './uiThunks';
-import { Order, ReviewPayload } from '@/lib/types';
 import { getMyOrdersAction } from '@/actions/order-actions';
+import { Order, ReviewPayload } from '@/lib/types';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { clearCart } from '../slices/cartSlice';
+import { addOrder, setOrders, updateOrder } from '../slices/orderSlice';
+import {
+  addReview as addReviewAction,
+  deleteReview as deleteReviewAction,
+  updateReviewHelpfulCount,
+  updateStock,
+} from '../slices/productSlice';
+import { AppDispatch, RootState } from '../store';
+import { showToast } from './uiThunks';
 
 /**
  * Generate unique order ID with random component for better uniqueness
@@ -29,43 +28,42 @@ export const placeOrder = createAsyncThunk<
   string, // Return type (order ID)
   Omit<Order, 'id' | 'date'>, // Argument type
   { dispatch: AppDispatch; state: RootState }
->(
-  'order/placeOrder',
-  async (orderDetails, { dispatch }) => {
-    try {
-      const newOrder: Order = {
-        id: generateOrderId(),
-        date: new Date().toISOString(),
-        ...orderDetails,
-      };
+>('order/placeOrder', async (orderDetails, { dispatch }) => {
+  try {
+    const newOrder: Order = {
+      id: generateOrderId(),
+      date: new Date().toISOString(),
+      ...orderDetails,
+    };
 
-      // Add order to state
-      dispatch(addOrder(newOrder));
+    // Add order to state
+    dispatch(addOrder(newOrder));
 
-      // Batch stock updates for better performance
-      const stockUpdates = newOrder.items.map(item => 
-        dispatch(updateStock({ 
-          productId: item.id, 
-          quantity: item.quantity 
-        }))
-      );
+    // Batch stock updates for better performance
+    const stockUpdates = newOrder.items.map((item) =>
+      dispatch(
+        updateStock({
+          productId: item.id,
+          quantity: item.quantity,
+        })
+      )
+    );
 
-      // Wait for all stock updates to complete
-      await Promise.all(stockUpdates);
+    // Wait for all stock updates to complete
+    await Promise.all(stockUpdates);
 
-      // Clear cart after successful order
-      dispatch(clearCart());
-      
-      // Show success message
-      dispatch(showToast('Order placed successfully!', 'success'));
-      
-      return newOrder.id;
-    } catch (error) {
-      dispatch(showToast('Failed to place order. Please try again.', 'error'));
-      throw error;
-    }
+    // Clear cart after successful order
+    dispatch(clearCart());
+
+    // Show success message
+    dispatch(showToast('Order placed successfully!', 'success'));
+
+    return newOrder.id;
+  } catch (error) {
+    dispatch(showToast('Failed to place order. Please try again.', 'error'));
+    throw error;
   }
-);
+});
 
 /**
  * Add or update a product review
@@ -74,23 +72,20 @@ export const addReview = createAsyncThunk<
   void,
   { productId: string; reviewData: ReviewPayload },
   { dispatch: AppDispatch }
->(
-  'product/addReview',
-  async ({ productId, reviewData }, { dispatch }) => {
-    try {
-      dispatch(addReviewAction({ productId, reviewData }));
-      
-      const message = reviewData.id 
-        ? 'Review updated successfully!' 
-        : 'Thank you for your review!';
-      
-      dispatch(showToast(message, 'success'));
-    } catch (error) {
-      dispatch(showToast('Failed to submit review. Please try again.', 'error'));
-      throw error;
-    }
+>('product/addReview', async ({ productId, reviewData }, { dispatch }) => {
+  try {
+    dispatch(addReviewAction({ productId, reviewData }));
+
+    const message = reviewData.id
+      ? 'Review updated successfully!'
+      : 'Thank you for your review!';
+
+    dispatch(showToast(message, 'success'));
+  } catch (error) {
+    dispatch(showToast('Failed to submit review. Please try again.', 'error'));
+    throw error;
   }
-);
+});
 
 /**
  * Delete a product review
@@ -99,21 +94,19 @@ export const deleteReview = createAsyncThunk<
   void,
   { productId: string; reviewId: string },
   { dispatch: AppDispatch }
->(
-  'product/deleteReview',
-  async ({ productId, reviewId }, { dispatch }) => {
-    try {
-      dispatch(deleteReviewAction({ productId, reviewId }));
-      dispatch(showToast('Review deleted successfully', 'info'));
-    } catch (error) {
-      dispatch(showToast('Failed to delete review. Please try again.', 'error'));
-      throw error;
-    }
+>('product/deleteReview', async ({ productId, reviewId }, { dispatch }) => {
+  try {
+    dispatch(deleteReviewAction({ productId, reviewId }));
+    dispatch(showToast('Review deleted successfully', 'info'));
+  } catch (error) {
+    dispatch(showToast('Failed to delete review. Please try again.', 'error'));
+    throw error;
   }
-);
+});
 
 /**
  * Toggle helpful status on a review
+ * Note: helpfulReviews are stored in database (Prisma), not Redux
  */
 export const toggleHelpfulReview = createAsyncThunk<
   void,
@@ -122,29 +115,38 @@ export const toggleHelpfulReview = createAsyncThunk<
 >(
   'product/toggleHelpfulReview',
   async ({ productId, reviewId }, { dispatch, getState, rejectWithValue }) => {
-    const { user } = getState().user;
-    
+    const { currentUser } = getState().user;
+
     // Check authentication
-    if (!user) {
+    if (!currentUser) {
       dispatch(showToast('You must be logged in to do that.', 'error'));
       return rejectWithValue('User not authenticated');
     }
 
     try {
-      const hasBeenMarkedHelpful = user.helpfulReviews?.includes(reviewId) ?? false;
+      // Check if user has marked this review as helpful
+      const hasBeenMarkedHelpful =
+        currentUser.helpfulReviews?.includes(reviewId) ?? false;
       const direction = hasBeenMarkedHelpful ? 'decrement' : 'increment';
 
-      // Update user's helpful reviews list
-      dispatch(toggleHelpfulReviewAction(reviewId));
-      
-      // Update the review's helpful count
-      dispatch(updateReviewHelpfulCount({
-        productId,
-        reviewId,
-        direction,
-      }));
+      // Update the review's helpful count in product state
+      // Note: To persist this, you should call a Server Action
+      dispatch(
+        updateReviewHelpfulCount({
+          productId,
+          reviewId,
+          direction,
+        })
+      );
+
+      const message = hasBeenMarkedHelpful
+        ? 'Removed from helpful'
+        : 'Marked as helpful';
+      dispatch(showToast(message, 'info'));
     } catch (error) {
-      dispatch(showToast('Failed to update review. Please try again.', 'error'));
+      dispatch(
+        showToast('Failed to update review. Please try again.', 'error')
+      );
       throw error;
     }
   }
@@ -152,17 +154,21 @@ export const toggleHelpfulReview = createAsyncThunk<
 
 // Export legacy thunk functions for backward compatibility
 // These wrap the new async thunks for components that haven't been updated yet
-export const placeOrderLegacy = (orderDetails: Omit<Order, 'id' | 'date'>) => 
-  (dispatch: AppDispatch) => dispatch(placeOrder(orderDetails));
+export const placeOrderLegacy =
+  (orderDetails: Omit<Order, 'id' | 'date'>) => (dispatch: AppDispatch) =>
+    dispatch(placeOrder(orderDetails));
 
-export const addReviewLegacy = (productId: string, reviewData: ReviewPayload) => 
-  (dispatch: AppDispatch) => dispatch(addReview({ productId, reviewData }));
+export const addReviewLegacy =
+  (productId: string, reviewData: ReviewPayload) => (dispatch: AppDispatch) =>
+    dispatch(addReview({ productId, reviewData }));
 
-export const deleteReviewLegacy = (productId: string, reviewId: string) => 
-  (dispatch: AppDispatch) => dispatch(deleteReview({ productId, reviewId }));
+export const deleteReviewLegacy =
+  (productId: string, reviewId: string) => (dispatch: AppDispatch) =>
+    dispatch(deleteReview({ productId, reviewId }));
 
-export const toggleHelpfulReviewLegacy = (productId: string, reviewId: string) => 
-  (dispatch: AppDispatch) => dispatch(toggleHelpfulReview({ productId, reviewId }));
+export const toggleHelpfulReviewLegacy =
+  (productId: string, reviewId: string) => (dispatch: AppDispatch) =>
+    dispatch(toggleHelpfulReview({ productId, reviewId }));
 
 /**
  * Update order status with validation and error handling
@@ -176,7 +182,7 @@ export const updateOrderStatus = createAsyncThunk<
   async ({ orderId, newStatus }, { dispatch, getState, rejectWithValue }) => {
     try {
       const { orders } = getState().orders;
-      const orderToUpdate = orders.find(o => o.id === orderId);
+      const orderToUpdate = orders.find((o) => o.id === orderId);
 
       // Validate order exists
       if (!orderToUpdate) {
@@ -185,9 +191,17 @@ export const updateOrderStatus = createAsyncThunk<
       }
 
       // Validate status transition (optional - add business logic here)
-      const isValidTransition = validateStatusTransition(orderToUpdate.status, newStatus);
+      const isValidTransition = validateStatusTransition(
+        orderToUpdate.status,
+        newStatus
+      );
       if (!isValidTransition) {
-        dispatch(showToast(`Cannot change status from ${orderToUpdate.status} to ${newStatus}`, 'error'));
+        dispatch(
+          showToast(
+            `Cannot change status from ${orderToUpdate.status} to ${newStatus}`,
+            'error'
+          )
+        );
         return rejectWithValue('Invalid status transition');
       }
 
@@ -204,12 +218,16 @@ export const updateOrderStatus = createAsyncThunk<
 
       // Update order in store
       dispatch(updateOrder(updatedOrder));
-      
+
       // Show user-friendly success message
       const statusMessage = getStatusMessage(newStatus);
-      dispatch(showToast(`Order ${formatOrderId(orderId)} ${statusMessage}`, 'success'));
+      dispatch(
+        showToast(`Order ${formatOrderId(orderId)} ${statusMessage}`, 'success')
+      );
     } catch (error) {
-      dispatch(showToast('Failed to update order status. Please try again.', 'error'));
+      dispatch(
+        showToast('Failed to update order status. Please try again.', 'error')
+      );
       throw error;
     }
   }
@@ -220,16 +238,16 @@ export const updateOrderStatus = createAsyncThunk<
  * Add your business logic here
  */
 const validateStatusTransition = (
-  currentStatus: Order['status'], 
+  currentStatus: Order['status'],
   newStatus: Order['status']
 ): boolean => {
   // Example validation rules - customize based on your business logic
   const statusFlow: Record<Order['status'], Order['status'][]> = {
-    'Pending': ['Processing', 'Cancelled'],
-    'Processing': ['Shipped', 'Cancelled'],
-    'Shipped': ['Delivered'],
-    'Delivered': [], // Final state
-    'Cancelled': [], // Final state
+    Pending: ['Processing', 'Cancelled'],
+    Processing: ['Shipped', 'Cancelled'],
+    Shipped: ['Delivered'],
+    Delivered: [], // Final state
+    Cancelled: [], // Final state
   };
 
   // If no restrictions defined, allow all transitions
@@ -244,11 +262,11 @@ const validateStatusTransition = (
  */
 const getStatusMessage = (status: Order['status']): string => {
   const messages: Record<Order['status'], string> = {
-    'Pending': 'is pending',
-    'Processing': 'is being processed',
-    'Shipped': 'has been shipped',
-    'Delivered': 'has been delivered',
-    'Cancelled': 'has been cancelled',
+    Pending: 'is pending',
+    Processing: 'is being processed',
+    Shipped: 'has been shipped',
+    Delivered: 'has been delivered',
+    Cancelled: 'has been cancelled',
   };
 
   return messages[status] || `status updated to ${status}`;
@@ -269,8 +287,9 @@ const formatOrderId = (orderId: string): string => {
 };
 
 // Legacy export for backward compatibility
-export const updateOrderStatusInStore = (orderId: string, newStatus: Order['status']) => 
-  (dispatch: AppDispatch) => dispatch(updateOrderStatus({ orderId, newStatus }));
+export const updateOrderStatusInStore =
+  (orderId: string, newStatus: Order['status']) => (dispatch: AppDispatch) =>
+    dispatch(updateOrderStatus({ orderId, newStatus }));
 
 /**
  * Fetch all orders for the current user
@@ -279,38 +298,35 @@ export const fetchOrders = createAsyncThunk<
   void,
   void,
   { dispatch: AppDispatch; state: RootState }
->(
-  'order/fetchOrders',
-  async (_, { dispatch }) => {
-    try {
-      const result = await getMyOrdersAction();
-      if (result.success && result.data) {
-        // Convert non-serializable Date objects to strings and map items
-        const serializableOrders = result.data.map(order => {
-          const { createdAt, updatedAt, items, ...rest } = order;
-          const isoCreatedAt = createdAt.toISOString();
-          return {
-            ...rest,
-            createdAt: isoCreatedAt,
-            updatedAt: updatedAt.toISOString(),
-            date: isoCreatedAt, // Also set the date field
-            items: items.map(item => ({
-              id: item.productId,
-              cartItemId: item.id, // Use OrderItem id as cartItemId
-              title: item.product.title,
-              price: item.price,
-              quantity: item.quantity,
-              image: item.product.thumbnail,
-            })),
-          };
-        });
-        dispatch(setOrders(serializableOrders as any));
-      } else {
-        dispatch(showToast(result.error || 'Failed to fetch orders.', 'error'));
-      }
-    } catch (error) {
-      dispatch(showToast('Failed to fetch orders. Please try again.', 'error'));
-      throw error;
+>('order/fetchOrders', async (_, { dispatch }) => {
+  try {
+    const result = await getMyOrdersAction();
+    if (result.success && result.data) {
+      // Convert non-serializable Date objects to strings and map items
+      const serializableOrders = result.data.map((order) => {
+        const { createdAt, updatedAt, items, ...rest } = order;
+        const isoCreatedAt = createdAt.toISOString();
+        return {
+          ...rest,
+          createdAt: isoCreatedAt,
+          updatedAt: updatedAt.toISOString(),
+          date: isoCreatedAt, // Also set the date field
+          items: items.map((item) => ({
+            id: item.productId,
+            cartItemId: item.id, // Use OrderItem id as cartItemId
+            title: item.product.title,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.product.thumbnail,
+          })),
+        };
+      });
+      dispatch(setOrders(serializableOrders as any));
+    } else {
+      dispatch(showToast(result.error || 'Failed to fetch orders.', 'error'));
     }
+  } catch (error) {
+    dispatch(showToast('Failed to fetch orders. Please try again.', 'error'));
+    throw error;
   }
-);
+});
