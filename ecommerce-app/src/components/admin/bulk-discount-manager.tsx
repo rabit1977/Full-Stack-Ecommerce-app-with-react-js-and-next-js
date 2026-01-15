@@ -21,7 +21,22 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 
-export function BulkDiscountManager() {
+interface BulkDiscountManagerProps {
+  categories: string[];
+  brands: string[];
+  applyBulkDiscountAction: (data: {
+    discountType: 'all' | 'category' | 'brand';
+    category?: string;
+    brand?: string;
+    discount: number;
+  }) => Promise<{ success: boolean; error?: string; message?: string; count?: number }>;
+}
+
+export function BulkDiscountManager({
+  categories,
+  brands,
+  applyBulkDiscountAction,
+}: BulkDiscountManagerProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [discountType, setDiscountType] = useState<
@@ -55,27 +70,16 @@ export function BulkDiscountManager() {
     }
 
     startTransition(async () => {
-      try {
-        const response = await fetch('/api/admin/products/bulk-discount', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            discountType,
-            category: selectedCategory,
-            brand: selectedBrand,
-            discount: discountValue,
-          }),
-        });
+      const result = await applyBulkDiscountAction({
+        discountType,
+        category: selectedCategory,
+        brand: selectedBrand,
+        discount: discountValue,
+      });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to apply discount');
-        }
-
-        // Success toast
-        toast.success(`✅ ${data.message}`, {
-          description: `Updated ${data.count} products in the database`,
+      if (result.success) {
+        toast.success(`✅ ${result.message}`, {
+          description: `Updated ${result.count} products in the database`,
           duration: 4000,
         });
 
@@ -84,15 +88,10 @@ export function BulkDiscountManager() {
         setSelectedCategory('');
         setSelectedBrand('');
         setDiscountType('all');
-
-        // Force refresh to show updated discounts
-        router.push('/products');
         router.refresh();
-      } catch (error) {
-        console.error('Discount error:', error);
+      } else {
         toast.error('❌ Failed to apply discount', {
-          description:
-            error instanceof Error ? error.message : 'Please try again',
+          description: result.error || 'Please try again',
           duration: 4000,
         });
       }
@@ -152,13 +151,9 @@ export function BulkDiscountManager() {
                 <SelectValue placeholder='Choose category' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='Laptops'>Laptops</SelectItem>
-                <SelectItem value='Smartphones'>Smartphones</SelectItem>
-                <SelectItem value='Tablets'>Tablets</SelectItem>
-                <SelectItem value='Cameras'>Cameras</SelectItem>
-                <SelectItem value='Headphones'>Headphones</SelectItem>
-                <SelectItem value='Monitors'>Monitors</SelectItem>
-                <SelectItem value='TVs'>TVs</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -173,13 +168,9 @@ export function BulkDiscountManager() {
                 <SelectValue placeholder='Choose brand' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='Apple'>Apple</SelectItem>
-                <SelectItem value='Samsung'>Samsung</SelectItem>
-                <SelectItem value='Dell'>Dell</SelectItem>
-                <SelectItem value='Sony'>Sony</SelectItem>
-                <SelectItem value='LG'>LG</SelectItem>
-                <SelectItem value='HP'>HP</SelectItem>
-                <SelectItem value='Lenovo'>Lenovo</SelectItem>
+                {brands.map((brand) => (
+                  <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

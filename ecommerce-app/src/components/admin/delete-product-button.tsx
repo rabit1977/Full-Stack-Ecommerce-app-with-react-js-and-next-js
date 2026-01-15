@@ -1,6 +1,5 @@
 'use client';
 
-import { deleteProductAction } from '@/actions/product-actions';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -10,9 +9,14 @@ import { toast } from 'sonner';
 interface DeleteProductButtonProps {
   productId: string;
   productTitle: string;
+  deleteProductAction: (id: string) => Promise<{ success: boolean; error?: string; message?: string; }>;
 }
 
-export function DeleteProductButton({ productId, productTitle }: DeleteProductButtonProps) {
+export function DeleteProductButton({ 
+  productId, 
+  productTitle,
+  deleteProductAction,
+}: DeleteProductButtonProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
