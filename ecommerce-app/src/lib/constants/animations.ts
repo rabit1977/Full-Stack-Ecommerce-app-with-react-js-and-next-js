@@ -39,37 +39,7 @@ export const fadeInUp = {
   }),
 };
 
-/**
- * Container for staggered children animations
- */
-export const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
 
-/**
- * Individual item animation for staggered lists
- */
-export const staggerItem: Variants = {
-  hidden: { 
-    opacity: 0, 
-    y: 20 
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      ease: 'easeOut',
-    },
-  },
-};
 
 /**
  * Card animation with scale effect
