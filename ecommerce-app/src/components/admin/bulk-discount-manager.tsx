@@ -30,12 +30,14 @@ interface BulkDiscountManagerProps {
     brand?: string;
     discount: number;
   }) => Promise<{ success: boolean; error?: string; message?: string; count?: number }>;
+  onSuccess?: () => void;
 }
 
 export function BulkDiscountManager({
   categories,
   brands,
   applyBulkDiscountAction,
+  onSuccess,
 }: BulkDiscountManagerProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -89,6 +91,7 @@ export function BulkDiscountManager({
         setSelectedBrand('');
         setDiscountType('all');
         router.refresh();
+        onSuccess?.(); // Close the modal
       } else {
         toast.error('❌ Failed to apply discount', {
           description: result.error || 'Please try again',

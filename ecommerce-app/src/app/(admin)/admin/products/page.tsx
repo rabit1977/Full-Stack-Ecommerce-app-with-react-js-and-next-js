@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { BulkDiscountManager } from '@/components/admin/bulk-discount-manager';
+import { BulkDiscountModal } from '@/components/admin/bulk-discount-modal';
 import { ProductsClient } from '@/components/admin/products-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -150,27 +151,11 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
           </p>
         </div>
         <div className='flex gap-2'>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant='outline'>
-                <Tag className='h-4 w-4 mr-2' />
-                Bulk Discounts
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Bulk Discount Manager</DialogTitle>
-                <DialogDescription>
-                  Apply discounts to multiple products at once.
-                </DialogDescription>
-              </DialogHeader>
-              <BulkDiscountManager
-                categories={categories.map((c) => c.category)}
-                brands={brands.map((b) => b.brand)}
-                applyBulkDiscountAction={applyBulkDiscountAction}
-              />
-            </DialogContent>
-          </Dialog>
+          <BulkDiscountModal
+            categories={categories.map((c) => c.category)}
+            brands={brands.map((b) => b.brand)}
+            applyBulkDiscountAction={applyBulkDiscountAction}
+          />
           <Button asChild>
             <Link href='/admin/products/new'>
               <PlusCircle className='h-4 w-4 mr-2' />
