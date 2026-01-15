@@ -43,9 +43,9 @@ export default async function DashboardPage() {
   ]);
 
   // Optional: fetch cart items count if you have a cart table
-  // const cartItemsCount = await prisma.cartItem.aggregate({
-  //   _sum: { quantity: true }
-  // });
+   const cartItemsCount = await prisma.cartItem.aggregate({
+   _sum: { quantity: true }
+   });
 
   return (
     <Suspense fallback={<DashboardSkeleton />}>
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
         users={users} 
         products={products} 
         orders={orders}
-        // cartItemsCount={cartItemsCount._sum.quantity || 0}
+        cartItemsCount={cartItemsCount._sum.quantity || 0}
       />
     </Suspense>
   );
