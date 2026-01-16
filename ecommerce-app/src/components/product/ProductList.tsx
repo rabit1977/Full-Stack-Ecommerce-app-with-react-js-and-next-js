@@ -1,7 +1,7 @@
 // components/product/product-list.tsx
 'use client';
 
-import { Product } from '@/lib/types';
+import { Product } from '@prisma/client';
 import { ProductCard } from './product-card';
 
 interface ProductListProps {

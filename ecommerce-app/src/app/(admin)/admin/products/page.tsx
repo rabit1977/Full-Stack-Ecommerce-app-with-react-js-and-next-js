@@ -1,21 +1,16 @@
+import {
+  applyBulkDiscountAction,
+  deleteMultipleProductsAction,
+  deleteProductAction,
+} from '@/actions/product-actions';
 import { auth } from '@/auth';
-import { BulkDiscountManager } from '@/components/admin/bulk-discount-manager';
 import { BulkDiscountModal } from '@/components/admin/bulk-discount-modal';
 import { ProductsClient } from '@/components/admin/products-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { PaginationControls } from '@/components/ui/pagination';
 import { prisma } from '@/lib/db';
-import { Package, PlusCircle, Tag } from 'lucide-react';
-import { revalidatePath } from 'next/cache';
+import { Package, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -32,7 +27,7 @@ async function requireAdmin() {
   const session = await auth();
   if (!session?.user || (session.user as any).role !== 'ADMIN') {
     // Better to redirect than throw error for UX
-    redirect('/'); 
+    redirect('/');
   }
 }
 
@@ -41,7 +36,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
 
   // 2. Await the searchParams before accessing properties
   const searchParams = await props.searchParams;
-  
+
   const page = Number(searchParams?.page) || 1;
   const limit = Number(searchParams?.limit) || 12;
   const skip = (page - 1) * limit;
@@ -63,13 +58,13 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
 
   // 3. Convert Dates to Strings for Client Component
   // Client components often expect JSON-serializable data (strings), not Date objects
-  const products = rawProducts.map(product => ({
+  const products = rawProducts.map((product) => ({
     ...product,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
     // Ensure JSON fields are typed correctly if needed
-    options: product.options as any, 
-    specifications: product.specifications as any
+    options: product.options as any,
+    specifications: product.specifications as any,
   }));
 
   const totalPages = Math.ceil(totalCount / limit);
@@ -81,59 +76,59 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
     lowStock: products.filter((p) => p.stock < 10).length,
   };
 
-  // --- SERVER ACTIONS ---
+  // // --- SERVER ACTIONS ---
 
-  async function deleteProductAction(id: string) {
-    'use server';
-    await requireAdmin();
-    try {
-      await prisma.product.delete({ where: { id } });
-      revalidatePath('/admin/products');
-      return { success: true, message: 'Product deleted' };
-    } catch (error) {
-      return { success: false, error: 'Failed to delete product' };
-    }
-  }
+  // async function deleteProductAction(id: string) {
+  //   'use server';
+  //   await requireAdmin();
+  //   try {
+  //     await prisma.product.delete({ where: { id } });
+  //     revalidatePath('/admin/products');
+  //     return { success: true, message: 'Product deleted' };
+  //   } catch (error) {
+  //     return { success: false, error: 'Failed to delete product' };
+  //   }
+  // }
 
-  async function deleteMultipleProductsAction(ids: string[]) {
-    'use server';
-    await requireAdmin();
-    try {
-      await prisma.product.deleteMany({ where: { id: { in: ids } } });
-      revalidatePath('/admin/products');
-      return { success: true, message: `${ids.length} products deleted` };
-    } catch (error) {
-      return { success: false, error: 'Failed to delete products' };
-    }
-  }
+  // async function deleteMultipleProductsAction(ids: string[]) {
+  //   'use server';
+  //   await requireAdmin();
+  //   try {
+  //     await prisma.product.deleteMany({ where: { id: { in: ids } } });
+  //     revalidatePath('/admin/products');
+  //     return { success: true, message: `${ids.length} products deleted` };
+  //   } catch (error) {
+  //     return { success: false, error: 'Failed to delete products' };
+  //   }
+  // }
 
-  async function applyBulkDiscountAction(data: {
-    discountType: 'all' | 'category' | 'brand';
-    category?: string;
-    brand?: string;
-    discount: number;
-  }) {
-    'use server';
-    await requireAdmin();
-    try {
-      const where: any = {};
-      if (data.discountType === 'category') where.category = data.category;
-      if (data.discountType === 'brand') where.brand = data.brand;
+  // async function applyBulkDiscountAction(data: {
+  //   discountType: 'all' | 'category' | 'brand';
+  //   category?: string;
+  //   brand?: string;
+  //   discount: number;
+  // }) {
+  //   'use server';
+  //   await requireAdmin();
+  //   try {
+  //     const where: any = {};
+  //     if (data.discountType === 'category') where.category = data.category;
+  //     if (data.discountType === 'brand') where.brand = data.brand;
 
-      const result = await prisma.product.updateMany({
-        where,
-        data: { discount: data.discount },
-      });
-      revalidatePath('/admin/products');
-      return {
-        success: true,
-        message: 'Discount applied',
-        count: result.count,
-      };
-    } catch (error) {
-      return { success: false, error: 'Failed to apply discount' };
-    }
-  }
+  //     const result = await prisma.product.updateMany({
+  //       where,
+  //       data: { discount: data.discount },
+  //     });
+  //     revalidatePath('/admin/products');
+  //     return {
+  //       success: true,
+  //       message: 'Discount applied',
+  //       count: result.count,
+  //     };
+  //   } catch (error) {
+  //     return { success: false, error: 'Failed to apply discount' };
+  //   }
+  // }
 
   return (
     <div className='space-y-8'>

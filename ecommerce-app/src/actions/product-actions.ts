@@ -469,6 +469,34 @@ export async function deleteMultipleProductsAction(ids: string[]) {
   }
 }
 
+export async function applyBulkDiscountAction(data: {
+  discountType: 'all' | 'category' | 'brand';
+  category?: string;
+  brand?: string;
+  discount: number;
+}) {
+  'use server';
+  await requireAdmin();
+  try {
+    const where: any = {};
+    if (data.discountType === 'category') where.category = data.category;
+    if (data.discountType === 'brand') where.brand = data.brand;
+
+    const result = await prisma.product.updateMany({
+      where,
+      data: { discount: data.discount },
+    });
+    revalidatePath('/admin/products');
+    return {
+      success: true,
+      message: 'Discount applied',
+      count: result.count,
+    };
+  } catch (error) {
+    return { success: false, error: 'Failed to apply discount' };
+  }
+}
+
 /** * Get categories
  */
 export async function getCategoriesAction(): Promise<string[]> {
