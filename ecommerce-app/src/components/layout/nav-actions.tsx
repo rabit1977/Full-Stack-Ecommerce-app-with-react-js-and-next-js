@@ -262,7 +262,7 @@ export const NavActions = () => {
         aria-label={`View wishlist (${wishlistCount} items)`}
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'relative bg-slate-900 hover:bg-slate-700 text-white'
+          'relative  hover:bg-slate-100 hover:text-slate-950 dark:hover:text-slate-100 dark:text-slate-100 text-slate-900'
         )}
       >
         <Heart className='h-5 w-5' />
@@ -284,7 +284,7 @@ export const NavActions = () => {
             aria-label={`View shopping cart (${cartItemCount} items)`}
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'icon' }),
-              'relative bg-slate-900 hover:bg-slate-700 text-white'
+              'relative  hover:bg-slate-100 hover:text-slate-950 dark:hover:text-slate-100 dark:text-slate-100 text-slate-900'
             )}
           >
             <ShoppingCart className='h-5 w-5' />

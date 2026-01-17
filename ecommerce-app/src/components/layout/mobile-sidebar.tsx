@@ -27,23 +27,16 @@ interface NavLinkProps {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
-  onClick: () => void;
   isActive?: boolean;
+  
 }
 
 /**
  * Navigation link component with icon and active state
  */
-const NavLink = ({
-  href,
-  icon: Icon,
-  children,
-  onClick,
-  isActive,
-}: NavLinkProps) => (
+const NavLink = ({ href, icon: Icon, children, isActive }: NavLinkProps) => (
   <Link
     href={href}
-    onClick={onClick}
     className={cn(
       'flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium transition-colors',
       isActive
@@ -51,7 +44,7 @@ const NavLink = ({
         : 'text-muted-foreground hover:bg-accent hover:text-foreground'
     )}
   >
-    <Icon className='h-5 w-5 flex-shrink-0' />
+    <Icon className='h-5 w-5 shrink-0' />
     <span>{children}</span>
   </Link>
 );
@@ -74,45 +67,9 @@ const MobileSidebar = () => {
   const user = useAppSelector((state) => state.user.currentUser);
   const isMenuOpen = useAppSelector((state) => state.ui.isMenuOpen);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  /**
-   * Lock body scroll when menu is open
-   */
-  useEffect(() => {
-    if (isMenuOpen) {
-      // Get current scroll position
-      const scrollY = window.scrollY;
-
-      // Save original body styles
-      const originalOverflow = document.body.style.overflow;
-
-      // Lock body scroll
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
-
-      // Store scroll position for restoration
-      document.body.dataset.scrollY = scrollY.toString();
-    } else {
-      // Restore scroll and styles
-      const scrollY = document.body.dataset.scrollY;
-
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
-
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY));
-      }
-
-      delete document.body.dataset.scrollY;
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
-      delete document.body.dataset.scrollY;
-    };
-  }, [isMenuOpen]);
+  
+  
+  const isInitialRender = useRef(true);
 
   /**
    * Close menu handler
@@ -120,6 +77,34 @@ const MobileSidebar = () => {
   const closeMenu = useCallback(() => {
     dispatch(setIsMenuOpen(false));
   }, [dispatch]);
+
+  
+  /**
+   * Close menu when route changes
+   */
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+    closeMenu();
+  }, [pathname, closeMenu]);
+
+  /**
+   * Lock body scroll when menu is open
+   */
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.classList.add('body-scroll-lock');
+    } else {
+      document.body.classList.remove('body-scroll-lock');
+    }
+
+    return () => {
+      document.body.classList.remove('body-scroll-lock');
+    };
+  }, [isMenuOpen]);
+
 
   /**
    * Handle logout with proper cleanup
@@ -181,7 +166,7 @@ const MobileSidebar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className='fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden'
+            className='fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden '
             onClick={closeMenu}
             aria-hidden='true'
           />
@@ -200,7 +185,7 @@ const MobileSidebar = () => {
           >
             <div className='flex h-full flex-col'>
               {/* Header */}
-              <div className='flex items-center justify-between border-b px-6 py-4 flex-shrink-0'>
+              <div className='flex items-center justify-between border-b px-6 py-4 shrink-0'>
                 <h2 className='text-lg font-semibold'>Menu</h2>
                 <Button
                   variant='ghost'
@@ -219,7 +204,7 @@ const MobileSidebar = () => {
                   {user ? (
                     <div className='rounded-lg border bg-card p-4'>
                       <div className='flex items-center gap-3'>
-                        <div className='flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold'>
+                        <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold'>
                           {userInitials || <User className='h-6 w-6' />}
                         </div>
                         <div className='min-w-0 flex-1'>
@@ -251,7 +236,6 @@ const MobileSidebar = () => {
                         key={link.href}
                         href={link.href}
                         icon={link.icon}
-                        onClick={closeMenu}
                         isActive={isActiveLink(link.href)}
                       >
                         {link.label}
@@ -270,7 +254,6 @@ const MobileSidebar = () => {
                         <NavLink
                           href='/account'
                           icon={UserCircle}
-                          onClick={closeMenu}
                           isActive={isActiveLink('/account')}
                         >
                           My Account
@@ -278,7 +261,6 @@ const MobileSidebar = () => {
                         <NavLink
                           href='/orders'
                           icon={ShoppingBag}
-                          onClick={closeMenu}
                           isActive={isActiveLink('/orders')}
                         >
                           My Orders
@@ -291,7 +273,7 @@ const MobileSidebar = () => {
 
               {/* Footer (Logout) */}
               {user && (
-                <div className='border-t p-6 flex-shrink-0'>
+                <div className='border-t p-6 shrink-0'>
                   <Button
                     variant='outline'
                     className='w-full gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground'

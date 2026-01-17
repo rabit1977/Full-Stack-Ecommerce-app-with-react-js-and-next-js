@@ -16,7 +16,6 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
-import { MobileSidebar } from './mobile-sidebar';
 import { NavActions } from './nav-actions';
 import { SearchBar } from './search-bar';
 
@@ -150,9 +149,6 @@ const Header = () => {
           </Button>
         </div>
       </div>
-
-      {/* Mobile Sidebar - renders based on Redux state */}
-      <MobileSidebar />
     </header>
   );
 };

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useUI } from '@/lib/hooks/useUI';
-import { staggerContainer, staggerItem } from '@/lib/constants/animations';
+
 import { motion } from 'framer-motion';
 import { Clock, Mail, MapPin, Phone, Send } from 'lucide-react';
 import Link from 'next/link';
@@ -116,13 +116,12 @@ export const ContactContent = () => {
 
   return (
     <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
+      initial='hidden'
+      animate='visible'
       className='container mx-auto px-4 py-12 sm:py-16 lg:py-20 space-y-6 lg:space-y-8 max-w-6xl'
     >
       {/* Page Header */}
-      <motion.div variants={staggerItem} className='text-center mb-12 sm:mb-16'>
+      <motion.div className='text-center mb-12 sm:mb-16'>
         <h1 className='text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white'>
           Get in Touch
         </h1>
@@ -132,7 +131,7 @@ export const ContactContent = () => {
         </p>
       </motion.div>
 
-      <motion.div variants={staggerItem} className='grid md:grid-cols-2 gap-8 lg:gap-12'>
+      <motion.div className='grid md:grid-cols-2 gap-8 lg:gap-12'>
         {/* Contact Form */}
         <div className='rounded-xl border bg-white p-6 sm:p-8 shadow-lg dark:bg-slate-900 space-y-6 dark:border-slate-800'>
           <h2 className='text-2xl font-semibold dark:text-white mb-6'>
@@ -155,9 +154,7 @@ export const ContactContent = () => {
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? 'name-error' : undefined}
                 className={
-                  errors.name
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : ''
+                  errors.name ? 'border-red-500 focus-visible:ring-red-500' : ''
                 }
               />
               {errors.name && (
@@ -208,9 +205,7 @@ export const ContactContent = () => {
                 onChange={handleChange}
                 disabled={isPending}
                 aria-invalid={!!errors.subject}
-                aria-describedby={
-                  errors.subject ? 'subject-error' : undefined
-                }
+                aria-describedby={errors.subject ? 'subject-error' : undefined}
                 className={
                   errors.subject
                     ? 'border-red-500 focus-visible:ring-red-500'
@@ -238,9 +233,7 @@ export const ContactContent = () => {
                 disabled={isPending}
                 rows={5}
                 aria-invalid={!!errors.message}
-                aria-describedby={
-                  errors.message ? 'message-error' : undefined
-                }
+                aria-describedby={errors.message ? 'message-error' : undefined}
                 className={
                   errors.message
                     ? 'border-red-500 focus-visible:ring-red-500'
@@ -285,7 +278,7 @@ export const ContactContent = () => {
             </h2>
             <div className='space-y-4'>
               <div className='flex gap-4'>
-                <div className='flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
+                <div className='shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
                   <MapPin className='h-4 w-4 text-primary' />
                 </div>
                 <div>
@@ -299,7 +292,7 @@ export const ContactContent = () => {
               </div>
 
               <div className='flex gap-4'>
-                <div className='flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
+                <div className='shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
                   <Phone className='h-4 w-4 text-primary' />
                 </div>
                 <div>
@@ -314,7 +307,7 @@ export const ContactContent = () => {
               </div>
 
               <div className='flex gap-4'>
-                <div className='flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
+                <div className='shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
                   <Mail className='h-4 w-4 text-primary' />
                 </div>
                 <div>
@@ -359,10 +352,7 @@ export const ContactContent = () => {
       </motion.div>
 
       {/* Map */}
-      <motion.div
-        variants={staggerItem}
-        className='rounded-xl block w-full overflow-hidden shadow-lg h-64 sm:h-80'
-      >
+      <motion.div className='rounded-xl block w-full overflow-hidden shadow-lg h-64 sm:h-80'>
         <iframe
           src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.004258724266!3d40.74076987932881!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259bf5c8eef01%3A0x7a2ff2c2e2b3c3b!2sTech%20Avenue!5e0!3m2!1sen!2sus!4v1690835000000!5m2!1sen!2sus'
           allowFullScreen

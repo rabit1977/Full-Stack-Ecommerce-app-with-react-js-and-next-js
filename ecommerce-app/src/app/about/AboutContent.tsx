@@ -2,7 +2,7 @@
 'use client';
 
 import { aboutContent } from '@/lib/constants/about-data';
-import { staggerContainer, staggerItem } from '@/lib/constants/animations';
+
 import { motion } from 'framer-motion';
 import { Heart, ShieldCheck, Zap } from 'lucide-react';
 import Image from 'next/image';
@@ -87,14 +87,9 @@ const TeamMemberCard = ({ member }: TeamMemberProps) => (
  */
 export const AboutContent = () => {
   return (
-    <motion.div 
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-      className='space-y-8'
-    >
+    <motion.div initial='hidden' animate='visible' className='space-y-8'>
       {/* Story Section */}
-      <motion.div variants={staggerItem}>
+      <motion.div>
         <section
           className='grid lg:grid-cols-2 gap-8 lg:gap-12 items-center'
           aria-labelledby='story-heading'
@@ -125,7 +120,7 @@ export const AboutContent = () => {
             </div>
           </div>
 
-          <div className='relative h-64 sm:h-80 lg:h-full lg:min-h-[400px] rounded-2xl overflow-hidden shadow-2xl'>
+          <div className='relative h-64 sm:h-80 lg:h-full lg:min-h-100 rounded-2xl overflow-hidden shadow-2xl'>
             <Image
               src={aboutContent.storyImage}
               alt='Electro office workspace with team collaboration'
@@ -139,7 +134,7 @@ export const AboutContent = () => {
       </motion.div>
 
       {/* Values Section */}
-      <motion.div variants={staggerItem}>
+      <motion.div>
         <section
           className='mt-16 sm:mt-20 lg:mt-24'
           aria-labelledby='values-heading'
@@ -170,7 +165,7 @@ export const AboutContent = () => {
       </motion.div>
 
       {/* Team Section */}
-      <motion.div variants={staggerItem}>
+      <motion.div>
         <section
           className='mt-16 sm:mt-20 lg:mt-24'
           aria-labelledby='team-heading'

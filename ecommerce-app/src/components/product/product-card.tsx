@@ -1,21 +1,20 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/hooks/useCart';
 import { useUI } from '@/lib/hooks/useUI';
+import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
-import { Product } from '@prisma/client';
 import { motion } from 'framer-motion';
-import { Eye, Heart, ShoppingCart } from 'lucide-react';
+import { Badge, Eye, Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useState, useTransition } from 'react';
+import { memo, useCallback, useMemo, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Button } from '../ui/button';
 import { ProductCartImage } from './product-image-carousel';
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductWithRelations;
 }
 
 export const ProductCard = memo(({ product }: ProductCardProps) => {
@@ -25,7 +24,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
 
   // Calculate current stock based on cart items
   const currentStock = useMemo(() => {
-    const cartItem = cart.find(item => item.id === product.id);
+    const cartItem = cart.find((item) => item.id === product.id);
     const quantityInCart = cartItem?.quantity || 0;
     return Math.max(0, product.stock - quantityInCart);
   }, [product.id, product.stock, cart]);
@@ -89,8 +88,8 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
           price: discount?.discountedPrice || product.price,
           quantity: 1,
         });
-        toast.success(`Added to cart • ${currentStock - 1} left in stock`, { 
-          duration: 2000 
+        toast.success(`Added to cart • ${currentStock - 1} left in stock`, {
+          duration: 2000,
         });
       });
     },
@@ -154,7 +153,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
             <span className='text-xs font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400'>
               {product.brand}
             </span>
-            <Badge variant='outline' className='text-xs'>
+            <Badge className='text-xs'>
               {product.category}
             </Badge>
           </div>
@@ -186,9 +185,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
             </div>
 
             {isLowStock && !isOutOfStock && (
-              <Badge variant='secondary' className='text-xs'>
-                Only {currentStock} left
-              </Badge>
+              <Badge className='text-xs'>Only {currentStock} left</Badge>
             )}
           </div>
 

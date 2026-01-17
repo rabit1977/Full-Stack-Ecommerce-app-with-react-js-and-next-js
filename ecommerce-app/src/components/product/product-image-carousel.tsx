@@ -2,31 +2,32 @@
 
 import { Badge } from '@/components/ui/badge';
 
+import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Product } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 
 interface ProductImageCarouselProps {
-  product: Product;
+  product: ProductWithRelations;
 }
 
 export function ProductCartImage({ product }: ProductImageCarouselProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  // Get all available images
+  // Get all available images from thumbnail and images relation
   const images = useMemo(() => {
-    const productImages = product?.thumbnail ? [product.thumbnail] : [];
-    const variantImages =
-      Array.isArray(product.options) && product.options?.[0]?.variants
-        ? product.options[0].variants.map((v) => v.image).filter(Boolean)
-        : [];
-
-    const allImages = [...productImages, ...variantImages];
-    return allImages.length > 0 ? allImages : ['/images/placeholder.jpg'];
-  }, [product.thumbnail, product.options]);
+    const imageUrls = product.images?.map((image) => image.url) ?? [];
+    if (product.thumbnail) {
+      imageUrls.unshift(product.thumbnail);
+    }
+    // Remove duplicates and return, or provide a placeholder
+    const uniqueImages = [...new Set(imageUrls)];
+    return uniqueImages.length > 0
+      ? uniqueImages
+      : ['/images/placeholder.jpg'];
+  }, [product.thumbnail, product.images]);
 
   const currentImage = images[activeImageIndex];
   const hasMultipleImages = images.length > 1;

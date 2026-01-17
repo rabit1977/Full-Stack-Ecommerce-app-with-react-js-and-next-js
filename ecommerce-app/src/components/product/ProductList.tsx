@@ -1,11 +1,11 @@
 // components/product/product-list.tsx
 'use client';
 
-import { Product } from '@prisma/client';
+import { ProductWithRelations } from '@/lib/types';
 import { ProductCard } from './product-card';
 
 interface ProductListProps {
-  products: Product[];
+  products: ProductWithRelations[];
 }
 
 export const ProductList = ({ products }: ProductListProps) => {
