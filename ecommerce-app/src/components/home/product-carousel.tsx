@@ -168,9 +168,25 @@ export const ProductCarousel = ({
                   {currentProduct.description}
                 </p>
                 <div className='flex items-center gap-4 flex-wrap'>
-                  <span className='text-2xl sm:text-3xl font-bold text-white'>
-                    {formatPrice(currentProduct.price)}
-                  </span>
+                  {currentProduct.discount > 0 ? (
+                    <>
+                      <span className='text-2xl sm:text-3xl font-bold text-red-500'>
+                        {formatPrice(
+                          currentProduct.price * (1 - currentProduct.discount / 100)
+                        )}
+                      </span>
+                      <span className='text-lg sm:text-xl text-slate-400 line-through'>
+                        {formatPrice(currentProduct.price)}
+                      </span>
+                      <Badge variant='destructive' className='text-sm'>
+                        {currentProduct.discount}% OFF
+                      </Badge>
+                    </>
+                  ) : (
+                    <span className='text-2xl sm:text-3xl font-bold text-white'>
+                      {formatPrice(currentProduct.price)}
+                    </span>
+                  )}
                   {currentProduct.rating && (
                     <div className='flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1'>
                       <Star className='h-4 w-4 fill-yellow-400 text-yellow-400' />

@@ -487,6 +487,8 @@ export async function applyBulkDiscountAction(data: {
       data: { discount: data.discount },
     });
     revalidatePath('/admin/products');
+    revalidatePath('/');
+    revalidatePath('/products');
     return {
       success: true,
       message: 'Discount applied',

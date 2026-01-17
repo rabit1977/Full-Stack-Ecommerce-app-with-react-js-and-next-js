@@ -1,8 +1,3 @@
-import {
-  applyBulkDiscountAction,
-  deleteMultipleProductsAction,
-  deleteProductAction,
-} from '@/actions/product-actions';
 import { auth } from '@/auth';
 import { BulkDiscountModal } from '@/components/admin/bulk-discount-modal';
 import { ProductsClient } from '@/components/admin/products-client';
@@ -11,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PaginationControls } from '@/components/ui/pagination';
 import { prisma } from '@/lib/db';
 import { Package, PlusCircle } from 'lucide-react';
+import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -78,57 +74,57 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
 
   // // --- SERVER ACTIONS ---
 
-  // async function deleteProductAction(id: string) {
-  //   'use server';
-  //   await requireAdmin();
-  //   try {
-  //     await prisma.product.delete({ where: { id } });
-  //     revalidatePath('/admin/products');
-  //     return { success: true, message: 'Product deleted' };
-  //   } catch (error) {
-  //     return { success: false, error: 'Failed to delete product' };
-  //   }
-  // }
+  async function deleteProductAction(id: string) {
+    'use server';
+    await requireAdmin();
+    try {
+      await prisma.product.delete({ where: { id } });
+      revalidatePath('/admin/products');
+      return { success: true, message: 'Product deleted' };
+    } catch (error) {
+      return { success: false, error: 'Failed to delete product' };
+    }
+  }
 
-  // async function deleteMultipleProductsAction(ids: string[]) {
-  //   'use server';
-  //   await requireAdmin();
-  //   try {
-  //     await prisma.product.deleteMany({ where: { id: { in: ids } } });
-  //     revalidatePath('/admin/products');
-  //     return { success: true, message: `${ids.length} products deleted` };
-  //   } catch (error) {
-  //     return { success: false, error: 'Failed to delete products' };
-  //   }
-  // }
+  async function deleteMultipleProductsAction(ids: string[]) {
+    'use server';
+    await requireAdmin();
+    try {
+      await prisma.product.deleteMany({ where: { id: { in: ids } } });
+      revalidatePath('/admin/products');
+      return { success: true, message: `${ids.length} products deleted` };
+    } catch (error) {
+      return { success: false, error: 'Failed to delete products' };
+    }
+  }
 
-  // async function applyBulkDiscountAction(data: {
-  //   discountType: 'all' | 'category' | 'brand';
-  //   category?: string;
-  //   brand?: string;
-  //   discount: number;
-  // }) {
-  //   'use server';
-  //   await requireAdmin();
-  //   try {
-  //     const where: any = {};
-  //     if (data.discountType === 'category') where.category = data.category;
-  //     if (data.discountType === 'brand') where.brand = data.brand;
+  async function applyBulkDiscountAction(data: {
+    discountType: 'all' | 'category' | 'brand';
+    category?: string;
+    brand?: string;
+    discount: number;
+  }) {
+    'use server';
+    await requireAdmin();
+    try {
+      const where: any = {};
+      if (data.discountType === 'category') where.category = data.category;
+      if (data.discountType === 'brand') where.brand = data.brand;
 
-  //     const result = await prisma.product.updateMany({
-  //       where,
-  //       data: { discount: data.discount },
-  //     });
-  //     revalidatePath('/admin/products');
-  //     return {
-  //       success: true,
-  //       message: 'Discount applied',
-  //       count: result.count,
-  //     };
-  //   } catch (error) {
-  //     return { success: false, error: 'Failed to apply discount' };
-  //   }
-  // }
+      const result = await prisma.product.updateMany({
+        where,
+        data: { discount: data.discount },
+      });
+      revalidatePath('/admin/products');
+      return {
+        success: true,
+        message: 'Discount applied',
+        count: result.count,
+      };
+    } catch (error) {
+      return { success: false, error: 'Failed to apply discount' };
+    }
+  }
 
   return (
     <div className='space-y-8'>

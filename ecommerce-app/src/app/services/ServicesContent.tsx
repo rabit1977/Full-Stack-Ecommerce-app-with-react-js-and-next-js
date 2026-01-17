@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { staggerContainer, staggerItem } from '@/lib/constants/animations';
+
 import { motion } from 'framer-motion';
 import { Headset, LucideIcon, Package, ShieldCheck, Truck } from 'lucide-react';
 import Link from 'next/link';
@@ -50,13 +50,12 @@ const services: Service[] = [
 export const ServicesContent = () => {
   return (
     <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
+      initial='hidden'
+      animate='visible'
       className='container mx-auto px-4 py-12 sm:px-6 lg:px-8 max-w-6xl'
     >
       {/* Header Section */}
-      <motion.section variants={staggerItem} className='text-center mb-12'>
+      <motion.section className='text-center mb-12'>
         <h1 className='text-4xl font-bold text-foreground mb-4'>
           Our Services
         </h1>
@@ -68,14 +67,10 @@ export const ServicesContent = () => {
       </motion.section>
 
       {/* Services Grid */}
-      <motion.section
-        variants={staggerItem}
-        className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12'
-      >
+      <motion.section className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12'>
         {services.map((service, index) => (
           <motion.div
             key={index}
-            variants={staggerItem}
             whileHover={{ y: -5 }}
             transition={{ duration: 0.2 }}
           >
@@ -99,7 +94,7 @@ export const ServicesContent = () => {
       </motion.section>
 
       {/* Contact Section */}
-      <motion.section variants={staggerItem} className='text-center'>
+      <motion.section className='text-center'>
         <h2 className='text-2xl font-bold text-foreground mb-4'>
           Need Assistance?
         </h2>

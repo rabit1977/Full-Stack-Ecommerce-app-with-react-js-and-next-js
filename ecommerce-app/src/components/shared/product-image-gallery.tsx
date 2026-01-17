@@ -69,7 +69,7 @@ export function ProductImageGallery({
       {/* Main Image Container */}
       <div
         ref={imageContainerRef}
-        className="relative h-80 w-full overflow-hidden rounded-xl border dark:border-slate-800 sm:h-[400px] cursor-crosshair"
+        className="relative h-80 w-full overflow-hidden rounded-xl border dark:border-slate-800 sm:h-100 cursor-crosshair"
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

@@ -31,14 +31,14 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
 
   const isWished = useMemo(
     () => wishlistItems.includes(product.id),
-    [wishlistItems, product.id]
+    [wishlistItems, product.id],
   );
 
   const isOutOfStock = useMemo(() => currentStock === 0, [currentStock]);
 
   const isLowStock = useMemo(
     () => !isOutOfStock && currentStock < 10,
-    [isOutOfStock, currentStock]
+    [isOutOfStock, currentStock],
   );
 
   // Discount calculation
@@ -59,7 +59,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
       e.preventDefault();
       setQuickViewProductId(product.id);
     },
-    [product.id, setQuickViewProductId]
+    [product.id, setQuickViewProductId],
   );
 
   const handleToggleWishlist = useCallback(
@@ -69,11 +69,11 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
         toggleWishlist(product.id);
         toast.success(
           isWished ? 'Removed from wishlist' : 'Added to wishlist',
-          { duration: 2000 }
+          { duration: 2000 },
         );
       });
     },
-    [product.id, toggleWishlist, isWished]
+    [product.id, toggleWishlist, isWished],
   );
 
   const handleAddToCart = useCallback(
@@ -93,7 +93,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
         });
       });
     },
-    [product, isOutOfStock, discount, addToCart, currentStock]
+    [product, isOutOfStock, discount, addToCart, currentStock],
   );
 
   return (
@@ -131,7 +131,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
             variant={isWished ? 'default' : 'secondary'}
             className={cn(
               'h-7 w-7 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300',
-              isWished && 'bg-red-500 hover:bg-red-600'
+              isWished && 'bg-red-500 hover:bg-red-600',
             )}
             onClick={handleToggleWishlist}
             disabled={isPending}
@@ -140,7 +140,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
             <Heart
               className={cn(
                 'size-3.5 transition-all',
-                isWished && 'fill-white text-white'
+                isWished && 'fill-white text-white',
               )}
             />
           </Button>
@@ -193,7 +193,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
           <Button
             className={cn(
               'w-full transition-all duration-300',
-              isOutOfStock && 'opacity-50 cursor-not-allowed'
+              isOutOfStock && 'opacity-50 cursor-not-allowed',
             )}
             onClick={handleAddToCart}
             disabled={isOutOfStock || isPending}
