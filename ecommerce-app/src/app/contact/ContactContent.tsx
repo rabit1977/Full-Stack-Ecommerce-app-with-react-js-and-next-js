@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useUI } from '@/lib/hooks/useUI';
 
 import { motion } from 'framer-motion';
 import { Clock, Mail, MapPin, Phone, Send } from 'lucide-react';
 import Link from 'next/link';
 import React, { useCallback, useState, useTransition } from 'react';
+import { toast } from 'sonner';
 
 interface FormData {
   name: string;
@@ -34,7 +34,6 @@ const INITIAL_FORM_STATE: FormData = {
 };
 
 export const ContactContent = () => {
-  const { showToast } = useUI();
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_STATE);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isPending, startTransition] = useTransition();
@@ -105,13 +104,13 @@ export const ContactContent = () => {
         // Simulate API call
         setTimeout(() => {
           console.log('Form submitted:', formData);
-          showToast("Message sent! We'll be in touch soon.");
+          toast("Message sent! We'll be in touch soon.");
           setFormData(INITIAL_FORM_STATE);
           setErrors({});
         }, 1000);
       });
     },
-    [formData, validateForm, showToast]
+    [formData, validateForm]
   );
 
   return (

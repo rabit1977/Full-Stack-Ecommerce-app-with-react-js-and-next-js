@@ -1,7 +1,6 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-
 import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -12,7 +11,7 @@ interface ProductImageCarouselProps {
   product: ProductWithRelations;
 }
 
-export function ProductCartImage({ product }: ProductImageCarouselProps) {
+export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -24,9 +23,7 @@ export function ProductCartImage({ product }: ProductImageCarouselProps) {
     }
     // Remove duplicates and return, or provide a placeholder
     const uniqueImages = [...new Set(imageUrls)];
-    return uniqueImages.length > 0
-      ? uniqueImages
-      : ['/images/placeholder.jpg'];
+    return uniqueImages.length > 0 ? uniqueImages : ['/images/placeholder.jpg'];
   }, [product.thumbnail, product.images]);
 
   const currentImage = images[activeImageIndex];
@@ -52,7 +49,7 @@ export function ProductCartImage({ product }: ProductImageCarouselProps) {
   }, [product.stock]);
 
   return (
-    <div className='relative aspect-square h-52 w-full overflow-hidden bg-slate-100 dark:bg-slate-600'>
+    <div className='relative aspect-square h-80 w-full overflow-hidden bg-slate-100 dark:bg-slate-600'>
       {/* Main Image */}
       <Link
         href={`/products/${product.id}`}
@@ -62,17 +59,17 @@ export function ProductCartImage({ product }: ProductImageCarouselProps) {
           src={currentImage as string}
           alt={`${product.title} - Image ${activeImageIndex + 1}`}
           fill
+          priority={true}
           className={cn(
             'object-cover transition-all duration-500',
             isImageLoaded ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
-            'group-hover:scale-105'
+            'group-hover:scale-105',
           )}
-          sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
           onLoad={() => setIsImageLoaded(true)}
           priority={activeImageIndex === 0}
         />
       </Link>
-      Stock Status Badge
+      {/* Stock Status Badge */}
       {stockStatus && (
         <Badge
           variant={stockStatus.variant}
@@ -93,7 +90,7 @@ export function ProductCartImage({ product }: ProductImageCarouselProps) {
                 'h-1.5 rounded-full cursor-pointer transition-all duration-300',
                 activeImageIndex === index
                   ? 'w-6 bg-white shadow-md'
-                  : 'w-1.5 bg-white/60 hover:bg-white/80'
+                  : 'w-1.5 bg-white/60 hover:bg-white/80',
               )}
             />
           ))}

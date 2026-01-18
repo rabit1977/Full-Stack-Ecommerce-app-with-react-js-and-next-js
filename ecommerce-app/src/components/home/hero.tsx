@@ -1,13 +1,13 @@
 'use client';
 
-import { Product } from '@/lib/types';
+import { ProductWithRelations } from '@/lib/types';
 import { HeroHeader } from './hero-header';
 import { ProductCarousel } from './product-carousel';
 import { Testimonials } from './testimonials';
 
 export interface HeroProps {
   /** Products to display in carousel */
-  products: Product[];
+  products: ProductWithRelations[];
   /** Number of products to show in carousel */
   carouselLimit?: number;
   /** Auto-play interval in milliseconds */

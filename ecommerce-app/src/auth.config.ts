@@ -1,5 +1,5 @@
-import { UserRole } from '@prisma/client';
 import { prisma } from '@/lib/db';
+import { UserRole } from '@prisma/client';
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
@@ -13,6 +13,8 @@ export const authConfig = {
         token.id = user.id;
         token.role = user.role as UserRole;
         token.bio = user.bio;
+        token.createdAt = user.createdAt; // 🔥 Add createdAt to token
+
         // On sign-in, fetch the wishlist from the DB
         try {
           const wishlistItems = await prisma.wishlistItem.findMany({
@@ -23,7 +25,7 @@ export const authConfig = {
         } catch (error) {
           console.error(
             "Database error fetching wishlist. Have you run 'npx prisma migrate dev'?",
-            error
+            error,
           );
           // Default to empty wishlist if DB query fails
           token.wishlist = [];
@@ -32,15 +34,19 @@ export const authConfig = {
       return token;
     },
     async session({ session, token }) {
-      // Add user ID, role, and wishlist to session
+      // Add user ID, role, wishlist, and createdAt to session
       if (session.user && token.id) {
         session.user.id = token.id as string;
 
-        // Fetch the latest role and bio from the database on every session check
+        // Fetch the latest role, bio, and createdAt from the database on every session check
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { role: true, bio: true },
+            select: {
+              role: true,
+              bio: true,
+              createdAt: true, // 🔥 Fetch createdAt from database
+            },
           });
 
           let userRole: UserRole = 'USER';
@@ -50,13 +56,19 @@ export const authConfig = {
             userRole = token.role as UserRole;
           }
           session.user.role = userRole;
-          
-          session.user.bio = dbUser?.bio || (token.bio as string | null) || null;
+
+          session.user.bio =
+            dbUser?.bio || (token.bio as string | null) || null;
+
+          // 🔥 Add createdAt to session (prefer DB value, fallback to token)
+          session.user.createdAt =
+            dbUser?.createdAt || (token.createdAt as Date);
         } catch (error) {
           console.error('Error fetching user data from database:', error);
           // Fallback to cached data if DB query fails
           session.user.role = (token.role as UserRole) || 'USER';
           session.user.bio = (token.bio as string | null) || null;
+          session.user.createdAt = token.createdAt as Date; // 🔥 Fallback to token value
         }
 
         session.user.wishlist = (token.wishlist as string[]) || [];

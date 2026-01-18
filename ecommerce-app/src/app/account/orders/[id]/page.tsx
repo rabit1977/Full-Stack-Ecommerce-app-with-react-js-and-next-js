@@ -1,56 +1,87 @@
-'use client';
-
+import { getOrderByIdAction } from '@/actions/order-actions';
 import { Button } from '@/components/ui/button';
-import { useAppSelector } from '@/lib/store/hooks';
-import { CartItem } from '@/lib/types';
 import { formatOrderDate, formatPrice } from '@/lib/utils/formatters';
 import { CheckCircle, ChevronLeft, Package, Truck } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
-const OrderDetailPage = () => {
-  const params = useParams();
-  const router = useRouter();
-  const { orders } = useAppSelector((state) => state.orders);
-  const order = orders.find((o) => o.id === params.id);
+// 1. Update the interface to use Promise
+interface OrderDetailPageProps {
+  params: Promise<{ id: string }>;
+}
+
+const OrderDetailPage = async ({ params }: OrderDetailPageProps) => {
+  // 2. Await the params before accessing properties
+  const { id } = await params;
+
+  if (!id) {
+    throw new Error('Order ID is not defined in the URL.');
+  }
+
+  const orderResult = await getOrderByIdAction(id);
+  const order = orderResult.data;
 
   if (!order) {
-    return (
-      <div className='container mx-auto px-4 py-16 text-center'>
-        <Package className='mx-auto h-24 w-24 text-slate-300 dark:text-slate-700' />
-        <h2 className='mt-6 text-2xl font-bold dark:text-white'>
-          Order not found
-        </h2>
-        <Button onClick={() => router.push('/account')} className='mt-8'>
-          Back to Account
-        </Button>
-      </div>
-    );
+    notFound();
   }
 
   const statusSteps = [
-    { name: 'Order Placed', icon: Package, status: 'complete' },
-    { name: 'Processing', icon: Package, status: 'complete' },
+    {
+      name: 'Order Placed',
+      icon: Package,
+      status: ['Pending', 'Processing', 'Shipped', 'Delivered'].includes(
+        order.status,
+      )
+        ? 'complete'
+        : 'upcoming',
+    },
+    {
+      name: 'Processing',
+      icon: Package,
+      status: ['Processing', 'Shipped', 'Delivered'].includes(order.status)
+        ? 'complete'
+        : order.status === 'Pending'
+          ? 'current'
+          : 'upcoming',
+    },
     {
       name: 'Shipped',
       icon: Truck,
-      status: order.shippingMethod === 'express' ? 'complete' : 'current',
+      status: ['Shipped', 'Delivered'].includes(order.status)
+        ? 'complete'
+        : order.status === 'Processing'
+          ? 'current'
+          : 'upcoming',
     },
-    { name: 'Delivered', icon: CheckCircle, status: 'upcoming' },
+    {
+      name: 'Delivered',
+      icon: CheckCircle,
+      status:
+        order.status === 'Delivered'
+          ? 'complete'
+          : order.status === 'Shipped'
+            ? 'current'
+            : 'upcoming',
+    },
   ];
+
+  // Safe JSON parsing (handle case where address might be null/undefined strictly)
+  const shippingAddress = order.shippingAddress
+    ? typeof order.shippingAddress === 'string'
+      ? JSON.parse(order.shippingAddress)
+      : order.shippingAddress
+    : { name: 'N/A', street: '', city: '', state: '', zip: '' };
 
   return (
     <div className='bg-slate-50 min-h-[70vh] dark:bg-slate-900'>
       <div className='container mx-auto px-4 py-12'>
-        <Button
-          variant='ghost'
-          onClick={() => router.push('/account')}
-          className='mb-6'
-        >
-          <ChevronLeft className='h-4 w-4 mr-2' />
-          Back to Orders
-        </Button>
+        <Link href='/account/orders'>
+          <Button variant='ghost' className='mb-6'>
+            <ChevronLeft className='h-4 w-4 mr-2' />
+            Back to Orders
+          </Button>
+        </Link>
 
         <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-8'>
           <div>
@@ -58,12 +89,13 @@ const OrderDetailPage = () => {
               Order Details
             </h1>
             <p className='text-slate-600 dark:text-slate-300 mt-2'>
-              Order #{order.id} • Placed on {formatOrderDate(order.date)}
+              Order #{order.id.slice(0, 12)}... • Placed on{' '}
+              {formatOrderDate(order.createdAt.toISOString())}
             </p>
           </div>
           <div className='mt-4 md:mt-0'>
             <div className='bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium dark:bg-green-900 dark:text-green-100'>
-              {order.shippingMethod === 'express' ? 'Shipped' : 'Processing'}
+              {order.status}
             </div>
           </div>
         </div>
@@ -122,12 +154,12 @@ const OrderDetailPage = () => {
                 Items in this Order
               </h2>
               <div className='divide-y dark:divide-slate-700'>
-                {order.items.map((item: CartItem) => (
-                  <div key={item.cartItemId} className='flex py-4'>
+                {order.items.map((item) => (
+                  <div key={item.id} className='flex py-4'>
                     <div className='h-20 w-20 flex shrink-0 overflow-hidden rounded-md border dark:border-slate-700'>
                       <Image
-                        src={item.image}
-                        alt={item.title || 'Product Image'}
+                        src={item.product?.thumbnail || '/placeholder.jpg'}
+                        alt={item.product?.title || 'Product Image'}
                         width={80}
                         height={80}
                         className='h-full w-full object-cover'
@@ -136,28 +168,17 @@ const OrderDetailPage = () => {
                     <div className='ml-4 flex-1'>
                       <h3 className='font-medium text-slate-900 dark:text-white'>
                         <Link
-                          href={`/products/${item.id}`}
+                          href={`/products/${item.productId}`}
                           className='hover:underline'
                         >
-                          {item.title}
+                          {item.product?.title || item.title}
                         </Link>
                       </h3>
                       <p className='text-sm text-slate-500 dark:text-slate-400'>
                         Quantity: {item.quantity}
                       </p>
-                      {item.options && (
-                        <div className='mt-1 flex flex-wrap gap-x-3 text-sm text-slate-500 dark:text-slate-400'>
-                          {Object.entries(item.options).map(
-                            ([name, value]: [string, string]) => (
-                              <span key={name}>
-                                {name}: {value}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
                       <p className='text-sm font-medium text-slate-900 dark:text-white mt-1'>
-                        {formatPrice(item.price * item.quantity)}
+                        {formatPrice(item.priceAtPurchase * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -179,10 +200,10 @@ const OrderDetailPage = () => {
                     {formatPrice(order.subtotal ?? 0)}
                   </p>
                 </div>
-                {(order.discountAmount ?? 0) > 0 && (
+                {(order.discount ?? 0) > 0 && (
                   <div className='flex justify-between text-sm text-green-600 dark:text-green-400'>
                     <p>Discount</p>
-                    <p>-{formatPrice(order.discountAmount ?? 0)}</p>
+                    <p>-{formatPrice(order.discount ?? 0)}</p>
                   </div>
                 )}
                 <div className='flex justify-between text-sm'>
@@ -194,7 +215,7 @@ const OrderDetailPage = () => {
                 <div className='flex justify-between text-sm'>
                   <p className='text-slate-600 dark:text-slate-300'>Taxes</p>
                   <p className='font-medium dark:text-white'>
-                    {formatPrice(order.taxes ?? 0)}
+                    {formatPrice(order.tax ?? 0)}
                   </p>
                 </div>
                 <div className='border-t border-slate-200 pt-2 flex justify-between text-base font-medium dark:border-slate-700 dark:text-white'>
@@ -210,14 +231,14 @@ const OrderDetailPage = () => {
               </h3>
               <div className='space-y-2 text-sm'>
                 <p className='font-medium dark:text-white'>
-                  {order.shippingAddress.name}
+                  {shippingAddress.name}
                 </p>
                 <p className='text-slate-600 dark:text-slate-300'>
-                  {order.shippingAddress.street}
+                  {shippingAddress.street}
                 </p>
                 <p className='text-slate-600 dark:text-slate-300'>
-                  {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
-                  {order.shippingAddress.zip}
+                  {shippingAddress.city}, {shippingAddress.state}{' '}
+                  {shippingAddress.zip}
                 </p>
                 <p className='mt-4'>
                   <span className='font-medium dark:text-white'>

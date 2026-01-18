@@ -1,5 +1,7 @@
+import { getCartAction } from '@/actions/cart-actions';
 import { getProductByIdAction } from '@/actions/product-actions';
-import { ProductCartImage } from '@/components/product/product-image-carousel';
+import { getWishlistAction } from '@/actions/wishlist-actions';
+import { ProductImageCarousel } from '@/components/product/product-image-carousel';
 import { RelatedProducts } from '@/components/product/related-products';
 import { ReviewsSection } from '@/components/product/reviews-section';
 import { notFound } from 'next/navigation';
@@ -11,19 +13,29 @@ export async function ProductDetailContent({
   productId: string;
 }) {
   const product = await getProductByIdAction(productId);
+  const { wishlist } = await getWishlistAction();
+  const cart = await getCartAction();
 
   if (!product) {
     notFound();
   }
 
+  const initialIsWished = wishlist.includes(product.id);
+  const initialQuantityInCart =
+    cart.items.find((item) => item.productId === product.id)?.quantity || 0;
+
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         <div>
-          <ProductCartImage product={product} />
+          <ProductImageCarousel product={product} />
         </div>
         <div>
-          <ProductPurchaseManager product={product} />
+          <ProductPurchaseManager
+            product={product}
+            initialIsWished={initialIsWished}
+            initialQuantityInCart={initialQuantityInCart}
+          />
         </div>
       </div>
       <div className='mt-16'>

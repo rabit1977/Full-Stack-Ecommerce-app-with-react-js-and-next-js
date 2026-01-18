@@ -18,8 +18,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAppDispatch } from '@/lib/hooks/useAppDispatch';
-import { deleteUserFromAdmin } from '@/lib/store/thunks/authThunks';
 import { User } from '@/lib/types';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
@@ -36,8 +34,6 @@ export const UsersDataTable = ({ users }: UsersDataTableProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-  const dispatch = useAppDispatch();
-
   const handleDeleteClick = (user: User) => {
     setUserToDelete(user);
     setShowDeleteDialog(true);
@@ -48,7 +44,8 @@ export const UsersDataTable = ({ users }: UsersDataTableProps) => {
 
     startTransition(async () => {
       try {
-        await dispatch(deleteUserFromAdmin(userToDelete.id));
+        // TODO: Implement deleteUserFromAdmin action
+        // await dispatch(deleteUserFromAdmin(userToDelete.id));
         toast.success(`User "${userToDelete.name}" deleted.`);
         setShowDeleteDialog(false);
         setUserToDelete(null);

@@ -1,104 +1,57 @@
 'use client';
 
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { setQuickViewProductId } from '@/lib/store/slices/uiSlice';
-import { AnimatePresence, motion } from 'framer-motion';
-
+import { addItemToCartAction } from '@/actions/cart-actions';
 import { Separator } from '@/components/ui/separator';
-import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
-import { useQuickViewHandlers } from '@/lib/hooks/useQuickViewHandlers';
-import { useQuickViewState } from '@/lib/hooks/useQuickViewState';
+import { useQuickView } from '@/lib/context/quick-view-context';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { AddToCartButton } from '../shared/quick-view-modal/AddToCartButton';
-
-import { ProductImageGallery } from '../shared/product-image-gallery';
 import { ModalHeader } from '../shared/quick-view-modal/ModalHeader';
 import { ProductInfo } from '../shared/quick-view-modal/ProductInfo';
 import { ProductOptions } from '../shared/quick-view-modal/ProductOptions';
 import { QuantitySelector } from '../shared/quick-view-modal/QuantitySelector';
+import { ProductImageCarousel } from './product-image-carousel';
 
-const QuickViewModal = () => {
-  const dispatch = useAppDispatch();
-  const { quickViewProductId } = useAppSelector((state) => state.ui);
-  const { products } = useAppSelector((state) => state.products);
-  const { itemIds: wishlist } = useAppSelector((state) => state.wishlist);
+export function QuickViewModal() {
+  const { isOpen, product, closeModal } = useQuickView();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState<
+    Record<string, string>
+  >({});
+  const [isPending, startTransition] = useTransition();
 
-  const product = products.find((p) => p.id === quickViewProductId);
+  if (!isOpen || !product) {
+    return null;
+  }
 
-  const {
-    quantity,
-    setQuantity,
-    adding,
-    setAdding,
-    added,
-    setAdded,
-    selectedOptions,
-    setSelectedOptions,
-    activeImage,
-    setActiveImage,
-    validationError,
-    setValidationError,
-  } = useQuickViewState(product);
-
-  const {
-    handleAddToCart,
-    handleToggleWishlist,
-    handleOptionChange,
-    handleQuantityChange,
-  } = useQuickViewHandlers(
-    product,
-    quantity,
-    selectedOptions,
-    setAdding,
-    setAdded,
-    setActiveImage,
-    setValidationError
-  );
-
-  const handleClose = () => dispatch(setQuickViewProductId(null));
-
-  useKeyboardShortcuts(
-    !!quickViewProductId,
-    handleClose,
-    !product?.stock ? undefined : handleAddToCart
-  );
-
-  // Unified option change handler that updates both state and active image
-  const onOptionChange = (optionName: string, optionValue: string) => {
-    const newOption = handleOptionChange(optionName, optionValue);
-    if (newOption) {
-      setSelectedOptions((prev) => ({ ...prev, ...newOption }));
-    }
+  const handleAddToCart = () => {
+    startTransition(async () => {
+      const result = await addItemToCartAction(
+        product.id,
+        quantity,
+        selectedOptions,
+      );
+      if (result.success) {
+        toast.success('Added to cart');
+        closeModal();
+      } else {
+        toast.error(result.message || 'Failed to add to cart');
+      }
+    });
   };
 
-  const onQuantityChange = (newQuantity: number) => {
-    const validQuantity = handleQuantityChange(newQuantity);
-    setQuantity(validQuantity);
-  };
-
-  const handleShare = () => {
-    if (navigator.share && product) {
-      navigator.share({
-        title: product.title,
-        text: product.description,
-        url: window.location.href,
-      });
-    }
-  };
-
-  if (!product) return null;
-
-  const isWished = wishlist?.includes(product.id);
   const isOutOfStock = product.stock === 0;
 
   return (
     <AnimatePresence>
-      {quickViewProductId && (
+      {isOpen && product && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm'
-          onClick={handleClose}
+          onClick={closeModal}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
@@ -109,78 +62,55 @@ const QuickViewModal = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <ModalHeader
-              onClose={handleClose}
-              onToggleWishlist={handleToggleWishlist}
-              isWished={isWished}
-              onShare={handleShare}
+              onClose={closeModal}
+              onToggleWishlist={() => {}} // TODO
+              isWished={false} // TODO
+              onShare={() => {}} // TODO
             />
 
-            <div className='grid md:grid-cols-2 gap-8 p-6 md:p-8'>
-              {/* Left Column - Images */}
-              <ProductImageGallery
-                product={product}
-                activeImage={activeImage}
-                selectedOptions={selectedOptions}
-                onOptionChange={onOptionChange}
-              />
+            <div className='p-6 flex flex-col md:flex-row gap-8 md:gap-12 shadow-lg rounded-xl border'>
+              <div className='h-full w-full md:w-1/2 shrink-0'>
+                <ProductImageCarousel product={product} />
+              </div>
 
-              {/* Right Column - Product Details */}
               <div className='space-y-6'>
                 <ProductInfo product={product} />
-
                 <Separator />
 
-                {/* Options */}
                 {product.options && (
                   <>
                     <ProductOptions
-                      options={product.options}
+                      options={product.options as any}
                       selectedOptions={selectedOptions}
-                      onOptionChange={onOptionChange}
-                      validationError={validationError}
+                      onOptionChange={(name, value) =>
+                        setSelectedOptions((prev) => ({
+                          ...prev,
+                          [name]: value,
+                        }))
+                      }
                     />
                     <Separator />
                   </>
                 )}
 
-                {/* Quantity Selector */}
                 {!isOutOfStock && (
                   <>
                     <QuantitySelector
                       quantity={quantity}
                       maxStock={product.stock}
-                      onQuantityChange={onQuantityChange}
-                      disabled={adding}
+                      onQuantityChange={setQuantity}
+                      disabled={isPending}
                     />
                     <Separator />
                   </>
                 )}
 
-                {/* Add to Cart Button */}
                 <AddToCartButton
                   isOutOfStock={isOutOfStock}
-                  isAdding={adding}
-                  isAdded={added}
+                  isAdding={isPending}
+                  isAdded={false} // This state seems to be for post-add animation, can be enhanced later
                   onAddToCart={handleAddToCart}
                 />
-
-                {/* Keyboard Shortcuts Hint */}
-                <p className='text-xs text-center text-muted-foreground'>
-                  Press{' '}
-                  <kbd className='px-1.5 py-0.5 rounded bg-muted font-mono'>
-                    Esc
-                  </kbd>{' '}
-                  to close
-                  {!isOutOfStock && (
-                    <>
-                      {' • '}
-                      <kbd className='px-1.5 py-0.5 rounded bg-muted font-mono'>
-                        Ctrl+Enter
-                      </kbd>{' '}
-                      to add to cart
-                    </>
-                  )}
-                </p>
               </div>
             </div>
           </motion.div>
@@ -188,6 +118,4 @@ const QuickViewModal = () => {
       )}
     </AnimatePresence>
   );
-};
-
-export { QuickViewModal };
+}

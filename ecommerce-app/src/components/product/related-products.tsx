@@ -1,40 +1,57 @@
-'use client';
+// components/product/related-products.tsx (Server Component Version)
 
-import { ProductCard } from '@/components/product/product-card';
-import { useProducts } from '@/lib/hooks/useProducts';
-import { Product } from '@prisma/client';
+import { getProductsAction } from '@/actions/product-actions';
+import { ProductWithRelations } from '@/lib/types';
+import { ProductCard } from './product-card';
 
 interface RelatedProductsProps {
-  currentProduct: Product;
+  currentProduct: ProductWithRelations;
+  limit?: number;
 }
-import { useMemo } from 'react';
 
-const RelatedProducts = ({ currentProduct }: RelatedProductsProps) => {
-  const { products } = useProducts();
+/**
+ * RelatedProducts Server Component
+ *
+ * Displays products related to the current product
+ * Fetches data on the server for better performance
+ */
+export async function RelatedProducts({
+  currentProduct,
+  limit = 4,
+}: RelatedProductsProps) {
+  // Fetch related products on the server
+  const { products } = await getProductsAction({
+    categories: currentProduct.category,
+    limit: limit + 1, // Get one extra in case current product is included
+    sort: 'rating',
+  });
 
-  const related = useMemo(() => {
-    return products
-      .filter(
-        (p) =>
-          p.category === currentProduct.category && p.id !== currentProduct.id
-      )
-      .slice(0, 4);
-  }, [products, currentProduct]);
+  // Filter out current product and limit results
+  const relatedProducts = products
+    .filter((p) => p.id !== currentProduct.id)
+    .slice(0, limit);
 
-  if (related.length === 0) return null;
+  // Don't render if no related products
+  if (relatedProducts.length === 0) {
+    return null;
+  }
 
   return (
-    <div className='mt-12 py-8 border-t dark:border-slate-800'>
-      <h2 className='text-2xl font-bold tracking-tight text-slate-900 dark:text-white'>
-        You Might Also Like
-      </h2>
-      <div className='mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-        {related.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
-    </div>
-  );
-};
+    <section className='py-12' aria-labelledby='related-products-heading'>
+      <div className='container mx-auto px-4'>
+        <h2
+          id='related-products-heading'
+          className='text-2xl sm:text-3xl font-bold mb-8'
+        >
+          Related Products
+        </h2>
 
-export { RelatedProducts };
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
+          {relatedProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

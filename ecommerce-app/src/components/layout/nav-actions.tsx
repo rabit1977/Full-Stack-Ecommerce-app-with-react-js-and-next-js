@@ -7,13 +7,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { removeFromCart } from '@/lib/store/slices/cartSlice';
-import { setTheme } from '@/lib/store/slices/uiSlice';
-import { logout } from '@/lib/store/thunks/authThunks';
 import { cn } from '@/lib/utils';
 import {
   Heart,
@@ -21,198 +16,43 @@ import {
   LogOut,
   Moon,
   Package,
-  ShoppingBag,
   ShoppingCart,
   Sun,
   User,
   UserCircle,
-  X,
 } from 'lucide-react';
-import Image from 'next/image';
+import { signOut, useSession } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-/**
- * Cart Item Component for Hover Popup
- */
-const CartPopupItem = ({ item }: { item: any }) => {
-  const dispatch = useAppDispatch();
+interface NavActionsProps {
+  initialWishlistCount: number;
+  initialCartItemCount: number;
+}
 
-  const handleRemove = (e: React.MouseEvent) => {
-    e.preventDefault();
-    dispatch(removeFromCart(item.cartItemId));
-  };
-
-  return (
-    <div className='group flex gap-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg px-2 transition-colors'>
-      {/* Product Image */}
-      <div className='relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-slate-100 dark:bg-slate-800'>
-        <Image
-          src={item.image || '/placeholder.png'}
-          alt={item.title}
-          fill
-          className='object-cover'
-        />
-      </div>
-
-      {/* Product Info */}
-      <div className='flex-1 min-w-0'>
-        <h4 className='text-sm font-medium line-clamp-1 dark:text-white'>
-          {item.title}
-        </h4>
-        <p className='text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5'>
-          {item.description || item.category}
-        </p>
-        <div className='flex items-center justify-between mt-1'>
-          <span className='text-xs text-slate-600 dark:text-slate-400'>
-            Qty: {item.quantity}
-          </span>
-          <span className='text-sm font-semibold dark:text-white'>
-            ${(item.price * item.quantity).toFixed(2)}
-          </span>
-        </div>
-      </div>
-
-      {/* Remove Button */}
-      <Button
-        variant='ghost'
-        size='icon'
-        className='h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity'
-        onClick={handleRemove}
-      >
-        <X className='h-4 w-4 text-slate-500' />
-      </Button>
-    </div>
-  );
-};
-
-/**
- * Cart Hover Popup Component
- */
-const CartHoverPopup = ({ cartItemCount }: { cartItemCount: number }) => {
-  const router = useRouter();
-  const cart = useAppSelector((state) => state.cart.cart);
-
-  const subtotal = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  }, [cart]);
-
-  if (cart.length === 0) {
-    return (
-      <HoverCardContent align='end' className='w-80' sideOffset={8}>
-        <div className='flex flex-col items-center justify-center py-8 text-center'>
-          <div className='h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4'>
-            <ShoppingCart className='h-8 w-8 text-slate-400 dark:text-slate-600' />
-          </div>
-          <h3 className='font-semibold text-lg mb-1 dark:text-white'>
-            Your cart is empty
-          </h3>
-          <p className='text-sm text-slate-600 dark:text-slate-400 mb-4'>
-            Add items to get started
-          </p>
-          <Button
-            size='sm'
-            onClick={() => router.push('/products')}
-            className='w-full'
-          >
-            Browse Products
-          </Button>
-        </div>
-      </HoverCardContent>
-    );
-  }
-
-  return (
-    <HoverCardContent align='end' className='w-96 p-0' sideOffset={8}>
-      {/* Header */}
-      <div className='flex items-center justify-between p-4 border-b'>
-        <div>
-          <h3 className='font-semibold text-base dark:text-white'>
-            Shopping Cart
-          </h3>
-          <p className='text-xs text-slate-500 dark:text-slate-400'>
-            {cartItemCount} {cartItemCount === 1 ? 'item' : 'items'}
-          </p>
-        </div>
-        <Badge variant='secondary' className='text-xs'>
-          ${subtotal.toFixed(2)}
-        </Badge>
-      </div>
-
-      {/* Cart Items - Scrollable */}
-      <ScrollArea className='max-h-75'>
-        <div className='px-4 divide-y dark:divide-slate-800'>
-          {cart.map((item) => (
-            <CartPopupItem key={item.cartItemId} item={item} />
-          ))}
-        </div>
-      </ScrollArea>
-
-      {/* Footer with Actions */}
-      <div className='p-4 border-t bg-slate-50 dark:bg-slate-900/50'>
-        <div className='flex items-center justify-between mb-3'>
-          <span className='text-sm font-medium dark:text-white'>Subtotal</span>
-          <span className='text-lg font-bold dark:text-white'>
-            ${subtotal.toFixed(2)}
-          </span>
-        </div>
-        <div className='space-y-2'>
-          <Button
-            className='w-full'
-            size='sm'
-            onClick={() => router.push('/checkout')}
-          >
-            <ShoppingBag className='h-4 w-4 mr-2' />
-            Proceed to Checkout
-          </Button>
-          <Button
-            variant='outline'
-            className='w-full'
-            size='sm'
-            onClick={() => router.push('/cart')}
-          >
-            View Cart
-          </Button>
-        </div>
-        <p className='text-xs text-center text-slate-500 dark:text-slate-400 mt-3'>
-          Shipping & taxes calculated at checkout
-        </p>
-      </div>
-    </HoverCardContent>
-  );
-};
-
-/**
- * Navigation actions component with theme toggle, cart, wishlist, and user menu
- *
- * Features:
- * - Theme toggle with smooth transitions
- * - Cart hover popup with items preview
- * - Wishlist with badge counters
- * - User dropdown menu with role-based links
- * - Optimized re-renders with memoization
- * - Accessible markup
- */
-export const NavActions = () => {
+export const NavActions = ({
+  initialWishlistCount,
+  initialCartItemCount,
+}: NavActionsProps) => {
   const [hasMounted, setHasMounted] = useState(false);
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user.currentUser);
-  const cart = useAppSelector((state) => state.cart.cart);
-  const wishlist = useAppSelector((state) => state.wishlist.itemIds);
-  const theme = useAppSelector((state) => state.ui.theme);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const [wishlistCount, setWishlistCount] = useState(initialWishlistCount);
+  const [cartItemCount, setCartItemCount] = useState(initialCartItemCount);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
-  // Memoized cart item count
-  const cartItemCount = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.quantity, 0);
-  }, [cart]);
+  useEffect(() => {
+    setWishlistCount(initialWishlistCount);
+  }, [initialWishlistCount]);
 
-  // Memoized wishlist count
-  const wishlistCount = useMemo(() => wishlist?.length || 0, [wishlist]);
+  useEffect(() => {
+    setCartItemCount(initialCartItemCount);
+  }, [initialCartItemCount]);
 
   // Get user's first name
   const firstName = useMemo(() => {
@@ -221,13 +61,13 @@ export const NavActions = () => {
 
   // Handle theme toggle
   const handleThemeToggle = useCallback(() => {
-    dispatch(setTheme(theme === 'light' ? 'dark' : 'light'));
-  }, [dispatch, theme]);
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  }, [setTheme, theme]);
 
   // Handle logout
   const handleLogout = useCallback(() => {
-    dispatch(logout());
-  }, [dispatch]);
+    signOut();
+  }, []);
 
   // Render a skeleton loader until the component has mounted on the client
   if (!hasMounted) {
@@ -262,7 +102,7 @@ export const NavActions = () => {
         aria-label={`View wishlist (${wishlistCount} items)`}
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'relative  hover:bg-slate-100 hover:text-slate-950 dark:hover:text-slate-100 dark:text-slate-100 text-slate-900'
+          'relative  hover:bg-slate-100 hover:text-slate-950 dark:hover:text-slate-100 dark:text-slate-100 text-slate-900',
         )}
       >
         <Heart className='h-5 w-5' />
@@ -284,7 +124,7 @@ export const NavActions = () => {
             aria-label={`View shopping cart (${cartItemCount} items)`}
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'icon' }),
-              'relative  hover:bg-slate-100 hover:text-slate-950 dark:hover:text-slate-100 dark:text-slate-100 text-slate-900'
+              'relative  hover:bg-slate-100 hover:text-slate-950 dark:hover:text-slate-100 dark:text-slate-100 text-slate-900',
             )}
           >
             <ShoppingCart className='h-5 w-5' />
@@ -298,7 +138,7 @@ export const NavActions = () => {
             )}
           </Link>
         </HoverCardTrigger>
-        <CartHoverPopup cartItemCount={cartItemCount} />
+        {/* <CartHoverPopup cartItemCount={cartItemCount} /> */}
       </HoverCard>
 
       {/* User Menu */}
@@ -317,7 +157,7 @@ export const NavActions = () => {
             <div className='p-4 border-b'>
               <p className='text-sm font-medium dark:text-white'>{user.name}</p>
               <p className='text-xs text-slate-500 dark:text-slate-400'>
-                {user.email || `${user.role || 'customer'}`}
+                {user.email || 'customer'}
               </p>
             </div>
 
@@ -338,18 +178,18 @@ export const NavActions = () => {
                 <span className='dark:text-white'>My Orders</span>
               </Link>
 
-              {user.role === 'ADMIN' && (
-                <>
-                  <Separator className='my-2' />
-                  <Link
-                    href='/admin/dashboard'
-                    className='flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer'
-                  >
-                    <LayoutDashboard className='h-4 w-4 text-slate-600 dark:text-slate-400' />
-                    <span className='dark:text-white'>Admin Dashboard</span>
-                  </Link>
-                </>
-              )}
+              {/* {user.role === 'ADMIN' && ( */}
+              <>
+                <Separator className='my-2' />
+                <Link
+                  href='/admin/dashboard'
+                  className='flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer'
+                >
+                  <LayoutDashboard className='h-4 w-4 text-slate-600 dark:text-slate-400' />
+                  <span className='dark:text-white'>Admin Dashboard</span>
+                </Link>
+              </>
+              {/* )} */}
             </div>
 
             {/* Logout */}

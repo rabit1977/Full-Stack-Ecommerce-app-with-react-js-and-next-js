@@ -1,210 +1,209 @@
 'use client';
 
-import { useCart } from '@/lib/hooks/useCart';
-import { useUI } from '@/lib/hooks/useUI';
+import { addItemToCartAction } from '@/actions/cart-actions';
+import { toggleWishlistAction } from '@/actions/wishlist-actions';
+import { useQuickView } from '@/lib/context/quick-view-context';
 import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import { motion } from 'framer-motion';
-import { Badge, Eye, Heart, ShoppingCart } from 'lucide-react';
+import { Eye, Heart, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useTransition } from 'react';
+import { memo, useCallback, useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '../ui/button';
-import { ProductCartImage } from './product-image-carousel';
+import { ProductImageCarousel } from './product-image-carousel';
 
 interface ProductCardProps {
   product: ProductWithRelations;
+  initialIsWished?: boolean;
 }
 
-export const ProductCard = memo(({ product }: ProductCardProps) => {
-  const { setQuickViewProductId } = useUI();
-  const { wishlistItems, toggleWishlist, addToCart, cart } = useCart();
-  const [isPending, startTransition] = useTransition();
+export const ProductCard = memo(
+  ({ product, initialIsWished = false }: ProductCardProps) => {
+    const [isPending, startTransition] = useTransition();
+    const [isWished, setIsWished] = useState(initialIsWished);
+    const { openModal } = useQuickView();
 
-  // Calculate current stock based on cart items
-  const currentStock = useMemo(() => {
-    const cartItem = cart.find((item) => item.id === product.id);
-    const quantityInCart = cartItem?.quantity || 0;
-    return Math.max(0, product.stock - quantityInCart);
-  }, [product.id, product.stock, cart]);
+    const currentStock = useMemo(() => product.stock, [product.stock]);
+    const isOutOfStock = useMemo(() => currentStock === 0, [currentStock]);
+    const isLowStock = useMemo(
+      () => !isOutOfStock && currentStock < 10,
+      [isOutOfStock, currentStock],
+    );
 
-  const isWished = useMemo(
-    () => wishlistItems.includes(product.id),
-    [wishlistItems, product.id],
-  );
+    const discount = useMemo(() => {
+      if (product.discount && product.discount > 0) {
+        return {
+          percentage: product.discount,
+          originalPrice: product.price,
+          discountedPrice: product.price * (1 - product.discount / 100),
+        };
+      }
+      return null;
+    }, [product.price, product.discount]);
 
-  const isOutOfStock = useMemo(() => currentStock === 0, [currentStock]);
+    const handleQuickView = useCallback(
+      (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openModal(product);
+      },
+      [openModal, product],
+    );
 
-  const isLowStock = useMemo(
-    () => !isOutOfStock && currentStock < 10,
-    [isOutOfStock, currentStock],
-  );
-
-  // Discount calculation
-  const discount = useMemo(() => {
-    if (product.discount && product.discount > 0) {
-      const discountedPrice = product.price * (1 - product.discount / 100);
-      return {
-        percentage: product.discount,
-        originalPrice: product.price,
-        discountedPrice,
-      };
-    }
-    return null;
-  }, [product.price, product.discount]);
-
-  const handleQuickView = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      setQuickViewProductId(product.id);
-    },
-    [product.id, setQuickViewProductId],
-  );
-
-  const handleToggleWishlist = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      startTransition(() => {
-        toggleWishlist(product.id);
-        toast.success(
-          isWished ? 'Removed from wishlist' : 'Added to wishlist',
-          { duration: 2000 },
-        );
-      });
-    },
-    [product.id, toggleWishlist, isWished],
-  );
-
-  const handleAddToCart = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (isOutOfStock) return;
-
-      startTransition(() => {
-        addToCart({
-          id: product.id,
-          title: product.title,
-          price: discount?.discountedPrice || product.price,
-          quantity: 1,
+    const handleToggleWishlist = useCallback(
+      async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        startTransition(async () => {
+          const result = await toggleWishlistAction(product.id);
+          if (result.success) {
+            const newWishState = !isWished;
+            setIsWished(newWishState);
+            toast.success(
+              newWishState ? 'Added to wishlist' : 'Removed from wishlist',
+            );
+          } else {
+            toast.error(
+              result.error || 'Please log in to manage your wishlist.',
+            );
+          }
         });
-        toast.success(`Added to cart • ${currentStock - 1} left in stock`, {
-          duration: 2000,
+      },
+      [product.id, isWished],
+    );
+
+    const handleAddToCart = useCallback(
+      (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isOutOfStock) return;
+        startTransition(async () => {
+          const result = await addItemToCartAction(product.id, 1);
+          if (result.success) {
+            toast.success('Added to cart!');
+          } else {
+            toast.error(result.message || 'Failed to add to cart.');
+          }
         });
-      });
-    },
-    [product, isOutOfStock, discount, addToCart, currentStock],
-  );
+      },
+      [product.id, isOutOfStock],
+    );
 
-  return (
-    <motion.div
-      layoutId={`product-card-${product.id}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className='w-full'
-    >
-      <div className='group relative h-full overflow-hidden rounded-xl border bg-white transition-all duration-300 hover:shadow-xl dark:hover:shadow-slate-800 dark:border-slate-700 dark:bg-slate-900'>
-        {/* Image Carousel */}
-        <ProductCartImage product={product} />
+    const effectivePrice = discount ? discount.discountedPrice : product.price;
 
-        {/* Discount Badge */}
-        {discount && (
-          <Badge className='absolute top-3 left-3 z-20 bg-red-500 text-white shadow-lg'>
-            -{discount.percentage}%
-          </Badge>
-        )}
+    return (
+      <motion.div
+        layoutId={`product-card-${product.id}`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className='group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg dark:border-slate-800'
+      >
+        {/* --- Image Section --- */}
+        <div className='relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-900'>
+          <ProductImageCarousel product={product} />
 
-        {/* Quick Actions */}
-        <div className='absolute right-3 top-3 z-20 flex gap-1'>
-          <Button
-            size='icon'
-            variant='secondary'
-            className='h-7 w-7 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300'
-            onClick={handleQuickView}
-            aria-label='Quick view'
-          >
-            <Eye className='size-3.5' />
-          </Button>
-          <Button
-            size='icon'
-            variant={isWished ? 'default' : 'secondary'}
-            className={cn(
-              'h-7 w-7 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300',
-              isWished && 'bg-red-500 hover:bg-red-600',
+          {/* Badges (Top Left) */}
+          <div className='absolute left-3 top-3 z-10 flex flex-col gap-1.5'>
+            {discount && (
+              <span className='inline-flex items-center rounded-md bg-red-600 px-2 py-1 text-xs font-bold text-white shadow-sm'>
+                -{Math.round(discount.percentage)}%
+              </span>
             )}
-            onClick={handleToggleWishlist}
-            disabled={isPending}
-            aria-label={isWished ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            <Heart
-              className={cn(
-                'size-3.5 transition-all',
-                isWished && 'fill-white text-white',
-              )}
-            />
-          </Button>
-        </div>
-
-        {/* Product Info */}
-        <div className='p-4 space-y-3'>
-          {/* Brand & Category */}
-          <div className='flex items-center justify-between'>
-            <span className='text-xs font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400'>
-              {product.brand}
-            </span>
-            <Badge className='text-xs'>
-              {product.category}
-            </Badge>
+            {isLowStock && (
+              <span className='inline-flex items-center rounded-md bg-amber-500 px-2 py-1 text-xs font-bold text-white shadow-sm'>
+                Low Stock
+              </span>
+            )}
           </div>
 
-          {/* Title */}
-          <Link href={`/products/${product.id}`}>
-            <h3 className='line-clamp-2 text-base font-semibold leading-tight text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors'>
+          {/* Floating Actions (Top Right) - Slide in on Hover */}
+          <div className='absolute right-3 top-3 z-10 flex flex-col gap-2 translate-x-12 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100'>
+            <Button
+              size='icon'
+              variant='secondary'
+              className='h-9 w-9 rounded-full bg-white/90 shadow-sm hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800'
+              onClick={handleQuickView}
+              title='Quick View'
+            >
+              <Eye className='h-4 w-4 text-slate-700 dark:text-slate-200' />
+            </Button>
+            <Button
+              size='icon'
+              variant='secondary'
+              className={cn(
+                'h-9 w-9 rounded-full bg-white/90 shadow-sm transition-colors hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800',
+                isWished && 'text-red-500 hover:text-red-600',
+              )}
+              onClick={handleToggleWishlist}
+              disabled={isPending}
+              title={isWished ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart
+                className={cn(
+                  'h-4 w-4 transition-all',
+                  isWished && 'fill-current',
+                )}
+              />
+            </Button>
+          </div>
+        </div>
+
+        {/* --- Content Section --- */}
+        <div className='flex flex-1 flex-col p-5'>
+          {/* Brand & Title */}
+          <Link href={`/products/${product.id}`} className='block'>
+            <p className='text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+              {product.brand}
+            </p>
+            <h3 className='mt-1 line-clamp-1 text-base font-semibold text-foreground transition-colors group-hover:text-primary'>
               {product.title}
             </h3>
           </Link>
 
-          {/* Price & Stock */}
-          <div className='flex items-end justify-between pt-2'>
-            <div className='flex flex-col gap-1'>
-              {discount ? (
-                <>
-                  <span className='text-lg font-bold text-slate-900 dark:text-white'>
-                    {formatPrice(discount.discountedPrice)}
-                  </span>
-                  <span className='text-sm text-slate-500 line-through dark:text-slate-400'>
-                    {formatPrice(discount.originalPrice)}
-                  </span>
-                </>
-              ) : (
-                <span className='text-lg font-bold text-slate-900 dark:text-white'>
-                  {formatPrice(product.price)}
-                </span>
-              )}
-            </div>
-
-            {isLowStock && !isOutOfStock && (
-              <Badge className='text-xs'>Only {currentStock} left</Badge>
+          {/* Price Area */}
+          <div className='mt-3 flex items-center gap-2'>
+            <span className='text-lg font-bold text-foreground'>
+              {formatPrice(effectivePrice)}
+            </span>
+            {discount && (
+              <span className='text-sm text-muted-foreground line-through decoration-slate-400/60'>
+                {formatPrice(discount.originalPrice)}
+              </span>
             )}
           </div>
 
-          {/* Add to Cart Button */}
-          <Button
-            className={cn(
-              'w-full transition-all duration-300',
-              isOutOfStock && 'opacity-50 cursor-not-allowed',
-            )}
-            onClick={handleAddToCart}
-            disabled={isOutOfStock || isPending}
-          >
-            <ShoppingCart className='h-4 w-4 mr-2' />
-            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-          </Button>
+          {/* Spacer to push button to bottom */}
+          <div className='flex-1' />
+
+          {/* --- Footer Action --- */}
+          <div className='mt-5'>
+            <Button
+              className={cn(
+                'h-10 w-full rounded-lg font-medium shadow-none transition-all',
+                isOutOfStock
+                  ? 'cursor-not-allowed bg-muted text-muted-foreground hover:bg-muted'
+                  : 'bg-primary hover:bg-primary/90 hover:shadow-md',
+              )}
+              onClick={handleAddToCart}
+              disabled={isOutOfStock || isPending}
+            >
+              {isOutOfStock ? (
+                'Out of Stock'
+              ) : (
+                <>
+                  <ShoppingBag className='mr-2 h-4 w-4' />
+                  Add to Cart
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
-    </motion.div>
-  );
-});
+      </motion.div>
+    );
+  },
+);
 
 ProductCard.displayName = 'ProductCard';

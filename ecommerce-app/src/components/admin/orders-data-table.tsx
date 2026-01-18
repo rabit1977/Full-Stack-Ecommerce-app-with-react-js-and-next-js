@@ -1,5 +1,6 @@
 'use client';
 
+import { updateOrderStatusAction } from '@/actions/order-actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,13 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAppDispatch } from '@/lib/store/hooks';
-import { updateOrderStatusInStore } from '@/lib/store/thunks/orderThunks';
 import { formatPrice } from '@/lib/utils/formatters';
-import { Order } from '@prisma/client';
+import { Order, OrderStatus } from '@prisma/client';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 
 interface OrdersDataTableProps {
   orders: Order[];
@@ -34,12 +35,17 @@ interface OrdersDataTableProps {
 
 export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-  const dispatch = useAppDispatch();
-
-  const handleStatusChange = (orderId: string, newStatus: Order['status']) => {
-    startTransition(() => {
-      dispatch(updateOrderStatusInStore(orderId, newStatus));
+  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
+    startTransition(async () => {
+      const result = await updateOrderStatusAction(orderId, newStatus);
+      if (result.success) {
+        toast.success(result.message);
+        router.refresh(); // Or rely on revalidatePath from action
+      } else {
+        toast.error(result.error);
+      }
     });
   };
 
@@ -61,11 +67,11 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.id}>
-              <TableCell className='font-medium'>{order.id}</TableCell>
+              <TableCell className='font-medium'>{order.id.slice(-8)}</TableCell>
               <TableCell>
                 {new Date(order.createdAt).toLocaleDateString()}
               </TableCell>
-              <TableCell>{order.shippingAddress.slice(9, 20)}</TableCell>
+              <TableCell>{JSON.parse(order.shippingAddress as string).name}</TableCell>
               <TableCell className='hidden md:table-cell'>
                 {formatPrice(order.total)}
               </TableCell>
@@ -75,8 +81,10 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                     order.status === 'Pending'
                       ? 'secondary'
                       : order.status === 'Shipped'
-                        ? 'outline'
-                        : 'default'
+                      ? 'outline'
+                      : order.status === 'Delivered'
+                      ? 'default'
+                      : 'destructive'
                   }
                 >
                   {order.status}
@@ -85,7 +93,7 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup='true' size='icon' variant='ghost'>
+                    <Button aria-haspopup='true' size='icon' variant='ghost' disabled={isPending}>
                       <MoreHorizontal className='h-4 w-4' />
                       <span className='sr-only'>Toggle menu</span>
                     </Button>
@@ -102,34 +110,15 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                         Update Status
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(order.id, 'Pending')
-                          }
-                        >
-                          Pending
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(order.id, 'Shipped')
-                          }
-                        >
-                          Shipped
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(order.id, 'Delivered')
-                          }
-                        >
-                          Delivered
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(order.id, 'Cancelled')
-                          }
-                        >
-                          Cancelled
-                        </DropdownMenuItem>
+                        {(['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'] as OrderStatus[]).map((status) => (
+                          <DropdownMenuItem
+                            key={status}
+                            onClick={() => handleStatusChange(order.id, status)}
+                            disabled={order.status === status}
+                          >
+                            {status}
+                          </DropdownMenuItem>
+                        ))}
                       </DropdownMenuSubContent>
                     </DropdownMenuSub>
                   </DropdownMenuContent>

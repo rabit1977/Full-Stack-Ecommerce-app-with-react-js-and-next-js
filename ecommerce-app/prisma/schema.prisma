@@ -21,7 +21,12 @@ enum OrderStatus {
   Shipped
   Delivered
   Cancelled
-} 
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
 
 model User {
   id            String    @id @default(cuid())
@@ -90,7 +95,7 @@ model Product {
   category    String
   rating      Float    @default(0)
   reviewCount Int      @default(0)
-  thumbnail   String?  
+  thumbnail   String?
   images      ProductImage[]
   options     Json?
   features    String[]
@@ -128,6 +133,8 @@ model Order {
   billingAddress  Json
   shippingMethod  Json
   paymentMethod   String
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 }
@@ -181,11 +188,11 @@ model CartItem {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int      @default(1)
-  selectedOptions Json?
+  selectedOptions Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, productId])
+  @@unique([userId, productId, selectedOptions])
 }
 
 model SavedForLater {
@@ -197,4 +204,16 @@ model SavedForLater {
   createdAt DateTime @default(now())
 
   @@unique([userId, productId])
+}
+
+model Coupon {
+  id          String      @id @default(cuid())
+  code        String      @unique
+  discount    Float
+  type        CouponType
+  expiresAt   DateTime?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orders      Order[]
 }

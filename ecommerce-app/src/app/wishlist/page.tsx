@@ -1,83 +1,19 @@
-'use client';
-
 import { getProductsByIdsAction } from '@/actions/product-actions';
-import { clearWishlistAction } from '@/actions/wishlist-actions';
+import { getWishlistAction } from '@/actions/wishlist-actions';
 import AuthGuard from '@/components/auth/auth-guard';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/lib/hooks/useCart';
-import { useAppDispatch } from '@/lib/store/hooks';
-import { setWishlist } from '@/lib/store/slices/wishlistSlice';
-import { addToCart } from '@/lib/store/thunks/cartThunks';
-import { formatPrice } from '@/lib/utils/formatters';
-import { getProductImage } from '@/lib/utils/product-images';
 import { Product } from '@prisma/client';
-import { Heart, Loader2, ShoppingCart, Trash2 } from 'lucide-react';
-import Image from 'next/image';
+import { Heart } from 'lucide-react';
+import { WishlistClient } from './WishlistClient';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 
-const WishlistPage = () => {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { wishlistItems, toggleWishlist, isWishlistInitialized } = useCart();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const WishlistPage = async () => {
+  const { wishlist: wishlistItems } = await getWishlistAction();
+  let products: Product[] = [];
 
-  useEffect(() => {
-    const fetchWishlistProducts = async () => {
-      if (!isWishlistInitialized) return;
-
-      setIsLoading(true);
-      if (wishlistItems.length > 0) {
-        const fetchedProducts = await getProductsByIdsAction(wishlistItems);
-        // Filter out any products that might not have been found
-        const validProducts = fetchedProducts.filter(
-          (p) => p !== null
-        ) as Product[];
-        setProducts(validProducts);
-      } else {
-        setProducts([]);
-      }
-      setIsLoading(false);
-    };
-
-    fetchWishlistProducts();
-  }, [wishlistItems, isWishlistInitialized]);
-
-  const viewProduct = (productId: string) => {
-    router.push(`/products/${productId}`);
-  };
-
-  const handleAddToCart = (product: Product) => {
-    dispatch(
-      addToCart({
-        id: product.id,
-        quantity: 1,
-        title: product.title,
-        price: product.price,
-      })
-    );
-    // Optionally remove from wishlist after adding to cart
-    toggleWishlist(product.id);
-  };
-
-  const handleClearWishlist = useCallback(async () => {
-    const result = await clearWishlistAction();
-    if (result.success) {
-      dispatch(setWishlist([]));
-    }
-  }, [dispatch]);
-
-  if (isLoading || !isWishlistInitialized) {
-    return (
-      <div className='container mx-auto px-4 py-16 text-center'>
-        <Loader2 className='mx-auto h-24 w-24 animate-spin text-slate-300 dark:text-slate-700' />
-        <h2 className='mt-6 text-2xl font-bold dark:text-white'>
-          Loading Wishlist...
-        </h2>
-      </div>
-    );
+  if (wishlistItems.length > 0) {
+    const fetchedProducts = await getProductsByIdsAction(wishlistItems);
+    products = fetchedProducts.filter((p) => p !== null) as Product[];
   }
 
   return (
@@ -93,85 +29,15 @@ const WishlistPage = () => {
           </p>
           <Button
             size='lg'
-            onClick={() => router.push('/products')}
+            //onClick={() => router.push('/products')} // This needs to be a Link in server component
             className='mt-8'
+            asChild
           >
-            Find Products
+            <Link href='/products'>Find Products</Link>
           </Button>
         </div>
       ) : (
-        <div className='bg-slate-50 min-h-[70vh] dark:bg-slate-900'>
-          <div className='container mx-auto px-4 py-12'>
-            <div className='flex items-center justify-between mb-8'>
-              <div className='flex items-baseline gap-4'>
-                <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
-                  Your Wishlist
-                </h1>
-                <span className='text-slate-600 dark:text-slate-300'>
-                  {products.length} item
-                  {products.length !== 1 ? 's' : ''}
-                </span>
-              </div>
-              <Button variant='outline' onClick={handleClearWishlist}>
-                <Trash2 className='mr-2 h-4 w-4' />
-                Clear Wishlist
-              </Button>
-            </div>
-
-            <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-              {products.map((product: Product) => (
-                <div
-                  key={product.id}
-                  className='border rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col dark:bg-slate-900 dark:border-slate-800'
-                >
-                  <div className='h-48 w-full overflow-hidden relative bg-slate-100 dark:bg-slate-800'>
-                    <Image
-                      src={getProductImage(product)}
-                      alt={product.title}
-                      fill
-                      className='object-cover hover:scale-110 transition-transform duration-300'
-                      sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
-                      priority={false}
-                    />
-                  </div>
-                  <div className='p-4 flex flex-col grow'>
-                    <h3 className='font-semibold text-slate-800 dark:text-white'>
-                      <Link
-                        href={`/products/${product.id}`}
-                        className='hover:underline hover:underline-offset-3   cursor-pointer'
-                      >
-                        {product.title}
-                      </Link>
-                    </h3>
-                    <p className='text-slate-500 text-sm dark:text-slate-400'>
-                      {product.brand}
-                    </p>
-                    <p className='mt-2 text-lg font-bold text-slate-900 dark:text-white'>
-                      {formatPrice(product.price)}
-                    </p>
-                    <div className='mt-4 pt-4 border-t flex flex-col gap-2  dark:border-slate-800'>
-                      <Button
-                        onClick={() => handleAddToCart(product)}
-                        className='w-full'
-                      >
-                        <ShoppingCart className='h-4 w-4 mr-2' />
-                        Add to Cart
-                      </Button>
-                      <Button
-                        variant='outline'
-                        onClick={() => toggleWishlist(product.id)}
-                        className='w-full'
-                      >
-                        <Trash2 className='h-4 w-4 mr-2' />
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <WishlistClient products={products} />
       )}
     </AuthGuard>
   );

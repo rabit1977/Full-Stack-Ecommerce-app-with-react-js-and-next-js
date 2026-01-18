@@ -10,29 +10,24 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Stars } from '@/components/ui/stars';
-import { useAuth } from '@/lib/hooks/useAuth';
-import { useAppDispatch } from '@/lib/store/hooks';
-import {
-  deleteReview,
-  toggleHelpfulReview,
-} from '@/lib/store/thunks/managementThunks';
-import { Product, Review } from '@/lib/types';
+import { ProductWithRelations, Review } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Pencil, ThumbsUp, Trash2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { useMemo, useState } from 'react';
 import { AddReviewForm } from './add-review-form';
 
 interface ReviewsSectionProps {
   productId: string;
-  product?: Product;
+  product?: ProductWithRelations ;
 }
 
 const ReviewsSection = ({
   productId,
   product: propsProduct,
 }: ReviewsSectionProps) => {
-  const { user } = useAuth();
-  const dispatch = useAppDispatch();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   // Use product from props (server-side) or default
   const product = propsProduct;
@@ -61,7 +56,8 @@ const ReviewsSection = ({
   };
 
   const handleToggleHelpful = (reviewId: string) => {
-    dispatch(toggleHelpfulReview({ productId, reviewId }));
+    // TODO: Implement toggleHelpfulReview action
+    // dispatch(toggleHelpfulReview({ productId, reviewId }));
   };
 
   const handleDeleteReviewClick = (reviewId: string) => {
@@ -71,7 +67,8 @@ const ReviewsSection = ({
 
   const confirmDeleteReview = () => {
     if (reviewIdToDelete) {
-      dispatch(deleteReview({ productId, reviewId: reviewIdToDelete }));
+      // TODO: Implement deleteReview action
+      // dispatch(deleteReview({ productId, reviewId: reviewIdToDelete }));
       setReviewIdToDelete(null);
       setShowConfirmDeleteDialog(false);
     }
@@ -179,7 +176,7 @@ const ReviewsSection = ({
                         !isUserReview &&
                           'hover:text-slate-900 dark:hover:text-white',
                         isHelpful && 'text-blue-600 dark:text-blue-400',
-                        isUserReview && 'cursor-not-allowed opacity-60'
+                        isUserReview && 'cursor-not-allowed opacity-60',
                       )}
                     >
                       <ThumbsUp

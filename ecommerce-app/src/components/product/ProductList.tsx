@@ -6,15 +6,16 @@ import { ProductCard } from './product-card';
 
 interface ProductListProps {
   products: ProductWithRelations[];
+  className?: string;
 }
 
-export const ProductList = ({ products }: ProductListProps) => {
+export const ProductList = ({ products, className }: ProductListProps) => {
   return (
-    <div className='mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+    <div className={`mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${className}`}>
       {products.length > 0 ? (
         // Render products when loaded
         products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} initialIsWished={false} />
         ))
       ) : (
         // Render "no products found" message

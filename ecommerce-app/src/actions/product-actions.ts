@@ -1,37 +1,12 @@
 'use server';
 
 import { prisma } from '@/lib/db';
-import { Prisma, Product } from '@prisma/client';
-
-/**
- * Product with relations (for frontend)
- */
-export type ProductWithRelations = Product & {
-  images: { id: string; url: string }[];
-  reviews: ({
-    user: { name: string | null };
-  } & {
-    id: string;
-    userId: string;
-    rating: number;
-    title: string;
-    comment: string;
-    helpful: number;
-    verifiedPurchase: boolean;
-    createdAt: Date;
-  })[];
-};
+import { ProductWithRelations, SortKey } from '@/lib/types';
+import { Prisma } from '@prisma/client';
 
 /**
  * Sort options
  */
-export type SortKey =
-  | 'featured'
-  | 'price-asc'
-  | 'price-desc'
-  | 'rating'
-  | 'newest'
-  | 'popularity';
 const sortOptions: Record<SortKey, Prisma.ProductOrderByWithRelationInput> = {
   featured: { rating: 'desc' },
   'price-asc': { price: 'asc' },
@@ -55,7 +30,7 @@ export interface GetProductsOptions {
 }
 
 export interface GetProductsResult {
-  products: Product[];
+  products: ProductWithRelations[];
   totalCount: number;
   page: number;
   totalPages: number;
@@ -65,18 +40,9 @@ export interface GetProductsResult {
 /**
  * Get products with filters and pagination
  */
-export async function getProductsAction(options: {
-  query?: string;
-  categories?: string;
-  brands?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minRating?: number;
-  inStock?: boolean;
-  sort?: SortKey;
-  page?: number;
-  limit?: number;
-}) {
+export async function getProductsAction(
+  options: GetProductsOptions = {},
+): Promise<GetProductsResult> {
   const {
     query,
     categories,
@@ -194,8 +160,11 @@ export async function getProductsAction(options: {
   }
 }
 
+/**
+ * Get single product by ID with all relations
+ */
 export async function getProductByIdAction(
-  id: string
+  id: string,
 ): Promise<ProductWithRelations | null> {
   try {
     const product = await prisma.product.findUnique({
@@ -234,26 +203,39 @@ export async function getProductByIdAction(
   }
 }
 
+/**
+ * Get filter options (categories, brands, price range)
+ */
 export async function getFiltersAction() {
-  const [categories, brands, priceAgg] = await Promise.all([
-    prisma.product.groupBy({
-      by: ['category'],
-    }),
-    prisma.product.groupBy({
-      by: ['brand'],
-    }),
-    prisma.product.aggregate({
-      _min: { price: true },
-      _max: { price: true },
-    }),
-  ]);
+  try {
+    const [categories, brands, priceAgg] = await Promise.all([
+      prisma.product.groupBy({
+        by: ['category'],
+      }),
+      prisma.product.groupBy({
+        by: ['brand'],
+      }),
+      prisma.product.aggregate({
+        _min: { price: true },
+        _max: { price: true },
+      }),
+    ]);
 
-  return {
-    categories: categories.map((c) => c.category),
-    brands: brands.map((b) => b.brand),
-    minPrice: priceAgg._min.price || 0,
-    maxPrice: priceAgg._max.price || 0,
-  };
+    return {
+      categories: categories.map((c) => c.category),
+      brands: brands.map((b) => b.brand),
+      minPrice: priceAgg._min.price || 0,
+      maxPrice: priceAgg._max.price || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching filters:', error);
+    return {
+      categories: [],
+      brands: [],
+      minPrice: 0,
+      maxPrice: 0,
+    };
+  }
 }
 
 // ============================================
@@ -268,10 +250,12 @@ import {
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
-// Helper to check admin access
+/**
+ * Helper to check admin access
+ */
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+  if (!session?.user || session.user.role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required');
   }
   return session;
@@ -295,6 +279,8 @@ export async function createProductAction(data: {
   specifications?: any;
 }) {
   try {
+    await requireAdmin();
+
     const { images, ...productData } = data;
 
     const product = await prisma.product.create({
@@ -327,16 +313,18 @@ export async function createProductAction(data: {
     console.error('Error creating product:', error);
     return {
       success: false,
-      error: 'Failed to create product',
+      error:
+        error instanceof Error ? error.message : 'Failed to create product',
     };
   }
 }
+
 /**
  * Update product (admin only)
  */
 export async function updateProductAction(
   id: string,
-  data: Partial<ProductFormValues>
+  data: Partial<ProductFormValues>,
 ) {
   try {
     await requireAdmin();
@@ -402,6 +390,7 @@ export async function updateProductAction(
     };
   }
 }
+
 /**
  * Delete product (admin only)
  */
@@ -469,37 +458,51 @@ export async function deleteMultipleProductsAction(ids: string[]) {
   }
 }
 
+/**
+ * Apply bulk discount (admin only)
+ */
 export async function applyBulkDiscountAction(data: {
   discountType: 'all' | 'category' | 'brand';
   category?: string;
   brand?: string;
   discount: number;
 }) {
-  'use server';
-  await requireAdmin();
   try {
-    const where: any = {};
-    if (data.discountType === 'category') where.category = data.category;
-    if (data.discountType === 'brand') where.brand = data.brand;
+    await requireAdmin();
+
+    const where: Prisma.ProductWhereInput = {};
+    if (data.discountType === 'category' && data.category) {
+      where.category = data.category;
+    }
+    if (data.discountType === 'brand' && data.brand) {
+      where.brand = data.brand;
+    }
 
     const result = await prisma.product.updateMany({
       where,
       data: { discount: data.discount },
     });
+
     revalidatePath('/admin/products');
-    revalidatePath('/');
     revalidatePath('/products');
+
     return {
       success: true,
-      message: 'Discount applied',
+      message: `Discount applied to ${result.count} products`,
       count: result.count,
     };
   } catch (error) {
-    return { success: false, error: 'Failed to apply discount' };
+    console.error('Error applying bulk discount:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to apply discount',
+    };
   }
 }
 
-/** * Get categories
+/**
+ * Get categories
  */
 export async function getCategoriesAction(): Promise<string[]> {
   try {
@@ -552,17 +555,19 @@ export async function getPriceRangeAction(): Promise<{
     return { min: 0, max: 0 };
   }
 }
+
 /**
  * Get multiple products by IDs
  */
 export async function getProductsByIdsAction(
-  ids: string[]
+  ids: string[],
 ): Promise<ProductWithRelations[]> {
-  if (ids.length === 0) return [];
+  const validIds = ids.filter(Boolean);
+  if (validIds.length === 0) return [];
 
   try {
     const products = await prisma.product.findMany({
-      where: { id: { in: ids } },
+      where: { id: { in: validIds } },
       include: {
         images: {
           select: {
@@ -590,7 +595,6 @@ export async function getProductsByIdsAction(
       },
     });
 
-    // Cast to get the raw product data which includes options as Json
     return products as ProductWithRelations[];
   } catch (error) {
     console.error('Error fetching products by IDs:', error);

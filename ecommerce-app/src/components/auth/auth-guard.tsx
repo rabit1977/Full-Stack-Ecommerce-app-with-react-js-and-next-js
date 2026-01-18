@@ -1,10 +1,9 @@
 'use client';
 
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { fetchOrders } from '@/lib/store/thunks/orderThunks';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -20,69 +19,39 @@ interface AuthGuardProps {
 
 /**
  * Auth guard component - protects routes from unauthenticated users
- * Handles redux-persist rehydration gracefully
  */
-const AuthGuard: React.FC<AuthGuardProps> = ({ 
-  children, 
+const AuthGuard: React.FC<AuthGuardProps> = ({
+  children,
   redirectTo = '/auth',
-  fallback 
+  fallback,
 }) => {
-  const { user } = useAppSelector((state) => state.user);
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Handle initial authentication check
-    let timeoutId: NodeJS.Timeout;
+    if (status === 'unauthenticated') {
+      router.replace(redirectTo);
+    }
+  }, [status, router, redirectTo]);
 
-    const checkAuth = () => {
-      // If user is undefined, we're still rehydrating from persist
-      if (user === undefined) {
-        timeoutId = setTimeout(checkAuth, 100);
-        return;
-      }
-
-      // User is authenticated
-      if (user) {
-        dispatch(fetchOrders());
-        setIsChecking(false);
-        return;
-      }
-
-      // User is not authenticated - redirect
-      if (user === null) {
-        router.replace(redirectTo);
-        return;
-      }
-    };
-
-    checkAuth();
-
-    // Cleanup timeout on unmount
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [user, router, redirectTo, dispatch]);
-
-  // Show loading state while checking authentication
-  if (isChecking) {
-    return fallback || (
-      <div className="flex min-h-[70vh] items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-16 w-16 animate-spin text-slate-400 mx-auto" />
-          <p className="text-slate-600 dark:text-slate-400">
-            Loading...
-          </p>
+  if (status === 'loading') {
+    return (
+      fallback || (
+        <div className='flex min-h-[70vh] items-center justify-center'>
+          <div className='text-center space-y-4'>
+            <Loader2 className='h-16 w-16 animate-spin text-slate-400 mx-auto' />
+            <p className='text-slate-600 dark:text-slate-400'>Loading...</p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 
-  // User is authenticated - render children
-  return <>{children}</>;
+  if (status === 'authenticated') {
+    return <>{children}</>;
+  }
+
+  return null;
 };
 
 export default AuthGuard;

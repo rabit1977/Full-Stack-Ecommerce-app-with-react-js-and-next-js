@@ -2,16 +2,19 @@
 import { getProductsAction } from '@/actions/product-actions';
 import { Hero } from '@/components/home/hero';
 import { FeaturedProducts } from '@/components/product/featured-products';
-import { mapPrismaProductsToFrontend } from '@/lib/utils/product-mapper';
 
+/**
+ * Home Page Component
+ * 
+ * Displays hero section with featured products carousel
+ * and featured products grid
+ */
 export default async function HomePage() {
-  const { products: rawProducts } = await getProductsAction({
+  // Fetch featured products
+  const { products } = await getProductsAction({
     limit: 10,
     sort: 'featured',
   });
-
-  // Convert Prisma products to frontend format
-  const products = mapPrismaProductsToFrontend(rawProducts);
 
   return (
     <>

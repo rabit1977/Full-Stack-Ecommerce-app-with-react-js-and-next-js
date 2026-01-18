@@ -1,271 +1,305 @@
-'use client';
-
 import AuthGuard from '@/components/auth/auth-guard';
 import { Button } from '@/components/ui/button';
-import { useAppSelector } from '@/lib/store/hooks';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/utils/formatters';
-import { Heart, Package, Settings, ShoppingCart, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { 
+  Heart, 
+  Package, 
+  Settings, 
+  ShoppingCart, 
+  User,
+  TrendingUp,
+  Calendar,
+  Mail,
+  Shield
+} from 'lucide-react';
+import { auth } from '@/auth';
+import { getMyOrdersAction } from '@/actions/order-actions';
+import { getCartAction } from '@/actions/cart-actions';
+import { getWishlistAction } from '@/actions/wishlist-actions';
+import { AccountStats } from '@/components/account/AccountStats';
+import Link from 'next/link';
 
-const AccountPage = () => {
-  const router = useRouter();
-  const { user } = useAppSelector((state) => state.user);
-  const { orders } = useAppSelector((state) => state.orders);
-  const { cart } = useAppSelector((state) => state.cart);
-  const { itemIds: wishlist } = useAppSelector((state) => state.wishlist);
+/**
+ * Account Page Component
+ * 
+ * Production-ready account dashboard with:
+ * - Responsive grid layout
+ * - Consistent typography scale
+ * - Proper dark mode support
+ * - Accessible markup
+ * - Clean visual hierarchy
+ */
+const AccountPage = async () => {
+  const session = await auth();
+  const user = session?.user;
 
-  // Calculate stats
-  const stats = useMemo(
-    () => ({
-      totalOrders: orders.length,
-      totalSpent: orders.reduce((sum, order) => sum + order.total, 0),
-      cartItems: cart.reduce((sum, item) => sum + item.quantity, 0),
-      wishlistItems: wishlist.length,
-    }),
-    [orders, cart, wishlist]
-  );
+  // Fetch user data in parallel
+  const [ordersResult, cartResult, wishlistResult] = await Promise.all([
+    getMyOrdersAction(),
+    getCartAction(),
+    getWishlistAction(),
+  ]);
 
-  const handleNavigate = (path: string) => {
-    router.push(path);
+  const orders = ordersResult.data ?? [];
+  const cartItems = cartResult.items ?? [];
+  const wishlist = wishlistResult.wishlist ?? [];
+
+  // Calculate statistics
+  const stats = {
+    totalOrders: orders.length,
+    totalSpent: orders.reduce((sum, order) => sum + order.total, 0),
+    cartItemsCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    wishlistItemsCount: wishlist.length,
   };
+
+  // Format member since date
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : 'N/A';
+
+  // Get user initials for avatar
+  const userInitials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'U';
 
   return (
     <AuthGuard>
-      <div className='bg-slate-50 min-h-[70vh] dark:bg-slate-900'>
-        <div className='container mx-auto px-4 py-12'>
+      <div className='min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950'>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16'>
           {/* Profile Header */}
-          <div className='flex items-center gap-6 mb-8'>
-            <div className='w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg'>
-              {user?.name ? (
-                <span className='text-3xl font-bold'>
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-              ) : (
-                <User className='h-10 w-10' />
-              )}
-            </div>
-            <div>
-              <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
-                {user?.name || 'User'}
-              </h1>
-              <p className='text-slate-600 dark:text-slate-300 mt-1'>
-                {user?.email || 'Loading...'}
-              </p>
-              <div className='flex items-center gap-2 mt-2'>
-                <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 capitalize'>
-                  {user?.role || 'User'}
-                </span>
+          <header className='mb-8 sm:mb-12'>
+            <div className='flex flex-col sm:flex-row items-start sm:items-center gap-6'>
+              {/* Avatar */}
+              <div className='relative group'>
+                <div className='w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg ring-4 ring-white dark:ring-slate-800 transition-transform group-hover:scale-105'>
+                  <span className='text-3xl sm:text-4xl font-bold'>
+                    {userInitials}
+                  </span>
+                </div>
+                <div className='absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full border-4 border-white dark:border-slate-800 flex items-center justify-center'>
+                  <div className='w-2 h-2 bg-white rounded-full animate-pulse' />
+                </div>
+              </div>
+
+              {/* User Info */}
+              <div className='flex-1'>
+                <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+                  <div>
+                    <h1 className='text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent mb-2'>
+                      {user?.name || 'Welcome'}
+                    </h1>
+                    <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm sm:text-base text-slate-600 dark:text-slate-400'>
+                      <div className='flex items-center gap-2'>
+                        <Mail className='h-4 w-4 flex-shrink-0' />
+                        <span className='truncate'>{user?.email || 'user@example.com'}</span>
+                      </div>
+                      <Separator orientation='vertical' className='hidden sm:block h-4' />
+                      <div className='flex items-center gap-2'>
+                        <Calendar className='h-4 w-4 flex-shrink-0' />
+                        <span>Member since {memberSince}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Edit Profile Button - Desktop */}
+                  <Link href='/account/edit' className='hidden sm:block'>
+                    <Button 
+                      size='lg' 
+                      className='gap-2 shadow-md hover:shadow-lg transition-shadow'
+                    >
+                      <Settings className='h-4 w-4' />
+                      Edit Profile
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Role Badge */}
+                <div className='flex items-center gap-2 mt-4'>
+                  <Badge 
+                    variant='secondary' 
+                    className='text-sm px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800'
+                  >
+                    <Shield className='h-3 w-3 mr-1.5' />
+                    <span className='capitalize font-medium'>{user?.role || 'User'}</span>
+                  </Badge>
+                  {stats.totalOrders > 0 && (
+                    <Badge variant='outline' className='text-sm px-3 py-1'>
+                      <TrendingUp className='h-3 w-3 mr-1.5' />
+                      {stats.totalOrders} {stats.totalOrders === 1 ? 'Order' : 'Orders'}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className='grid lg:grid-cols-3 gap-8'>
-            {/* Main Content */}
+            {/* Edit Profile Button - Mobile */}
+            <Link href='/account/edit' className='block sm:hidden mt-6'>
+              <Button size='lg' className='w-full gap-2'>
+                <Settings className='h-4 w-4' />
+                Edit Profile
+              </Button>
+            </Link>
+          </header>
+
+          {/* Main Content Grid */}
+          <div className='grid lg:grid-cols-3 gap-6 lg:gap-8'>
+            {/* Left Column - Main Content */}
             <div className='lg:col-span-2 space-y-6'>
               {/* Account Statistics */}
-              <div className='grid sm:grid-cols-2 gap-4'>
-                {/* Total Orders Card */}
-                <button
-                  onClick={() => handleNavigate('/orders')}
-                  className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700 hover:shadow-md transition-shadow text-left group'
-                >
+              <AccountStats
+                totalOrders={stats.totalOrders}
+                totalSpent={stats.totalSpent}
+                cartItems={stats.cartItemsCount}
+                wishlistItems={stats.wishlistItemsCount}
+              />
+
+              {/* Account Details Card */}
+              <Card className='shadow-sm hover:shadow-md transition-shadow'>
+                <CardHeader className='pb-4'>
                   <div className='flex items-center justify-between'>
-                    <div>
-                      <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                        Total Orders
-                      </p>
-                      <p className='text-3xl font-bold mt-2 dark:text-white'>
-                        {stats.totalOrders}
-                      </p>
-                    </div>
-                    <div className='w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-                      <Package className='h-6 w-6 text-orange-600 dark:text-orange-400' />
-                    </div>
+                    <CardTitle className='text-xl sm:text-2xl font-bold'>
+                      Account Information
+                    </CardTitle>
                   </div>
-                  <p className='text-xs text-slate-500 dark:text-slate-400 mt-3 hover:underline hover:cursor-pointer hover:text-blue-600 transition-colors'>
-                    Click to view orders
-                  </p>
-                </button>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid sm:grid-cols-2 gap-6'>
+                    {/* Full Name */}
+                    <div className='space-y-2'>
+                      <p className='text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider'>
+                        Full Name
+                      </p>
+                      <p className='text-base font-medium text-slate-900 dark:text-slate-100'>
+                        {user?.name || 'Not set'}
+                      </p>
+                    </div>
 
-                {/* Total Spent Card */}
-                <div className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700'>
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                        Total Spent
+                    {/* Email */}
+                    <div className='space-y-2'>
+                      <p className='text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider'>
+                        Email Address
                       </p>
-                      <p className='text-3xl font-bold mt-2 dark:text-white'>
-                        {formatPrice(stats.totalSpent)}
+                      <p className='text-base font-medium text-slate-900 dark:text-slate-100 break-all'>
+                        {user?.email || 'Not set'}
                       </p>
                     </div>
-                    <div className='w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center'>
-                      <span className='text-2xl'>💰</span>
-                    </div>
-                  </div>
-                  <p className='text-xs text-slate-500 dark:text-slate-400 mt-3'>
-                    Lifetime purchases
-                  </p>
-                </div>
 
-                {/* Cart Items Card */}
-                <button
-                  onClick={() => handleNavigate('/cart')}
-                  className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700 hover:shadow-md transition-shadow text-left group'
-                >
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                        Cart Items
+                    {/* Account Type */}
+                    <div className='space-y-2'>
+                      <p className='text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider'>
+                        Account Type
                       </p>
-                      <p className='text-3xl font-bold mt-2 dark:text-white'>
-                        {stats.cartItems}
+                      <p className='text-base font-medium text-slate-900 dark:text-slate-100 capitalize'>
+                        {user?.role || 'User'}
                       </p>
                     </div>
-                    <div className='w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-                      <ShoppingCart className='h-6 w-6 text-orange-600 dark:text-orange-400' />
-                    </div>
-                  </div>
-                  <p className='text-xs text-slate-500 dark:text-slate-400 mt-3 hover:underline hover:cursor-pointer hover:text-orange-600 transition-colors'>
-                    Click to view cart
-                  </p>
-                </button>
 
-                {/* Wishlist Items Card */}
-                <button
-                  onClick={() => handleNavigate('/wishlist')}
-                  className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700 hover:shadow-md transition-shadow text-left group'
-                >
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                        Wishlist
+                    {/* Member Since */}
+                    <div className='space-y-2'>
+                      <p className='text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider'>
+                        Member Since
                       </p>
-                      <p className='text-3xl font-bold mt-2 dark:text-white'>
-                        {stats.wishlistItems}
+                      <p className='text-base font-medium text-slate-900 dark:text-slate-100'>
+                        {memberSince}
                       </p>
                     </div>
-                    <div className='w-12 h-12 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-                      <Heart className='h-6 w-6 text-pink-600 dark:text-pink-400' />
-                    </div>
                   </div>
-                  <p className='text-xs text-slate-500 dark:text-slate-400 mt-3 hover:underline hover:cursor-pointer hover:text-pink-600 transition-colors'>
-                    Click to view wishlist
-                  </p>
-                </button>
-              </div>
-
-              {/* Account Details */}
-              <div className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700'>
-                <div className='flex items-center justify-between mb-6'>
-                  <h2 className='text-xl font-semibold dark:text-white'>
-                    Account Information
-                  </h2>
-
-                  <Button variant='outline' size='sm' onClick={() => handleNavigate('/account/edit')}>
-                    <Settings className='h-4 w-4 mr-2' />
-                    Edit Profile
-                  </Button>
-                </div>
-                <div className='grid sm:grid-cols-2 gap-6'>
-                  <div>
-                    <p className='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2'>
-                      Full Name
-                    </p>
-                    <p className='font-medium dark:text-white'>
-                      {user?.name || 'Not set'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2'>
-                      Email Address
-                    </p>
-                    <p className='font-medium dark:text-white break-all'>
-                      {user?.email || 'Not set'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2'>
-                      Account Type
-                    </p>
-                    <p className='font-medium dark:text-white capitalize'>
-                      {user?.role || 'User'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className='text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2'>
-                      Member Since
-                    </p>
-                    <p className='font-medium dark:text-white'>January 2024</p>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Sidebar */}
+            {/* Right Column - Sidebar */}
             <div className='space-y-6'>
-              {/* Quick Actions */}
-              <div className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700'>
-                <h3 className='text-lg font-semibold dark:text-white mb-4'>
-                  Quick Actions
-                </h3>
-                <div className='space-y-3'>
-                  <Button
-                    variant='outline'
-                    className='w-full justify-start hover:bg-slate-50 dark:hover:bg-slate-900'
-                    onClick={() => handleNavigate('/orders')}
-                  >
-                    <Package className='h-4 w-4 mr-2' />
-                    View My Orders
-                  </Button>
-                  <Button
-                    variant='outline'
-                    className='w-full justify-start hover:bg-slate-50 dark:hover:bg-slate-900'
-                    onClick={() => handleNavigate('/wishlist')}
-                  >
-                    <Heart className='h-4 w-4 mr-2' />
-                    View Wishlist
-                  </Button>
-                  <Button
-                    variant='outline'
-                    className='w-full justify-start hover:bg-slate-50 dark:hover:bg-slate-900'
-                    onClick={() => handleNavigate('/cart')}
-                  >
-                    <ShoppingCart className='h-4 w-4 mr-2' />
-                    View Cart
-                  </Button>
-                  <Button
-                    variant='outline'
-                    className='w-full justify-start hover:bg-slate-50 dark:hover:bg-slate-900'
-                    onClick={() => handleNavigate('/products')}
-                  >
-                    <Package className='h-4 w-4 mr-2' />
-                    Browse Products
-                  </Button>
-                </div>
-              </div>
+              {/* Quick Actions Card */}
+              <Card className='shadow-sm hover:shadow-md transition-shadow'>
+                <CardHeader className='pb-4'>
+                  <CardTitle className='text-lg sm:text-xl font-bold'>
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <nav className='space-y-2' aria-label='Quick navigation'>
+                    <Link href='/orders' className='block'>
+                      <Button
+                        variant='ghost'
+                        className='w-full justify-start h-auto py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors'
+                      >
+                        <Package className='h-5 w-5 mr-3 text-blue-600 dark:text-blue-400' />
+                        <span className='font-medium'>My Orders</span>
+                      </Button>
+                    </Link>
 
-              {/* Shopping Summary */}
+                    <Link href='/wishlist' className='block'>
+                      <Button
+                        variant='ghost'
+                        className='w-full justify-start h-auto py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors'
+                      >
+                        <Heart className='h-5 w-5 mr-3 text-red-600 dark:text-red-400' />
+                        <span className='font-medium'>Wishlist</span>
+                      </Button>
+                    </Link>
+
+                    <Link href='/cart' className='block'>
+                      <Button
+                        variant='ghost'
+                        className='w-full justify-start h-auto py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors'
+                      >
+                        <ShoppingCart className='h-5 w-5 mr-3 text-green-600 dark:text-green-400' />
+                        <span className='font-medium'>Shopping Cart</span>
+                      </Button>
+                    </Link>
+
+                    <Separator className='my-2' />
+
+                    <Link href='/products' className='block'>
+                      <Button
+                        variant='ghost'
+                        className='w-full justify-start h-auto py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors'
+                      >
+                        <Package className='h-5 w-5 mr-3 text-purple-600 dark:text-purple-400' />
+                        <span className='font-medium'>Browse Products</span>
+                      </Button>
+                    </Link>
+                  </nav>
+                </CardContent>
+              </Card>
+
+              {/* Shopping Summary Card */}
               {stats.totalOrders > 0 && (
-                <div className='bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg p-6 shadow-lg text-white'>
-                  <h3 className='text-lg font-semibold mb-4'>
-                    Shopping Summary
-                  </h3>
-                  <div className='space-y-3'>
-                    <div className='flex justify-between items-center pb-3 border-b border-white/20'>
-                      <span className='text-blue-100'>Total Orders</span>
-                      <span className='text-2xl font-bold'>
-                        {stats.totalOrders}
-                      </span>
-                    </div>
-                    <div className='flex justify-between items-center'>
-                      <span className='text-blue-100'>Total Spent</span>
-                      <span className='text-2xl font-bold'>
-                        {formatPrice(stats.totalSpent)}
-                      </span>
+                <Card className='overflow-hidden shadow-lg border-0'>
+                  <div className='bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 p-6 text-white'>
+                    <h3 className='text-lg sm:text-xl font-bold mb-4 flex items-center gap-2'>
+                      <TrendingUp className='h-5 w-5' />
+                      Shopping Summary
+                    </h3>
+                    <div className='space-y-4'>
+                      <div className='flex justify-between items-center pb-4 border-b border-white/20'>
+                        <span className='text-blue-100 font-medium'>Total Orders</span>
+                        <span className='text-3xl font-bold tabular-nums'>
+                          {stats.totalOrders}
+                        </span>
+                      </div>
+                      <div className='flex justify-between items-center'>
+                        <span className='text-blue-100 font-medium'>Total Spent</span>
+                        <span className='text-3xl font-bold tabular-nums'>
+                          {formatPrice(stats.totalSpent)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Card>
               )}
             </div>
           </div>

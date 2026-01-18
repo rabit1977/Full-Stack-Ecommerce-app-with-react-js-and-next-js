@@ -9,16 +9,14 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useRouter } from 'next/navigation';
 import { Home, ShoppingCart, Heart, Sun, Moon, Search, Loader2 } from 'lucide-react';
-import { setTheme } from '@/lib/store/slices/uiSlice';
 import { Product } from '@/lib/types';
+import { useTheme } from 'next-themes';
 
 export const CommandPalette = () => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { theme } = useAppSelector((state) => state.ui);
+  const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
@@ -112,7 +110,7 @@ export const CommandPalette = () => {
         <CommandGroup heading="Actions">
           <CommandItem
             onSelect={() =>
-              runCommand(() => dispatch(setTheme(theme === 'light' ? 'dark' : 'light')))
+              runCommand(() => setTheme(theme === 'light' ? 'dark' : 'light'))
             }
           >
             {theme === 'light' ? (

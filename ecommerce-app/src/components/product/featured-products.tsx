@@ -1,8 +1,8 @@
 'use client';
 
-import { Product } from '@/lib/types';
 import { ProductList } from '@/components/product/ProductList';
 import { Button } from '@/components/ui/button';
+import { ProductWithRelations } from '@/lib/types'; // ✅ Changed import
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -12,7 +12,7 @@ interface FeaturedProductsProps {
   /** Section subtitle */
   subtitle?: string;
   /** Products to display */
-  products: Product[];
+  products: ProductWithRelations[]; // ✅ Changed type
   /** Whether to show "View All" button */
   showViewAll?: boolean;
   /** Custom class name */
@@ -20,8 +20,17 @@ interface FeaturedProductsProps {
 }
 
 /**
- * Simplified product grid for homepage/featured sections
- * No filtering, sorting, or pagination - just displays products
+ * Featured Products Section Component
+ *
+ * Displays a curated list of products with optional header and CTA
+ * Perfect for homepage featured sections or category highlights
+ *
+ * Features:
+ * - Responsive layout
+ * - Optional "View All" CTA
+ * - Mobile-optimized with bottom CTA
+ * - Clean, modern design
+ * - Accessible markup
  */
 export const FeaturedProducts = ({
   title = 'Featured Products',
@@ -31,27 +40,28 @@ export const FeaturedProducts = ({
   className,
 }: FeaturedProductsProps) => {
   return (
-    <section className={className}>
-      <div className="container mx-auto px-4 py-16">
+    <section className={className} aria-labelledby='featured-products-heading'>
+      <div className='container mx-auto px-4 py-16'>
         {/* Header */}
-        <div className="mb-12 flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <div className='mb-12 flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left'>
+          <div className='space-y-2'>
+            <h2
+              id='featured-products-heading'
+              className='text-3xl font-bold tracking-tight sm:text-4xl'
+            >
               {title}
             </h2>
             {subtitle && (
-              <p className="text-lg text-muted-foreground">
-                {subtitle}
-              </p>
+              <p className='text-lg text-muted-foreground'>{subtitle}</p>
             )}
           </div>
 
-          {/* View All Button */}
+          {/* View All Button - Desktop */}
           {showViewAll && (
-            <Button asChild  size="lg" className="gap-2">
-              <Link href="/products">
+            <Button asChild size='lg' className='hidden sm:inline-flex gap-2'>
+              <Link href='/products'>
                 View All Products
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className='h-4 w-4' />
               </Link>
             </Button>
           )}
@@ -62,14 +72,12 @@ export const FeaturedProducts = ({
 
         {/* Bottom CTA - Mobile */}
         {showViewAll && (
-          <div className="mt-12 flex justify-center sm:hidden ">
-            <Button asChild size="lg" className="gap-2 w-full max-w-md">
-              <Link href="/products">
-                View All Products
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+          <Button asChild size='lg' className='gap-2 w-full max-w-md'>
+            <Link href='/products'>
+              View All Products
+              <ArrowRight className='h-4 w-4' />
+            </Link>
+          </Button>
         )}
       </div>
     </section>

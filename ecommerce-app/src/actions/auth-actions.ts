@@ -1,7 +1,6 @@
 'use server';
 
 import { auth } from '@/auth';
-import { CartItem } from '@/components/cart/cart-item';
 import { prisma } from '@/lib/db';
 import { UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
@@ -19,7 +18,7 @@ async function requireAdmin() {
 export async function signupAction(
   name: string,
   email: string,
-  password: string
+  password: string,
 ) {
   // Validate input
   if (!email || !password || !name) {
@@ -60,7 +59,7 @@ export async function createUserAction(
   name: string,
   email: string,
   password: string,
-  role: UserRole
+  role: UserRole,
 ) {
   try {
     await requireAdmin();
@@ -124,7 +123,7 @@ export async function getUserByIdAction(userId: string) {
         reviews: {
           select: { id: true },
         },
-        cartItems: {  
+        cartItems: {
           select: { id: true },
         },
       },
@@ -167,7 +166,13 @@ export async function getUserByIdAction(userId: string) {
 }
 export async function updateUserAction(
   id: string,
-  data: { name?: string; email?: string; role?: UserRole; bio?: string, password?: string }
+  data: {
+    name?: string;
+    email?: string;
+    role?: UserRole;
+    bio?: string;
+    password?: string;
+  },
 ) {
   try {
     await requireAdmin();
@@ -177,19 +182,22 @@ export async function updateUserAction(
       const existingUser = await prisma.user.findFirst({
         where: {
           email: data.email,
-          id: { not: id }, 
+          id: { not: id },
         },
       });
       if (existingUser) {
-        return { success: false, message: 'Email is already in use by another account.' };
+        return {
+          success: false,
+          message: 'Email is already in use by another account.',
+        };
       }
     }
-    
+
     const updateData: any = {
       name: data.name,
       email: data.email,
       role: data.role,
-      bio: data.bio
+      bio: data.bio,
     };
 
     if (data.password && data.password.trim() !== '') {
@@ -226,10 +234,11 @@ export async function deleteUserAction(id: string) {
   }
 }
 
-
-export async function updateProfileAction(
-  data: { name?: string; email?: string; bio?: string; }
-) {
+export async function updateProfileAction(data: {
+  name?: string;
+  email?: string;
+  bio?: string;
+}) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -246,7 +255,10 @@ export async function updateProfileAction(
         },
       });
       if (existingUser) {
-        return { success: false, message: 'Email is already in use by another account.' };
+        return {
+          success: false,
+          message: 'Email is already in use by another account.',
+        };
       }
     }
 

@@ -1,8 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { setIsMenuOpen } from '@/lib/store/slices/uiSlice';
 import { cn } from '@/lib/utils';
 import {
   Briefcase,
@@ -32,6 +30,13 @@ const navLinks: NavLink[] = [
   { href: '/services', label: 'Services', icon: Briefcase },
 ];
 
+interface HeaderProps {
+  isMenuOpen: boolean;
+  toggleMobileMenu: () => void;
+  initialWishlistCount: number;
+  initialCartItemCount: number;
+}
+
 /**
  * Header component with sticky navigation, search, and responsive mobile menu
  *
@@ -42,10 +47,13 @@ const navLinks: NavLink[] = [
  * - Accessible markup
  * - Optimized re-renders
  */
-const Header = () => {
+const Header = ({
+  isMenuOpen,
+  toggleMobileMenu,
+  initialWishlistCount,
+  initialCartItemCount,
+}: HeaderProps) => {
   const pathname = usePathname();
-  const dispatch = useAppDispatch();
-  const isMenuOpen = useAppSelector((state) => state.ui.isMenuOpen);
 
   /**
    * Check if link is active
@@ -57,13 +65,6 @@ const Header = () => {
     },
     [pathname]
   );
-
-  /**
-   * Toggle mobile menu
-   */
-  const toggleMobileMenu = () => {
-    dispatch(setIsMenuOpen(!isMenuOpen));
-  };
 
   return (
     <header
@@ -134,7 +135,10 @@ const Header = () => {
 
         {/* Nav Actions (Cart, Theme, etc.) */}
         <div className='flex items-center'>
-          <NavActions />
+          <NavActions
+            initialWishlistCount={initialWishlistCount}
+            initialCartItemCount={initialCartItemCount}
+          />
 
           {/* Mobile Menu Button */}
           <Button

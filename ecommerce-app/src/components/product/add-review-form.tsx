@@ -3,9 +3,9 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/lib/hooks/useAuth';
 import { addOrUpdateReviewAction } from '@/actions/review-actions';
 import { Star } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -29,7 +29,8 @@ export const AddReviewForm = ({
   onCancelEdit,
 }: AddReviewFormProps) => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user;
   const [isPending, startTransition] = useTransition();
   const [rating, setRating] = useState(reviewToEdit?.rating || 0);
   const [title, setTitle] = useState(reviewToEdit?.title || '');
