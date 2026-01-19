@@ -12,8 +12,8 @@ export const userFormSchema = z.object({
     .string()
     .email({ message: 'Invalid email address' })
     .min(5, { message: 'Email must be at least 5 characters' }),
-  role: z.enum(['admin', 'customer'], {
-    message: 'Role must be either admin or customer',
+  role: z.enum(['admin', 'User'], {
+    message: 'Role must be either admin or User',
   }),
   password: z
     .string()

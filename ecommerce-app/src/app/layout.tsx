@@ -50,7 +50,7 @@ export default async function RootLayout({
             />
             <main className='min-h-auto'>{children}</main>
             <Footer />
-            <QuickViewModal />
+            <QuickViewModal/>
             <Toast />
           </div>
         </Providers>

@@ -28,7 +28,7 @@ const services: Service[] = [
     icon: Truck,
   },
   {
-    title: '24/7 Customer Support',
+    title: '24/7 User Support',
     description:
       'Our dedicated support team is always available to assist you with any queries or issues.',
     icon: Headset,
@@ -99,7 +99,7 @@ export const ServicesContent = () => {
           Need Assistance?
         </h2>
         <p className='text-lg text-muted-foreground mb-6'>
-          Our customer support team is here to help you with any questions or
+          Our User support team is here to help you with any questions or
           concerns.
         </p>
         <Link href='/contact'>

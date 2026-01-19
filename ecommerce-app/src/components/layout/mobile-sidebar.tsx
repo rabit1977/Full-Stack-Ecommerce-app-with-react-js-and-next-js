@@ -231,7 +231,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                             {user.name}
                           </p>
                           <p className='truncate text-sm text-muted-foreground'>
-                            {user.email || 'Customer'}
+                            {user.email || 'User'}
                           </p>
                         </div>
                       </div>

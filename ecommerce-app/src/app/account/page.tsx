@@ -1,30 +1,29 @@
+import { getCartAction } from '@/actions/cart-actions';
+import { getMyOrdersAction } from '@/actions/order-actions';
+import { getWishlistAction } from '@/actions/wishlist-actions';
+import { auth } from '@/auth';
+import { AccountStats } from '@/components/account/AccountStats';
 import AuthGuard from '@/components/auth/auth-guard';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/utils/formatters';
-import { 
-  Heart, 
-  Package, 
-  Settings, 
-  ShoppingCart, 
-  User,
-  TrendingUp,
+import {
   Calendar,
+  Heart,
   Mail,
-  Shield
+  Package,
+  Settings,
+  Shield,
+  ShoppingCart,
+  TrendingUp,
 } from 'lucide-react';
-import { auth } from '@/auth';
-import { getMyOrdersAction } from '@/actions/order-actions';
-import { getCartAction } from '@/actions/cart-actions';
-import { getWishlistAction } from '@/actions/wishlist-actions';
-import { AccountStats } from '@/components/account/AccountStats';
 import Link from 'next/link';
 
 /**
  * Account Page Component
- * 
+ *
  * Production-ready account dashboard with:
  * - Responsive grid layout
  * - Consistent typography scale
@@ -76,14 +75,14 @@ const AccountPage = async () => {
 
   return (
     <AuthGuard>
-      <div className='min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950'>
+      <div className='min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950'>
         <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16'>
           {/* Profile Header */}
           <header className='mb-8 sm:mb-12'>
             <div className='flex flex-col sm:flex-row items-start sm:items-center gap-6'>
               {/* Avatar */}
               <div className='relative group'>
-                <div className='w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg ring-4 ring-white dark:ring-slate-800 transition-transform group-hover:scale-105'>
+                <div className='w-20 h-20 sm:w-24 sm:h-24 bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg ring-4 ring-white dark:ring-slate-800 transition-transform group-hover:scale-105'>
                   <span className='text-3xl sm:text-4xl font-bold'>
                     {userInitials}
                   </span>
@@ -97,17 +96,22 @@ const AccountPage = async () => {
               <div className='flex-1'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
                   <div>
-                    <h1 className='text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent mb-2'>
+                    <h1 className='text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight bg-linear-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent mb-2'>
                       {user?.name || 'Welcome'}
                     </h1>
                     <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm sm:text-base text-slate-600 dark:text-slate-400'>
                       <div className='flex items-center gap-2'>
-                        <Mail className='h-4 w-4 flex-shrink-0' />
-                        <span className='truncate'>{user?.email || 'user@example.com'}</span>
+                        <Mail className='h-4 w-4 shrink-0' />
+                        <span className='truncate'>
+                          {user?.email || 'user@example.com'}
+                        </span>
                       </div>
-                      <Separator orientation='vertical' className='hidden sm:block h-4' />
+                      <Separator
+                        orientation='vertical'
+                        className='hidden sm:block h-4'
+                      />
                       <div className='flex items-center gap-2'>
-                        <Calendar className='h-4 w-4 flex-shrink-0' />
+                        <Calendar className='h-4 w-4 shrink-0' />
                         <span>Member since {memberSince}</span>
                       </div>
                     </div>
@@ -115,8 +119,8 @@ const AccountPage = async () => {
 
                   {/* Edit Profile Button - Desktop */}
                   <Link href='/account/edit' className='hidden sm:block'>
-                    <Button 
-                      size='lg' 
+                    <Button
+                      size='lg'
                       className='gap-2 shadow-md hover:shadow-lg transition-shadow'
                     >
                       <Settings className='h-4 w-4' />
@@ -127,17 +131,20 @@ const AccountPage = async () => {
 
                 {/* Role Badge */}
                 <div className='flex items-center gap-2 mt-4'>
-                  <Badge 
-                    variant='secondary' 
-                    className='text-sm px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800'
+                  <Badge
+                    variant='secondary'
+                    className='text-sm px-3 py-1 bg-linear-to-r from-blue-100 to-purple-100 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800'
                   >
                     <Shield className='h-3 w-3 mr-1.5' />
-                    <span className='capitalize font-medium'>{user?.role || 'User'}</span>
+                    <span className='capitalize font-medium'>
+                      {user?.role || 'User'}
+                    </span>
                   </Badge>
                   {stats.totalOrders > 0 && (
                     <Badge variant='outline' className='text-sm px-3 py-1'>
                       <TrendingUp className='h-3 w-3 mr-1.5' />
-                      {stats.totalOrders} {stats.totalOrders === 1 ? 'Order' : 'Orders'}
+                      {stats.totalOrders}{' '}
+                      {stats.totalOrders === 1 ? 'Order' : 'Orders'}
                     </Badge>
                   )}
                 </div>
@@ -286,13 +293,17 @@ const AccountPage = async () => {
                     </h3>
                     <div className='space-y-4'>
                       <div className='flex justify-between items-center pb-4 border-b border-white/20'>
-                        <span className='text-blue-100 font-medium'>Total Orders</span>
+                        <span className='text-blue-100 font-medium'>
+                          Total Orders
+                        </span>
                         <span className='text-3xl font-bold tabular-nums'>
                           {stats.totalOrders}
                         </span>
                       </div>
                       <div className='flex justify-between items-center'>
-                        <span className='text-blue-100 font-medium'>Total Spent</span>
+                        <span className='text-blue-100 font-medium'>
+                          Total Spent
+                        </span>
                         <span className='text-3xl font-bold tabular-nums'>
                           {formatPrice(stats.totalSpent)}
                         </span>

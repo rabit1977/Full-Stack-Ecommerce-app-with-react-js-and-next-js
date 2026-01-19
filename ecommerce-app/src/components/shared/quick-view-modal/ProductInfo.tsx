@@ -11,12 +11,14 @@ export const ProductInfo = ({ product }: ProductInfoProps) => {
   return (
     <div className='space-y-1'>
       {/* Title and Brand */}
-      <div className='flex justify-between'>
+      <div className='flex justify-between  md:flex-row md:items-center mt-8 gap-2'>
         <h2 className='text-xl md:text-2xl font-bold text-foreground'>
           {product.title}
         </h2>
         {product.brand && (
-          <p className='text-sm text-muted-foreground mt-1 bg-accent rounded-full px-2 py-1'>{product.brand}</p>
+          <p className='text-sm text-muted-foreground bg-accent rounded-full px-2 py-1'>
+            brand * {product.brand}
+          </p>
         )}
       </div>
 

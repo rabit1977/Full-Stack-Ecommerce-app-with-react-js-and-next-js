@@ -1,4 +1,5 @@
 import { Product } from '@prisma/client';
+import { ProductWithRelations } from './product';
 
 export interface QuickViewState {
   quantity: number;
@@ -16,7 +17,7 @@ export interface ImageGalleryProps {
 }
 
 export interface ProductInfoProps {
-  product: Product;
+  product: ProductWithRelations;
 }
 
 export interface ProductOptionsProps {

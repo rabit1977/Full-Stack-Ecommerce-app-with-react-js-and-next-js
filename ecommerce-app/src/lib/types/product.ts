@@ -31,7 +31,7 @@ export type Product = Omit<PrismaProduct, 'options' | 'specifications'> & {
 /**
  * Product with image relations
  */
-export type ProductWithImages = Product & {
+export type ProductWithImages = ProductWithRelations & {
   images: {
     id: string;
     url: string;

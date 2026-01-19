@@ -357,7 +357,7 @@ export async function createOrderAction(details: {
       const shippingCost = 5;
       const tax = subtotal * 0.1;
       const discount = 0;
-      const grandTotal = subtotal + tax + shippingCost - discount;
+      const total = subtotal + tax + shippingCost - discount;
 
       const order = await tx.order.create({
         data: {
@@ -366,8 +366,8 @@ export async function createOrderAction(details: {
           tax,
           shippingCost,
           discount,
-          grandTotal,
-          total: grandTotal,
+          total,
+          total: total,
           status: 'Pending',
           shippingAddress: JSON.stringify(details.shippingAddress),
           billingAddress: JSON.stringify(details.shippingAddress),

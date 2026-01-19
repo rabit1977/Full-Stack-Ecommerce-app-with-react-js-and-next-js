@@ -19,7 +19,7 @@ export const testimonialsData: Testimonial[] = [
   },
   {
     quote:
-      'Fast shipping and excellent customer service! Highly recommend this store.',
+      'Fast shipping and excellent User service! Highly recommend this store.',
     name: 'Emily W.',
     rating: 5,
   },

@@ -26,7 +26,7 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { href: '/products', label: 'Products', icon: Package },
   { href: '/about', label: 'About', icon: Info },
-  { href: '/contact', label: 'Customer Care', icon: Headset },
+  { href: '/contact', label: 'User Care', icon: Headset },
   { href: '/services', label: 'Services', icon: Briefcase },
 ];
 
@@ -63,7 +63,7 @@ const Header = ({
       if (href === '/') return pathname === '/';
       return pathname.startsWith(href);
     },
-    [pathname]
+    [pathname],
   );
 
   return (
@@ -106,7 +106,7 @@ const Header = ({
                   'text-sm font-medium transition-colors relative',
                   isActive
                     ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
@@ -118,7 +118,7 @@ const Header = ({
                         'mb-0.5 inline-block h-4 w-4 hover:text-foreground group shrink-0 items-center justify-center',
                         isActive
                           ? 'text-foreground'
-                          : 'text-muted-foreground group-hover:text-foreground'
+                          : 'text-muted-foreground group-hover:text-foreground',
                       )}
                     />
                   )}

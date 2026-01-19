@@ -1,5 +1,6 @@
-import { CartItem as PrismaCartItem, Product } from '@prisma/client';
+import { CartItem as PrismaCartItem } from '@prisma/client';
+import { ProductWithRelations } from './product';
 
 export type CartItemWithProduct = PrismaCartItem & {
-  product: Product;
+  product: ProductWithRelations;
 };

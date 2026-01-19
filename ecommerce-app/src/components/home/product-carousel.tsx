@@ -43,9 +43,9 @@ const SWIPE_CONFIDENCE_THRESHOLD = 10000;
 
 /**
  * Product Carousel Component
- * 
+ *
  * Interactive carousel for showcasing featured products
- * 
+ *
  * Features:
  * - Auto-play with pause on hover
  * - Swipe/drag support
@@ -161,9 +161,9 @@ export const ProductCarousel = ({
               sizes='100vw'
               quality={90}
             />
-            {/* Gradient Overlay */}
-            <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent' />
-            
+            {/* linear Overlay */}
+            <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent' />
+
             {/* Content */}
             <div className='absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-12'>
               <div className='max-w-4xl space-y-3 sm:space-y-4'>
@@ -173,17 +173,17 @@ export const ProductCarousel = ({
                     {currentProduct.category}
                   </div>
                 )}
-                
+
                 {/* Title */}
                 <h2 className='text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight drop-shadow-lg'>
                   {currentProduct.title}
                 </h2>
-                
+
                 {/* Description */}
                 <p className='text-sm sm:text-base lg:text-lg text-slate-200 max-w-2xl line-clamp-2 drop-shadow-md'>
                   {currentProduct.description}
                 </p>
-                
+
                 {/* Price & Rating */}
                 <div className='flex items-center gap-3 sm:gap-4 flex-wrap'>
                   {currentProduct.discount > 0 ? (
@@ -206,7 +206,7 @@ export const ProductCarousel = ({
                       {formatPrice(currentProduct.price)}
                     </span>
                   )}
-                  
+
                   {currentProduct.rating > 0 && (
                     <div className='flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg'>
                       <Star className='h-4 w-4 fill-yellow-400 text-yellow-400' />
@@ -216,7 +216,7 @@ export const ProductCarousel = ({
                     </div>
                   )}
                 </div>
-                
+
                 {/* CTA Button */}
                 <Button
                   size='lg'
@@ -246,7 +246,7 @@ export const ProductCarousel = ({
           >
             <ChevronLeft className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform' />
           </button>
-          
+
           {/* Next Button */}
           <button
             onClick={() => paginate(1)}
@@ -255,7 +255,7 @@ export const ProductCarousel = ({
           >
             <ChevronRight className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform' />
           </button>
-          
+
           {/* Slide Indicators */}
           <div className='absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10'>
             {carouselProducts.map((_, index) => (
@@ -272,7 +272,7 @@ export const ProductCarousel = ({
               />
             ))}
           </div>
-          
+
           {/* Play/Pause Control */}
           <div className='absolute top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-2 z-10'>
             {isPaused && (

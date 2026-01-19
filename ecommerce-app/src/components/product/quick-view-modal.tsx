@@ -1,6 +1,7 @@
 'use client';
 
 import { addItemToCartAction } from '@/actions/cart-actions';
+import { toggleWishlistAction } from '@/actions/wishlist-actions';
 import { Separator } from '@/components/ui/separator';
 import { useQuickView } from '@/lib/context/quick-view-context';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -13,17 +14,53 @@ import { ProductOptions } from '../shared/quick-view-modal/ProductOptions';
 import { QuantitySelector } from '../shared/quick-view-modal/QuantitySelector';
 import { ProductImageCarousel } from './product-image-carousel';
 
-export function QuickViewModal() {
+interface ProductQuickViewProps {
+  // You might pass initial wishlist state here if available
+  initialIsWished?: boolean;
+}
+
+export function QuickViewModal({
+  initialIsWished = false,
+}: ProductQuickViewProps) {
   const { isOpen, product, closeModal } = useQuickView();
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, string>
   >({});
   const [isPending, startTransition] = useTransition();
+  const [isWished, setIsWished] = useState(initialIsWished);
 
   if (!isOpen || !product) {
     return null;
   }
+
+  // 2. The Logic (Identical to your ProductPurchasePanel)
+  const handleToggleWishlist = () => {
+    startTransition(async () => {
+      // Optimistic update (optional, makes it feel faster)
+      setIsWished((prev) => !prev);
+
+      const result = await toggleWishlistAction(product.id);
+
+      if (!result.success) {
+        // Revert on failure
+        setIsWished((prev) => !prev);
+        toast.error(result.error ?? 'Wishlist update failed');
+        return;
+      }
+
+      // Sync with server response
+      const wished = result.wishlist.includes(product.id);
+      setIsWished(wished);
+
+      toast.success(wished ? 'Added to wishlist' : 'Removed from wishlist');
+    });
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied to clipboard');
+  };
 
   const handleAddToCart = () => {
     startTransition(async () => {
@@ -42,6 +79,7 @@ export function QuickViewModal() {
   };
 
   const isOutOfStock = product.stock === 0;
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -63,9 +101,9 @@ export function QuickViewModal() {
           >
             <ModalHeader
               onClose={closeModal}
-              onToggleWishlist={() => {}} // TODO
-              isWished={false} // TODO
-              onShare={() => {}} // TODO
+              onToggleWishlist={handleToggleWishlist} // TODO
+              isWished={isWished} // TODO
+              onShare={handleShare} // TODO
             />
 
             <div className='p-6 flex flex-col md:flex-row gap-8 md:gap-12 shadow-lg rounded-xl border'>

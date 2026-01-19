@@ -157,7 +157,7 @@ export const NavActions = ({
             <div className='p-4 border-b'>
               <p className='text-sm font-medium dark:text-white'>{user.name}</p>
               <p className='text-xs text-slate-500 dark:text-slate-400'>
-                {user.email || 'customer'}
+                {user.email || 'User'}
               </p>
             </div>
 

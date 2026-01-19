@@ -58,7 +58,7 @@ export const FeaturedProducts = ({
 
           {/* View All Button - Desktop */}
           {showViewAll && (
-            <Button asChild size='lg' className='hidden sm:inline-flex gap-2'>
+            <Button asChild size='lg' className='hidden sm:inline-flex gap-2 '>
               <Link href='/products'>
                 View All Products
                 <ArrowRight className='h-4 w-4' />
@@ -72,12 +72,18 @@ export const FeaturedProducts = ({
 
         {/* Bottom CTA - Mobile */}
         {showViewAll && (
-          <Button asChild size='lg' className='gap-2 w-full max-w-md'>
-            <Link href='/products'>
-              View All Products
-              <ArrowRight className='h-4 w-4' />
-            </Link>
-          </Button>
+          <div className='mt-10 flex justify-center sm:hidden'>
+            <Button
+              asChild
+              size='lg'
+              className='gap-2 w-full flex justify-center max-w-md'
+            >
+              <Link href='/products'>
+                View All Products
+                <ArrowRight className='h-4 w-4' />
+              </Link>
+            </Button>
+          </div>
         )}
       </div>
     </section>

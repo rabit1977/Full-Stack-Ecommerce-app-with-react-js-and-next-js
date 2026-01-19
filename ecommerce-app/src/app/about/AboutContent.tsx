@@ -28,7 +28,7 @@ const values = [
   },
   {
     icon: <Heart className='h-8 w-8 text-red-500' />,
-    title: 'Customer First',
+    title: 'User First',
     description:
       "Your satisfaction is our priority. We're here to help you every step of the way.",
   },
@@ -114,8 +114,7 @@ export const AboutContent = () => {
                 From the smallest smart gadget to the most powerful computing
                 device, every product on our platform is hand-picked and
                 rigorously tested. We stand behind our products with a
-                commitment to quality and customer service that is second to
-                none.
+                commitment to quality and User service that is second to none.
               </p>
             </div>
           </div>

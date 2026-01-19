@@ -59,7 +59,6 @@ export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
           src={currentImage as string}
           alt={`${product.title} - Image ${activeImageIndex + 1}`}
           fill
-          priority={true}
           className={cn(
             'object-cover transition-all duration-500',
             isImageLoaded ? 'scale-100 opacity-100' : 'scale-95 opacity-0',

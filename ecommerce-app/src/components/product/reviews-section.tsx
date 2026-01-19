@@ -19,7 +19,7 @@ import { AddReviewForm } from './add-review-form';
 
 interface ReviewsSectionProps {
   productId: string;
-  product?: ProductWithRelations ;
+  product?: ProductWithRelations;
 }
 
 const ReviewsSection = ({
@@ -80,7 +80,7 @@ const ReviewsSection = ({
     <div className='mt-12 py-8 border-t dark:border-slate-800'>
       <div className='flex justify-between items-center'>
         <h2 className='text-2xl font-bold tracking-tight text-slate-900 dark:text-white'>
-          Customer Reviews
+          User Reviews
         </h2>
         {user && userReview && !editingReview && (
           <div className='flex items-center gap-2'>

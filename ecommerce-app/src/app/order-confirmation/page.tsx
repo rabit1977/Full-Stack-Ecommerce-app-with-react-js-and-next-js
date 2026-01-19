@@ -110,7 +110,7 @@ function OrderConfirmationContent() {
         {/* Buyer */}
         <Card>
           <CardHeader>
-            <CardTitle>Customer</CardTitle>
+            <CardTitle>User</CardTitle>
           </CardHeader>
           <CardContent className='flex items-center gap-4'>
             <Avatar className='h-10 w-10'>

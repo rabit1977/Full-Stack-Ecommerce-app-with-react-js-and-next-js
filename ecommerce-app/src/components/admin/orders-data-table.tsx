@@ -56,7 +56,7 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
           <TableRow>
             <TableHead>Order ID</TableHead>
             <TableHead>Date</TableHead>
-            <TableHead>Customer</TableHead>
+            <TableHead>User</TableHead>
             <TableHead className='hidden md:table-cell'>Total</TableHead>
             <TableHead className='hidden md:table-cell'>Status</TableHead>
             <TableHead>
@@ -67,11 +67,15 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.id}>
-              <TableCell className='font-medium'>{order.id.slice(-8)}</TableCell>
+              <TableCell className='font-medium'>
+                {order.id.slice(-8)}
+              </TableCell>
               <TableCell>
                 {new Date(order.createdAt).toLocaleDateString()}
               </TableCell>
-              <TableCell>{JSON.parse(order.shippingAddress as string).name}</TableCell>
+              <TableCell>
+                {JSON.parse(order.shippingAddress as string).name}
+              </TableCell>
               <TableCell className='hidden md:table-cell'>
                 {formatPrice(order.total)}
               </TableCell>
@@ -81,10 +85,10 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                     order.status === 'Pending'
                       ? 'secondary'
                       : order.status === 'Shipped'
-                      ? 'outline'
-                      : order.status === 'Delivered'
-                      ? 'default'
-                      : 'destructive'
+                        ? 'outline'
+                        : order.status === 'Delivered'
+                          ? 'default'
+                          : 'destructive'
                   }
                 >
                   {order.status}
@@ -93,7 +97,12 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup='true' size='icon' variant='ghost' disabled={isPending}>
+                    <Button
+                      aria-haspopup='true'
+                      size='icon'
+                      variant='ghost'
+                      disabled={isPending}
+                    >
                       <MoreHorizontal className='h-4 w-4' />
                       <span className='sr-only'>Toggle menu</span>
                     </Button>
@@ -110,7 +119,15 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                         Update Status
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent>
-                        {(['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'] as OrderStatus[]).map((status) => (
+                        {(
+                          [
+                            'Pending',
+                            'Processing',
+                            'Shipped',
+                            'Delivered',
+                            'Cancelled',
+                          ] as OrderStatus[]
+                        ).map((status) => (
                           <DropdownMenuItem
                             key={status}
                             onClick={() => handleStatusChange(order.id, status)}

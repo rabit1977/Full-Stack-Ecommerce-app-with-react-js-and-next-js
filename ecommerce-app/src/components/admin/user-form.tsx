@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,77 +18,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { User, UserRole } from '@prisma/client';
+import { Loader2, Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-// Schema for creating new user (password required)
-// Match your Prisma UserRole enum values
-const createUserSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.email({ message: 'Invalid email address.' }),
-  password: z
-    .string()
-    .min(6, { message: 'Password must be at least 6 characters.' }),
-  role: z.enum(UserRole, { message: 'Please select a role.' }),
+/**
+ * Form validation schema
+ */
+const userFormSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['USER', 'ADMIN']),
+  bio: z.string().optional(),
 });
 
-// Schema for editing user (password optional)
-const editUserSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.email({ message: 'Invalid email address.' }),
-  password: z
-    .string()
-    .min(6, { message: 'Password must be at least 6 characters.' })
-    .optional()
-    .or(z.literal('')),
-  role: z.nativeEnum(UserRole, { message: 'Please select a role.' }),
-});
+type UserFormValues = z.infer<typeof userFormSchema>;
 
-// Export types
-export type CreateUserFormValues = z.infer<typeof createUserSchema>;
-export type EditUserFormValues = z.infer<typeof editUserSchema>;
-
-// ✅ Two separate prop interfaces
-interface CreateUserFormProps {
-  user?: null;
-  onSubmit: (values: CreateUserFormValues) => void | Promise<void>;
+interface UserFormProps {
+  onSubmit: (values: UserFormValues) => void | Promise<void>;
   isSubmitting: boolean;
+  mode?: 'create' | 'edit';
 }
 
-interface EditUserFormProps {
-  user: User;
-  onSubmit: (values: EditUserFormValues) => void | Promise<void>;
-  isSubmitting: boolean;
-}
-
-// Union type for props
-type UserFormProps = CreateUserFormProps | EditUserFormProps;
-
-export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
-  const isEditing = !!user;
-  const schema = isEditing ? editUserSchema : createUserSchema;
-
-  const form = useForm<CreateUserFormValues | EditUserFormValues>({
-    resolver: zodResolver(schema),
+/**
+ * User Form Component
+ * 
+ * Form for creating new users with validation
+ */
+export function UserForm({ onSubmit, isSubmitting, mode = 'create' }: UserFormProps) {
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(userFormSchema),
     defaultValues: {
-      name: user?.name || '',
-      email: user?.email || '',
+      name: '',
+      email: '',
       password: '',
-      role: user?.role || UserRole.USER,
+      role: 'USER',
+      bio: '',
     },
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit as any)} className='space-y-8'>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        {/* Name Field */}
         <FormField
           control={form.control}
           name='name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Full Name</FormLabel>
               <FormControl>
                 <Input
                   placeholder='John Doe'
@@ -95,61 +77,67 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
                   disabled={isSubmitting}
                 />
               </FormControl>
+              <FormDescription>
+                The user's full name as it will appear in the system
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Email Field */}
         <FormField
           control={form.control}
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email Address</FormLabel>
               <FormControl>
                 <Input
                   type='email'
-                  placeholder='john.doe@example.com'
+                  placeholder='john@example.com'
                   {...field}
                   disabled={isSubmitting}
                 />
               </FormControl>
+              <FormDescription>
+                Must be a valid email address for account verification
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Password Field */}
         <FormField
           control={form.control}
           name='password'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Password {isEditing && '(leave blank to keep unchanged)'}
-              </FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input
                   type='password'
-                  placeholder={
-                    isEditing
-                      ? 'Leave blank to keep current password'
-                      : 'Enter password (min 6 characters)'
-                  }
+                  placeholder='••••••••'
                   {...field}
                   disabled={isSubmitting}
                 />
               </FormControl>
+              <FormDescription>
+                Minimum 6 characters. User can change this later.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Role Field */}
         <FormField
           control={form.control}
           name='role'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Role</FormLabel>
+              <FormLabel>Account Role</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
@@ -161,20 +149,67 @@ export const UserForm = ({ user, onSubmit, isSubmitting }: UserFormProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={UserRole.USER}>User</SelectItem>
-                  <SelectItem value={UserRole.CUSTOMER}>Customer</SelectItem>
-                  <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                  <SelectItem value='USER'>User (Standard Access)</SelectItem>
+                  <SelectItem value='ADMIN'>Admin (Full Access)</SelectItem>
                 </SelectContent>
               </Select>
+              <FormDescription>
+                Admin users have full access to all features
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type='submit' disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : user ? 'Save Changes' : 'Create User'}
-        </Button>
+        {/* Bio Field */}
+        <FormField
+          control={form.control}
+          name='bio'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Biography (Optional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder='Tell us a bit about this user...'
+                  className='resize-none'
+                  rows={4}
+                  {...field}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
+              <FormDescription>
+                Optional biography or notes about the user
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Submit Button */}
+        <div className='flex justify-end gap-4 pt-4'>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={() => form.reset()}
+            disabled={isSubmitting}
+          >
+            Reset Form
+          </Button>
+          <Button type='submit' disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                Creating User...
+              </>
+            ) : (
+              <>
+                <Save className='h-4 w-4 mr-2' />
+                Create User
+              </>
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );
-};
+}

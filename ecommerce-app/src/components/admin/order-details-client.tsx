@@ -67,7 +67,7 @@ type OrderStatus = OrderWithDetails['status'];
  * Get status badge variant
  */
 const getStatusVariant = (
-  status: OrderStatus
+  status: OrderStatus,
 ): 'default' | 'secondary' | 'destructive' | 'outline' => {
   const variants: Partial<
     Record<OrderStatus, 'default' | 'secondary' | 'destructive' | 'outline'>
@@ -112,7 +112,7 @@ export function OrderDetailsSkeleton() {
 interface OrderDetailsClientProps {
   order: OrderWithDetails | null;
   updateOrderStatusAction: (
-    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled'
+    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled',
   ) => Promise<{
     success: boolean;
     error?: string;
@@ -380,7 +380,7 @@ export default function OrderDetailsClient({
             <CardHeader>
               <CardTitle className='flex items-center gap-2 text-lg'>
                 <User className='h-5 w-5' />
-                Customer
+                User
               </CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -389,8 +389,7 @@ export default function OrderDetailsClient({
                   {order.user.name}
                 </p>
                 <p className='text-sm text-slate-500 dark:text-slate-400 mt-1'>
-                  Customer since{' '}
-                  {formatOrderDate(order.user.createdAt.toString())}
+                  User since {formatOrderDate(order.user.createdAt.toString())}
                 </p>
               </div>
               <Separator />

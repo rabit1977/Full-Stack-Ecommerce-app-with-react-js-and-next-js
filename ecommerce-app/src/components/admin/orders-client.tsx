@@ -4,8 +4,8 @@ import { OrdersDataTable } from '@/components/admin/orders-data-table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Order } from '@prisma/client';
 import { formatPrice } from '@/lib/utils/formatters';
+import { Order } from '@prisma/client';
 import { Clock, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -153,7 +153,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
     switch (activeTab) {
       case 'pending':
         return orders.filter(
-          (o) => o.status === 'Pending' || o.status === 'Processing'
+          (o) => o.status === 'Pending' || o.status === 'Processing',
         );
       case 'shipped':
         return orders.filter((o) => o.status === 'Shipped');
@@ -169,13 +169,13 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   const statusCounts = useMemo(
     () => ({
       pending: orders.filter(
-        (o) => o.status === 'Pending' || o.status === 'Processing'
+        (o) => o.status === 'Pending' || o.status === 'Processing',
       ).length,
       shipped: orders.filter((o) => o.status === 'Shipped').length,
       delivered: orders.filter((o) => o.status === 'Delivered').length,
       cancelled: orders.filter((o) => o.status === 'Cancelled').length,
     }),
-    [orders]
+    [orders],
   );
 
   return (
@@ -189,7 +189,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
           </h1>
         </div>
         <p className='text-slate-600 dark:text-slate-400'>
-          Manage and track customer orders ({orders.length} total)
+          Manage and track User orders ({orders.length} total)
         </p>
       </div>
 

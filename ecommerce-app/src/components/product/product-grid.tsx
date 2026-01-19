@@ -27,7 +27,6 @@ export const ProductGrid = ({
   currentMaxPrice,
   currentSort,
   pageSize = 8,
-  // ADD THESE TWO LINES BELOW to accept the full lists from the parent
   allCategories,
   allBrands,
 }: ProductGridProps) => {

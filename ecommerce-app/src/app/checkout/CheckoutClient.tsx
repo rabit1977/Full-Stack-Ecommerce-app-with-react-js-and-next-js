@@ -189,8 +189,6 @@ export function CheckoutClient({ cartItems }: CheckoutClientProps) {
         subtotal,
         tax: taxes,
         shippingCost,
-        discount: 0, // Not implemented yet
-        grandTotal: total,
         shippingAddress: JSON.stringify({
           name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
           street: shippingInfo.address,
@@ -310,7 +308,7 @@ export function CheckoutClient({ cartItems }: CheckoutClientProps) {
                     Shipping Method
                   </h3>
                   <div className='space-y-3'>
-                    <label className='flex items-center gap-3 cursor-pointer p-4 border-2 rounded-lg transition-all hover:border-slate-300 dark:hover:border-slate-600 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900 dark:border-slate-700'>
+                    <label className='flex items-center gap-3 cursor-pointer p-4 border-2 rounded-lg transition-all hover:border-slate-300 dark:hover:border-slate-600 has-:checked:border-blue-600 has-:checked:bg-blue-50 dark:has-:checked:bg-blue-900 dark:border-slate-700'>
                       <input
                         type='radio'
                         name='shipping'
@@ -333,7 +331,7 @@ export function CheckoutClient({ cartItems }: CheckoutClientProps) {
                         </p>
                       </div>
                     </label>
-                    <label className='flex items-center gap-3 cursor-pointer p-4 border-2 rounded-lg transition-all hover:border-slate-300 dark:hover:border-slate-600 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900 dark:border-slate-700'>
+                    <label className='flex items-center gap-3 cursor-pointer p-4 border-2 rounded-lg transition-all hover:border-slate-300 dark:hover:border-slate-600 has-:checked:border-blue-600 has-:checked:bg-blue-50 dark:has-:checked:bg-blue-900 dark:border-slate-700'>
                       <input
                         type='radio'
                         name='shipping'

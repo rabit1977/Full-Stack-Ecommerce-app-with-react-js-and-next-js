@@ -54,7 +54,7 @@ export const CartItem = React.memo(
 
     return (
       <li className='flex flex-col py-6 sm:flex-row px-4'>
-        <div className='h-48 w-full flex-shrink-0 overflow-hidden rounded-md border dark:border-slate-800 sm:h-24 sm:w-24'>
+        <div className='h-48 w-full shrink-0 overflow-hidden rounded-md border dark:border-slate-800 sm:h-24 sm:w-24'>
           <Image
             src={getProductImage(item.product)}
             alt={item.product.title}
@@ -74,7 +74,7 @@ export const CartItem = React.memo(
                   {item.product.title}
                 </Link>
               </h3>
-              <p className='mt-1 flex-shrink-0 sm:ml-4 sm:mt-0'>
+              <p className='mt-1 shrink-0 sm:ml-4 sm:mt-0'>
                 {formatPrice(item.product.price * item.quantity)}
               </p>
             </div>
