@@ -30,7 +30,7 @@ export default async function RootLayout({
 
   const initialWishlistCount = wishlist.length;
   const initialCartItemCount = cart.items.reduce(
-    (sum, item) => sum + item.quantity,
+    (sum: number, item: any) => sum + item.quantity,
     0,
   );
 

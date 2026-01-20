@@ -367,7 +367,6 @@ export async function createOrderAction(details: {
           shippingCost,
           discount,
           total,
-          total: total,
           status: 'Pending',
           shippingAddress: JSON.stringify(details.shippingAddress),
           billingAddress: JSON.stringify(details.shippingAddress),

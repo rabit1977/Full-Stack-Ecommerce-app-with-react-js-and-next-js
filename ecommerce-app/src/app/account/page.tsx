@@ -49,8 +49,11 @@ const AccountPage = async () => {
   // Calculate statistics
   const stats = {
     totalOrders: orders.length,
-    totalSpent: orders.reduce((sum, order) => sum + order.total, 0),
-    cartItemsCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    totalSpent: orders.reduce((sum: number, order) => sum + order.total, 0),
+    cartItemsCount: cartItems.reduce(
+      (sum: number, item: any) => sum + item.quantity,
+      0,
+    ),
     wishlistItemsCount: wishlist.length,
   };
 

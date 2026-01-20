@@ -1,6 +1,8 @@
 // app/admin/users/[id]/page.tsx
 
 import { getUserByIdAction } from '@/actions/user-actions';
+import { auth } from '@/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,24 +13,20 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDateTime } from '@/lib/utils/formatters';
 import {
   ArrowLeft,
   Calendar,
+  CheckCircle2,
   Edit,
-  Heart,
   Mail,
+  Shield,
   ShoppingBag,
   Star,
-  User as UserIcon,
-  Shield,
-  CheckCircle2,
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { auth } from '@/auth';
 
 interface UserDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -36,7 +34,7 @@ interface UserDetailsPageProps {
 
 /**
  * User Details Page - Server Component
- * 
+ *
  * Displays comprehensive user information for admin review
  */
 export default async function UserDetailsPage({
@@ -64,10 +62,13 @@ export default async function UserDetailsPage({
   // Calculate user statistics
   const totalOrders = user.orders?.length || 0;
   const totalReviews = user.reviews?.length || 0;
-  const totalSpent = user.orders?.reduce((sum, order) => sum + order.total, 0) || 0;
-  const averageRating = totalReviews > 0
-    ? (user.reviews?.reduce((sum, review) => sum + review.rating, 0) || 0) / totalReviews
-    : 0;
+  const totalSpent =
+    user.orders?.reduce((sum, order) => sum + order.total, 0) || 0;
+  const averageRating =
+    totalReviews > 0
+      ? (user.reviews?.reduce((sum, review) => sum + review.rating, 0) || 0) /
+        totalReviews
+      : 0;
 
   return (
     <div className='container mx-auto px-4 py-8'>
@@ -81,7 +82,9 @@ export default async function UserDetailsPage({
               </Link>
             </Button>
             <div>
-              <h1 className='text-3xl font-bold tracking-tight'>User Details</h1>
+              <h1 className='text-3xl font-bold tracking-tight'>
+                User Details
+              </h1>
               <p className='text-muted-foreground mt-1'>
                 Comprehensive user account information
               </p>
@@ -103,7 +106,10 @@ export default async function UserDetailsPage({
               <CardHeader>
                 <div className='flex items-start gap-4'>
                   <Avatar className='h-20 w-20'>
-                    <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
+                    <AvatarImage
+                      src={user.image || undefined}
+                      alt={user.name || 'User'}
+                    />
                     <AvatarFallback className='text-2xl'>
                       {user.name?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
@@ -111,14 +117,18 @@ export default async function UserDetailsPage({
                   <div className='flex-1 space-y-2'>
                     <div className='flex items-center justify-between'>
                       <div>
-                        <CardTitle className='text-2xl'>{user.name || 'No name'}</CardTitle>
+                        <CardTitle className='text-2xl'>
+                          {user.name || 'No name'}
+                        </CardTitle>
                         <CardDescription className='flex items-center gap-2 mt-1'>
                           <Mail className='h-4 w-4' />
                           {user.email}
                         </CardDescription>
                       </div>
                       <Badge
-                        variant={user.role === 'ADMIN' ? 'destructive' : 'secondary'}
+                        variant={
+                          user.role === 'ADMIN' ? 'destructive' : 'secondary'
+                        }
                         className='text-sm'
                       >
                         <Shield className='h-3 w-3 mr-1' />
@@ -147,24 +157,40 @@ export default async function UserDetailsPage({
               </CardHeader>
               <CardContent className='space-y-4'>
                 <Separator />
-                
+
                 {/* Account Details */}
                 <div className='grid grid-cols-2 gap-4'>
                   <div>
-                    <p className='text-sm font-medium text-muted-foreground'>User ID</p>
-                    <p className='text-sm font-mono mt-1 break-all'>{user.id}</p>
+                    <p className='text-sm font-medium text-muted-foreground'>
+                      User ID
+                    </p>
+                    <p className='text-sm font-mono mt-1 break-all'>
+                      {user.id}
+                    </p>
                   </div>
                   <div>
-                    <p className='text-sm font-medium text-muted-foreground'>Account Type</p>
-                    <p className='text-sm mt-1 capitalize'>{user.role?.toLowerCase() || 'User'}</p>
+                    <p className='text-sm font-medium text-muted-foreground'>
+                      Account Type
+                    </p>
+                    <p className='text-sm mt-1 capitalize'>
+                      {user.role?.toLowerCase() || 'User'}
+                    </p>
                   </div>
                   <div>
-                    <p className='text-sm font-medium text-muted-foreground'>Created At</p>
-                    <p className='text-sm mt-1'>{formatDateTime(user.createdAt)}</p>
+                    <p className='text-sm font-medium text-muted-foreground'>
+                      Created At
+                    </p>
+                    <p className='text-sm mt-1'>
+                      {formatDateTime(user.createdAt)}
+                    </p>
                   </div>
                   <div>
-                    <p className='text-sm font-medium text-muted-foreground'>Last Updated</p>
-                    <p className='text-sm mt-1'>{formatDateTime(user.updatedAt)}</p>
+                    <p className='text-sm font-medium text-muted-foreground'>
+                      Last Updated
+                    </p>
+                    <p className='text-sm mt-1'>
+                      {formatDateTime(user.updatedAt)}
+                    </p>
                   </div>
                 </div>
 
@@ -173,7 +199,9 @@ export default async function UserDetailsPage({
                   <>
                     <Separator />
                     <div>
-                      <p className='text-sm font-medium text-muted-foreground mb-2'>Biography</p>
+                      <p className='text-sm font-medium text-muted-foreground mb-2'>
+                        Biography
+                      </p>
                       <p className='text-sm leading-relaxed'>{user.bio}</p>
                     </div>
                   </>
@@ -186,7 +214,9 @@ export default async function UserDetailsPage({
               <Card>
                 <CardHeader>
                   <CardTitle>Recent Orders</CardTitle>
-                  <CardDescription>Latest {user.orders.length} orders</CardDescription>
+                  <CardDescription>
+                    Latest {user.orders.length} orders
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
@@ -196,13 +226,17 @@ export default async function UserDetailsPage({
                         className='flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors'
                       >
                         <div className='space-y-1'>
-                          <p className='text-sm font-medium'>Order #{order.id.slice(0, 8)}</p>
+                          <p className='text-sm font-medium'>
+                            Order #{order.id.slice(0, 8)}
+                          </p>
                           <p className='text-xs text-muted-foreground'>
                             {formatDateTime(order.createdAt)}
                           </p>
                         </div>
                         <div className='text-right'>
-                          <p className='text-sm font-semibold'>${order.total.toFixed(2)}</p>
+                          <p className='text-sm font-semibold'>
+                            ${order.total.toFixed(2)}
+                          </p>
                           <Badge variant='outline' className='text-xs'>
                             {order.status}
                           </Badge>
@@ -219,7 +253,9 @@ export default async function UserDetailsPage({
               <Card>
                 <CardHeader>
                   <CardTitle>Recent Reviews</CardTitle>
-                  <CardDescription>Latest {user.reviews.length} product reviews</CardDescription>
+                  <CardDescription>
+                    Latest {user.reviews.length} product reviews
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
@@ -270,7 +306,7 @@ export default async function UserDetailsPage({
                     </div>
                     <span className='text-lg font-bold'>{totalOrders}</span>
                   </div>
-                  
+
                   <div className='flex items-center justify-between p-3 bg-accent/50 rounded-lg'>
                     <div className='flex items-center gap-2'>
                       <Star className='h-4 w-4 text-yellow-600 dark:text-yellow-400' />
@@ -285,7 +321,9 @@ export default async function UserDetailsPage({
                         <ShoppingBag className='h-4 w-4 text-green-600 dark:text-green-400' />
                         <span className='text-sm font-medium'>Total Spent</span>
                       </div>
-                      <span className='text-lg font-bold'>${totalSpent.toFixed(2)}</span>
+                      <span className='text-lg font-bold'>
+                        ${totalSpent.toFixed(2)}
+                      </span>
                     </div>
                   )}
 
@@ -295,7 +333,9 @@ export default async function UserDetailsPage({
                         <Star className='h-4 w-4 text-purple-600 dark:text-purple-400' />
                         <span className='text-sm font-medium'>Avg. Rating</span>
                       </div>
-                      <span className='text-lg font-bold'>{averageRating.toFixed(1)}</span>
+                      <span className='text-lg font-bold'>
+                        {averageRating.toFixed(1)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -308,13 +348,21 @@ export default async function UserDetailsPage({
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className='space-y-2'>
-                <Button asChild variant='outline' className='w-full justify-start'>
+                <Button
+                  asChild
+                  variant='outline'
+                  className='w-full justify-start'
+                >
                   <Link href={`/admin/users/${user.id}/edit`}>
                     <Edit className='h-4 w-4 mr-2' />
                     Edit User
                   </Link>
                 </Button>
-                <Button asChild variant='outline' className='w-full justify-start'>
+                <Button
+                  asChild
+                  variant='outline'
+                  className='w-full justify-start'
+                >
                   <Link href={`/admin/orders?userId=${user.id}`}>
                     <ShoppingBag className='h-4 w-4 mr-2' />
                     View Orders

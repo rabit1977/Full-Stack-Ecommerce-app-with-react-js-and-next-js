@@ -203,16 +203,58 @@ export async function getCartAction() {
     const [cartItems, savedForLaterItems] = await Promise.all([
       prisma.cartItem.findMany({
         where: { userId: session.user.id },
-        include: { product: true },
+        include: {
+          product: {
+            include: {
+              images: { select: { id: true, url: true } },
+              reviews: {
+                select: {
+                  id: true,
+                  userId: true,
+                  rating: true,
+                  title: true,
+                  comment: true,
+                  helpful: true,
+                  verifiedPurchase: true,
+                  createdAt: true,
+                  user: { select: { name: true } }
+                }
+              }
+            }
+          }
+        },
         orderBy: { createdAt: 'desc' },
       }),
       prisma.savedForLater.findMany({
         where: { userId: session.user.id },
-        include: { product: true },
+        include: {
+          product: {
+            include: {
+              images: { select: { id: true, url: true } },
+              reviews: {
+                select: {
+                  id: true,
+                  userId: true,
+                  rating: true,
+                  title: true,
+                  comment: true,
+                  helpful: true,
+                  verifiedPurchase: true,
+                  createdAt: true,
+                  user: { select: { name: true } }
+                }
+              }
+            }
+          }
+        },
         orderBy: { createdAt: 'desc' },
       }),
     ]);
-    return { items: cartItems, savedForLater: savedForLaterItems };
+    
+    return {
+      items: cartItems as any,
+      savedForLater: savedForLaterItems as any
+    };
   } catch (error) {
     return emptyCart;
   }

@@ -26,7 +26,7 @@ export const priceFmt = formatPrice;
 export const formatCurrency = (
   amount: number,
   currency: string = 'USD',
-  locale: string = 'en-US'
+  locale: string = 'en-US',
 ): string => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -66,7 +66,7 @@ export const formatNumber = (num: number): string => {
  */
 export const formatPercentage = (
   value: number,
-  decimals: number = 0
+  decimals: number = 0,
 ): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'percent',
@@ -83,7 +83,7 @@ export const formatPercentage = (
  */
 export const formatDiscount = (
   originalPrice: number,
-  discountedPrice: number
+  discountedPrice: number,
 ): string => {
   if (originalPrice <= 0 || discountedPrice >= originalPrice) {
     return '';
@@ -111,7 +111,7 @@ export const formatOrderDate = (dateString: string): string => {
  * @param dateString - ISO date string
  * @returns Formatted date with time (e.g., "Jan 15, 2024, 3:45 PM")
  */
-export const formatDateTime = (dateString: string): string => {
+export const formatDateTime = (date: string | Date): string => {
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
@@ -119,7 +119,7 @@ export const formatDateTime = (dateString: string): string => {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }).format(new Date(dateString));
+  }).format(new Date(date));
 };
 
 /**
