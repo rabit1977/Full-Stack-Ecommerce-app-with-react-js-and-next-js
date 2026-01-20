@@ -5,7 +5,9 @@ import { Product as PrismaProduct, Prisma } from '@prisma/client';
  * Product option variant (single variant within an option)
  */
 export interface ProductOptionVariant {
+  name?: string;
   value: string;
+  image?: string;
   priceModifier?: number;
   inStock?: boolean;
 }
@@ -16,6 +18,7 @@ export interface ProductOptionVariant {
  */
 export interface ProductOption {
   name: string;
+  type: string;
   variants: ProductOptionVariant[];
 }
 
@@ -31,7 +34,7 @@ export type Product = Omit<PrismaProduct, 'options' | 'specifications'> & {
 /**
  * Product with image relations
  */
-export type ProductWithImages = ProductWithRelations & {
+export type ProductWithImages = Product & {
   images: {
     id: string;
     url: string;
@@ -62,9 +65,10 @@ export type ProductWithRelations = Product & {
     id: string;
     url: string;
   }[];
-  reviews: {
+  reviews?: {
     id: string;
     userId: string;
+    productId: string;
     rating: number;
     title: string;
     comment: string;

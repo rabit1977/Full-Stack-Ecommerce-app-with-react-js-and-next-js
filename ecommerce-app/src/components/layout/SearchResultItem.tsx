@@ -1,6 +1,6 @@
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
-import { Product } from '@prisma/client';
+import { Product } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 

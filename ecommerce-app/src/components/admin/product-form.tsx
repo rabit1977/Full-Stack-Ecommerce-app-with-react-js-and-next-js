@@ -17,14 +17,14 @@ import {
   productFormSchema,
   type ProductFormValues,
 } from '@/lib/schemas/product-schema';
-import { Product } from '@/lib/types';
+import { ProductWithRelations } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface ProductFormProps {
-  product?: Product | null;
+  product?: ProductWithRelations | null;
   onSubmit: (values: ProductFormValues) => void | Promise<void>;
   isSubmitting?: boolean;
 }
@@ -35,7 +35,9 @@ export const ProductForm = ({
   isSubmitting = false,
 }: ProductFormProps) => {
   const [useUrlInput, setUseUrlInput] = useState(true);
-  const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    product?.images?.map(img => img.url) || []
+  );
   const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProductFormValues>({
@@ -356,7 +358,7 @@ export const ProductForm = ({
           <Button
             type='submit'
             disabled={isSubmitting || isUploading}
-            className='min-w-[120px]'
+            className='min-w-30'
           >
             {isSubmitting ? (
               <>

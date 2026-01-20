@@ -71,7 +71,12 @@ function OrderConfirmationContent() {
         : await getMyOrdersAction();
 
       if (res.success) {
-        setOrder(orderId ? res.data : res.data[0] || null);
+        const orderData = res.data;
+        if (orderId) {
+          setOrder(orderData || null);
+        } else {
+          setOrder(Array.isArray(orderData) ? orderData[0] || null : null);
+        }
       } else {
         toast.error(res.error || 'Failed to fetch order details.');
       }

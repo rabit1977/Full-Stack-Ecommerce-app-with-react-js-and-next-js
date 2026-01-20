@@ -26,7 +26,7 @@ export const SearchDropdown = ({
     <div
       id='search-results'
       role='listbox'
-      className='absolute left-0 right-0 top-full z-50 mt-2 rounded-lg border bg-background shadow-lg max-h-[400px] overflow-auto'
+      className='absolute left-0 right-0 top-full z-50 mt-2 rounded-lg border bg-background shadow-lg max-h-100 overflow-auto'
     >
       {isLoading ? (
         <div className='flex items-center justify-center p-8'>

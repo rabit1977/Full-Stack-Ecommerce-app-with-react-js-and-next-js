@@ -12,6 +12,7 @@ declare module 'next-auth' {
       role: UserRole;
       bio?: string | null;
       wishlist: string[];
+      helpfulReviews: string[];
       createdAt: Date; // 🔥 Add createdAt here
     } & DefaultSession['user'];
   }
@@ -23,6 +24,7 @@ declare module 'next-auth' {
     id: string;
     role: UserRole;
     bio?: string | null;
+    helpfulReviews: string[];
     createdAt: Date; // 🔥 Add createdAt here
   }
 }
@@ -36,6 +38,7 @@ declare module 'next-auth/jwt' {
     role: UserRole;
     bio?: string | null;
     wishlist: string[];
+    helpfulReviews: string[];
     createdAt: Date; // 🔥 Add createdAt here
   }
 }

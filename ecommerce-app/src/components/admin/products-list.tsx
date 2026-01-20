@@ -1,6 +1,9 @@
 'use client';
 
-import { deleteMultipleProductsAction } from '@/actions/product-actions';
+import {
+  deleteMultipleProductsAction,
+  deleteProductAction,
+} from '@/actions/product-actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Product } from '@/lib/types';
@@ -24,7 +27,8 @@ export function ProductsList({ products }: ProductsListProps) {
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedIds(products.map((p) => p.id));
-    } else {
+    }
+    else {
       setSelectedIds([]);
     }
   };
@@ -32,7 +36,8 @@ export function ProductsList({ products }: ProductsListProps) {
   const handleSelectRow = (id: string, checked: boolean) => {
     if (checked) {
       setSelectedIds((prev) => [...prev, id]);
-    } else {
+    }
+    else {
       setSelectedIds((prev) => prev.filter((i) => i !== id));
     }
   };
@@ -46,7 +51,8 @@ export function ProductsList({ products }: ProductsListProps) {
         toast.success(result.message);
         setSelectedIds([]);
         router.refresh();
-      } else {
+      }
+      else {
         toast.error(result.error);
       }
     });
@@ -130,6 +136,7 @@ export function ProductsList({ products }: ProductsListProps) {
             <DeleteProductButton
               productId={product.id}
               productTitle={product.title}
+              deleteProductAction={deleteProductAction}
             />
           </div>
         </div>

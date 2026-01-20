@@ -2,18 +2,18 @@ import { getProductsByIdsAction } from '@/actions/product-actions';
 import { getWishlistAction } from '@/actions/wishlist-actions';
 import AuthGuard from '@/components/auth/auth-guard';
 import { Button } from '@/components/ui/button';
-import { Product } from '@prisma/client';
+import { ProductWithRelations } from '@/lib/types';
 import { Heart } from 'lucide-react';
-import { WishlistClient } from './WishlistClient';
 import Link from 'next/link';
+import { WishlistClient } from './WishlistClient';
 
 const WishlistPage = async () => {
   const { wishlist: wishlistItems } = await getWishlistAction();
-  let products: Product[] = [];
+  let products: ProductWithRelations[] = [];
 
   if (wishlistItems.length > 0) {
     const fetchedProducts = await getProductsByIdsAction(wishlistItems);
-    products = fetchedProducts.filter((p) => p !== null) as Product[];
+    products = fetchedProducts.filter((p) => p !== null);
   }
 
   return (

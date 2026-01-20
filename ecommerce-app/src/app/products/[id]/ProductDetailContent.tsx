@@ -22,7 +22,8 @@ export async function ProductDetailContent({
 
   const initialIsWished = wishlist.includes(product.id);
   const initialQuantityInCart =
-    cart.items.find((item) => item.productId === product.id)?.quantity || 0;
+    cart.items.find((item: any) => item.productId === product.id)?.quantity ||
+    0;
 
   return (
     <div className='container mx-auto px-4 py-8'>

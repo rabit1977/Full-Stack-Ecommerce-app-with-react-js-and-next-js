@@ -2,15 +2,15 @@
 
 import { getFiltersAction, getProductsAction } from '@/actions/product-actions';
 import { ProductGrid } from '@/components/product/product-grid'; // Check case: product-grid vs ProductGrid
-import { Product, SortKey } from '@/lib/types';
+import { ProductWithImages, SortKey } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const ProductsPage = () => {
   const searchParams = useSearchParams();
-  
+
   // Product Data States
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithImages[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isProductLoading, setIsProductLoading] = useState(true);
 
@@ -50,16 +50,17 @@ const ProductsPage = () => {
       const page = Number(params.get('page')) || 1;
 
       try {
-        const { products: newProducts, totalCount: newTotal } = await getProductsAction({
-          query,
-          categories,
-          brands,
-          minPrice,
-          maxPrice,
-          sort,
-          page,
-          limit: 8,
-        });
+        const { products: newProducts, totalCount: newTotal } =
+          await getProductsAction({
+            query,
+            categories,
+            brands,
+            minPrice,
+            maxPrice,
+            sort,
+            page,
+            limit: 8,
+          });
 
         setProducts(newProducts);
         setTotalCount(newTotal);
@@ -85,8 +86,12 @@ const ProductsPage = () => {
   // Only use the full screen loader for the INITIAL load of filters
   // Do NOT use it for subsequent product filtering
   if (!filtersLoaded) {
-     // You can use your LoadingOverlay here if you want a full screen load initially
-     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    // You can use your LoadingOverlay here if you want a full screen load initially
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -94,11 +99,9 @@ const ProductsPage = () => {
       // Data
       products={products}
       totalCount={totalCount}
-      
       // Filter Lists (Passed from the one-time fetch)
       allCategories={allCategories}
       allBrands={allBrands}
-      
       // Current State (from URL)
       currentPage={page}
       currentCategories={categories}

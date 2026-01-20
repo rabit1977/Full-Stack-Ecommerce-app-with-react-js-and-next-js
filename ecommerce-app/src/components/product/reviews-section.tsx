@@ -38,7 +38,7 @@ const ReviewsSection = ({
   // Find user's review - now call hooks before early return
   const userReview = useMemo(() => {
     if (!user) return null;
-    return reviews.find((review) => review.author === user.name) || null;
+    return reviews.find((review) => review.userId === user.id) || null;
   }, [reviews, user]);
 
   const [editingReview, setEditingReview] = useState<Review | null>(null);
@@ -124,17 +124,17 @@ const ReviewsSection = ({
         ) : (
           reviews.map((review) => {
             const isHelpful = user?.helpfulReviews?.includes(review.id);
-            const isUserReview = user && user.name === review.author;
+            const isUserReview = user && user.id === review.userId;
             return (
               <div key={review.id} className='flex flex-col sm:flex-row gap-4'>
                 <div className='shrink-0 w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-200'>
-                  {(review.author || '?').charAt(0).toUpperCase()}
+                  {(review.user.name || '?').charAt(0).toUpperCase()}
                 </div>
                 <div className='flex-1'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-2'>
                       <h4 className='font-semibold text-slate-900 dark:text-white'>
-                        {review.author || 'Anonymous'}
+                        {review.user.name || 'Anonymous'}
                       </h4>
                       <Stars value={review.rating} />
                     </div>

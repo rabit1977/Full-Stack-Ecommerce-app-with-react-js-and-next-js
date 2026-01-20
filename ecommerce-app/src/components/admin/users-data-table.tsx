@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { User } from '@/types';
+import { User } from '@/lib/types';
 import { deleteUserFromAdminAction } from '@/actions/user-actions';
 import { MoreHorizontal, Trash2, Eye, Edit, UserCog } from 'lucide-react';
 import Link from 'next/link';

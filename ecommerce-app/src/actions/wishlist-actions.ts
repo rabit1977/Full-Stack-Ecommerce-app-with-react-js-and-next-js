@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
-type ToggleWishlistResult = {
+type WishlistActionResult = {
   success: boolean;
   wishlist: string[];
   error?: string;
@@ -13,7 +13,7 @@ type ToggleWishlistResult = {
 /**
  * Get the product IDs of all items in the current user's wishlist.
  */
-export async function getWishlistAction() {
+export async function getWishlistAction(): Promise<WishlistActionResult> {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, error: 'Unauthorized', wishlist: [] };
@@ -40,7 +40,7 @@ export async function getWishlistAction() {
  */
 export async function toggleWishlistAction(
   productId: string,
-): Promise<ToggleWishlistResult> {
+): Promise<WishlistActionResult> {
   console.log('toggleWishlistAction called with productId:', productId);
   const session = await auth();
   console.log('toggleWishlistAction - session:', session);

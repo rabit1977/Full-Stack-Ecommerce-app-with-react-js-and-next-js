@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Product } from '@/lib/types';
-import { getInitialOptions, getInitialActiveImage } from '../utils/quickview';
+import { ProductWithImages } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import { getInitialActiveImage, getInitialOptions } from '../utils/quickview';
 
-export const useQuickViewState = (product: Product | undefined) => {
+export const useQuickViewState = (product: ProductWithImages | undefined) => {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<
+    Record<string, string>
+  >({});
   const [activeImage, setActiveImage] = useState<string>('');
   const [validationError, setValidationError] = useState<string>('');
 

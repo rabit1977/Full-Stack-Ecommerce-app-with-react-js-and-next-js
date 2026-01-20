@@ -1,4 +1,3 @@
-import { Product } from '@prisma/client';
 import { ProductWithRelations } from './product';
 
 export interface QuickViewState {
@@ -21,7 +20,7 @@ export interface ProductInfoProps {
 }
 
 export interface ProductOptionsProps {
-  options: Product['options'];
+  options: ProductWithRelations['options'];
   selectedOptions: Record<string, string>;
   onOptionChange: (optionName: string, optionValue: string) => void;
   validationError?: string;

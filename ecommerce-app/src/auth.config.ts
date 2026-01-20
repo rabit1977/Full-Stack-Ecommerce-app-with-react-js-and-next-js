@@ -13,6 +13,7 @@ export const authConfig = {
         token.id = user.id;
         token.role = user.role as UserRole;
         token.bio = user.bio;
+        token.helpfulReviews = user.helpfulReviews;
         token.createdAt = user.createdAt; // 🔥 Add createdAt to token
 
         // On sign-in, fetch the wishlist from the DB
@@ -45,6 +46,7 @@ export const authConfig = {
             select: {
               role: true,
               bio: true,
+              helpfulReviews: true,
               createdAt: true, // 🔥 Fetch createdAt from database
             },
           });
@@ -63,12 +65,17 @@ export const authConfig = {
           // 🔥 Add createdAt to session (prefer DB value, fallback to token)
           session.user.createdAt =
             dbUser?.createdAt || (token.createdAt as Date);
+
+          // Add helpfulReviews to session
+          session.user.helpfulReviews =
+            dbUser?.helpfulReviews || (token.helpfulReviews as string[]) || [];
         } catch (error) {
           console.error('Error fetching user data from database:', error);
           // Fallback to cached data if DB query fails
           session.user.role = (token.role as UserRole) || 'USER';
           session.user.bio = (token.bio as string | null) || null;
           session.user.createdAt = token.createdAt as Date; // 🔥 Fallback to token value
+          session.user.helpfulReviews = (token.helpfulReviews as string[]) || [];
         }
 
         session.user.wishlist = (token.wishlist as string[]) || [];

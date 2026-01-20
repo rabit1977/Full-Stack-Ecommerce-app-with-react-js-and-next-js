@@ -1,19 +1,26 @@
 'use client';
 
-import { clearWishlistAction, toggleWishlistAction } from '@/actions/wishlist-actions';
+import { addItemToCartAction } from '@/actions/cart-actions';
+import {
+  clearWishlistAction,
+  toggleWishlistAction,
+} from '@/actions/wishlist-actions';
 import { Button } from '@/components/ui/button';
+import { ProductWithRelations } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
-import { Product } from '@prisma/client';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
-import { addItemToCartAction } from '@/actions/cart-actions';
 
-export function WishlistClient({ products }: { products: Product[] }) {
+export function WishlistClient({
+  products,
+}: {
+  products: ProductWithRelations[];
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -28,16 +35,16 @@ export function WishlistClient({ products }: { products: Product[] }) {
       }
     });
   };
-  
+
   const handleClearWishlist = () => {
     startTransition(async () => {
-        const result = await clearWishlistAction();
-        if (result.success) {
-            toast.success('Wishlist cleared');
-            router.refresh();
-        } else {
-            toast.error('Failed to clear wishlist');
-        }
+      const result = await clearWishlistAction();
+      if (result.success) {
+        toast.success('Wishlist cleared');
+        router.refresh();
+      } else {
+        toast.error('Failed to clear wishlist');
+      }
     });
   };
 
@@ -65,7 +72,11 @@ export function WishlistClient({ products }: { products: Product[] }) {
               {products.length} item{products.length !== 1 ? 's' : ''}
             </span>
           </div>
-          <Button variant='outline' onClick={handleClearWishlist} disabled={isPending}>
+          <Button
+            variant='outline'
+            onClick={handleClearWishlist}
+            disabled={isPending}
+          >
             <Trash2 className='mr-2 h-4 w-4' />
             Clear Wishlist
           </Button>

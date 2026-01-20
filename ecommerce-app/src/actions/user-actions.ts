@@ -27,16 +27,6 @@ export async function getAllUsersAction() {
       orderBy: {
         createdAt: 'desc',
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        image: true,
-        createdAt: true,
-        updatedAt: true,
-        emailVerified: true,
-      },
     });
 
     return {
@@ -214,6 +204,7 @@ export async function updateUserAction(
     name?: string;
     email?: string;
     role?: UserRole;
+    bio?: string;
   }
 ) {
   try {
@@ -251,6 +242,7 @@ export async function updateUserAction(
         ...(data.name && { name: data.name }),
         ...(data.email && { email: data.email }),
         ...(data.role && { role: data.role }),
+        ...(data.bio !== undefined && { bio: data.bio }),
       },
       select: {
         id: true,
@@ -351,7 +343,7 @@ export async function createUserAction(data: {
         email: data.email,
         password: hashedPassword,
         role: data.role,
-        bio: data.bio || null,
+        bio: data.bio,
       },
       select: {
         id: true,
