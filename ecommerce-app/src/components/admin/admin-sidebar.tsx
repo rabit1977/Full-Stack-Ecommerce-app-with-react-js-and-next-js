@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Package, ShoppingCart, Users } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Ticket, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -10,6 +10,7 @@ const navLinks = [
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/users', label: 'Customers', icon: Users },
+  { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
 ];
 
 /**
@@ -57,7 +58,7 @@ export const AdminBottomNav = () => {
 
   return (
     <nav className='lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t dark:bg-slate-900 dark:border-slate-800 shadow-lg'>
-      <div className='grid grid-cols-4 h-16'>
+      <div className='grid grid-cols-5 h-16'>
         {navLinks.map((link) => {
           const isActive = pathname.startsWith(link.href);
           const Icon = link.icon;

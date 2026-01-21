@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { CartItemWithProduct } from '@/lib/types/cart';
+import { cn } from '@/lib/utils';
 import {
     ArrowLeft,
     Check,
@@ -143,7 +144,11 @@ export function CartClient({
       );
 
       let discount = 0;
-      if (appliedCoupon) {
+      const isCouponValid = appliedCoupon && 
+        appliedCoupon.isActive && 
+        (!appliedCoupon.expiresAt || new Date(appliedCoupon.expiresAt) > new Date());
+
+      if (appliedCoupon && isCouponValid) {
         if (appliedCoupon.type === 'PERCENTAGE') {
           discount = subtotal * (appliedCoupon.discount / 100);
         } else {
@@ -361,32 +366,84 @@ export function CartClient({
                 </CardHeader>
                 <CardContent className='space-y-4'>
                   {appliedCoupon ? (
-                    <div className='flex items-center justify-between p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-900 rounded-lg'>
-                      <div className='flex items-center gap-3'>
-                        <div className='h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center'>
-                          <Check className='h-5 w-5 text-green-600 dark:text-green-400' />
+                    (() => {
+                      const isCouponValid =
+                        appliedCoupon.isActive &&
+                        (!appliedCoupon.expiresAt ||
+                          new Date(appliedCoupon.expiresAt) > new Date());
+
+                      return (
+                        <div
+                          className={cn(
+                            'flex items-center justify-between p-4 rounded-lg border',
+                            isCouponValid
+                              ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-900'
+                              : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-900'
+                          )}
+                        >
+                          <div className='flex items-center gap-3'>
+                            <div
+                              className={cn(
+                                'h-10 w-10 rounded-full flex items-center justify-center',
+                                isCouponValid
+                                  ? 'bg-green-100 dark:bg-green-900'
+                                  : 'bg-red-100 dark:bg-red-900'
+                              )}
+                            >
+                              <Tag
+                                className={cn(
+                                  'h-5 w-5',
+                                  isCouponValid
+                                    ? 'text-green-600 dark:text-green-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                )}
+                              />
+                            </div>
+                            <div>
+                              <p
+                                className={cn(
+                                  'font-bold uppercase tracking-wider',
+                                  isCouponValid
+                                    ? 'text-green-900 dark:text-green-100'
+                                    : 'text-red-900 dark:text-red-100'
+                                )}
+                              >
+                                {appliedCoupon.code}
+                              </p>
+                              <p
+                                className={cn(
+                                  'text-xs',
+                                  isCouponValid
+                                    ? 'text-green-700 dark:text-green-300'
+                                    : 'text-red-700 dark:text-red-300'
+                                )}
+                              >
+                                {isCouponValid
+                                  ? appliedCoupon.type === 'PERCENTAGE'
+                                    ? `${appliedCoupon.discount}% discount applied`
+                                    : `$${appliedCoupon.discount.toFixed(2)} discount applied`
+                                  : 'Coupon found but is currently expired or inactive'}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={handleRemoveCoupon}
+                            disabled={isApplyingCoupon}
+                            className={cn(
+                              'hover:bg-opacity-10',
+                              isCouponValid
+                                ? 'text-green-600 hover:text-green-700 hover:bg-green-100'
+                                : 'text-red-600 hover:text-red-700 hover:bg-red-100'
+                            )}
+                          >
+                            <X className='h-4 w-4 mr-2' />
+                            Remove
+                          </Button>
                         </div>
-                        <div>
-                          <p className='font-semibold text-green-800 dark:text-green-200'>
-                            {appliedCoupon.code}
-                          </p>
-                          <p className='text-sm text-green-600 dark:text-green-400'>
-                            {appliedCoupon.type === 'PERCENTAGE'
-                              ? `${appliedCoupon.discount}% off`
-                              : `$${appliedCoupon.discount} off`}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        onClick={handleRemoveCoupon}
-                        disabled={isApplyingCoupon}
-                        className='text-green-600 hover:text-green-700 hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900'
-                      >
-                        <X className='h-4 w-4' />
-                      </Button>
-                    </div>
+                      );
+                    })()
                   ) : (
                     <CouponInput
                       onApplyCoupon={handleApplyCoupon}
