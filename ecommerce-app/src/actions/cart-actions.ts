@@ -26,10 +26,10 @@ export async function addItemToCartAction(
       return { success: false, message: 'Product not found' };
     }
 
-    // // If the item is in the wishlist, remove it
-    // await prisma.wishlistItem.deleteMany({
-    //   where: { userId, productId },
-    // });
+    // If the item is in the wishlist, remove it
+    await prisma.wishlistItem.deleteMany({
+      where: { userId, productId },
+    });
 
     const optionsToSave =
       options && Object.keys(options).length > 0 ? options : {};
@@ -308,11 +308,9 @@ export async function moveToCartAction(savedItemId: string) {
             return { success: false, message: addResult.message || 'Failed to move to cart' };
         }
         
-        // If adding to cart was successful, remove from saved for later
-        await prisma.savedForLater.delete({
-            where: { id: savedItemId },
-        });
-
+        // addItemToCartAction already handles removing the product from saved for later
+        // so we just need to return the result
+        
         revalidatePath('/cart');
         return { success: true, message: 'Item moved to cart' };
     } catch (error) {
