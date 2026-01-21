@@ -44,8 +44,8 @@ export async function signupAction(
         name,
         email,
         password: hashedPassword,
-        // Default role is "CUSTOMER" from schema
-        role: email === 'rabit@gmail.com' ? 'ADMIN' : 'USER',
+        // Default role is "USER" from schema
+        role: 'USER',
       },
     });
     return { success: true };
