@@ -8,6 +8,10 @@ import {
   saveForLaterAction,
   updateCartItemQuantityAction,
 } from '@/actions/cart-actions';
+import {
+  applyCouponAction,
+  removeCouponAction,
+} from '@/actions/coupon-actions';
 import { CartItem } from '@/components/cart/cart-item';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { SavedItem } from '@/components/cart/saved-item';
@@ -39,18 +43,6 @@ import {
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-
-// Mock coupon data - replace with API call
-const VALID_COUPONS = {
-  SAVE10: { discount: 0.1, type: 'percentage', description: '10% off' },
-  SAVE20: { discount: 0.2, type: 'percentage', description: '20% off' },
-  FLAT15: { discount: 15, type: 'fixed', description: '$15 off' },
-  WELCOME: {
-    discount: 0.15,
-    type: 'percentage',
-    description: '15% off for new customers',
-  },
-} as const;
 
 function EmptyCart() {
   const router = useRouter();
@@ -87,23 +79,19 @@ function EmptyCart() {
 
 function CouponInput({
   onApplyCoupon,
+  isApplying,
 }: {
   onApplyCoupon: (code: string) => void;
+  isApplying: boolean;
 }) {
   const [couponCode, setCouponCode] = useState('');
-  const [isApplying, setIsApplying] = useState(false);
 
-  const handleApply = async () => {
+  const handleApply = () => {
     if (!couponCode.trim()) {
       toast.error('Please enter a coupon code');
       return;
     }
-
-    setIsApplying(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
     onApplyCoupon(couponCode.toUpperCase());
-    setIsApplying(false);
   };
 
   return (
@@ -133,37 +121,39 @@ function CouponInput({
 interface CartClientProps {
   cartItems: CartItemWithProduct[];
   savedForLaterItems: CartItemWithProduct[];
+  user: UserWithRelations | null;
 }
 
-export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
+export function CartClient({
+  cartItems,
+  savedForLaterItems,
+  user,
+}: CartClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [isApplyingCoupon, startCouponTransition] = useTransition();
+
+  const appliedCoupon = user?.coupon;
 
   const { subtotal, taxes, shipping, discount, total, itemCount } =
     useMemo(() => {
       const subtotal = cartItems.reduce(
         (sum, item) => sum + item.product.price * item.quantity,
-        0
+        0,
       );
 
       let discount = 0;
-      if (
-        appliedCoupon &&
-        VALID_COUPONS[appliedCoupon as keyof typeof VALID_COUPONS]
-      ) {
-        const coupon =
-          VALID_COUPONS[appliedCoupon as keyof typeof VALID_COUPONS];
-        if (coupon.type === 'percentage') {
-          discount = subtotal * coupon.discount;
+      if (appliedCoupon) {
+        if (appliedCoupon.type === 'PERCENTAGE') {
+          discount = subtotal * (appliedCoupon.discount / 100);
         } else {
-          discount = coupon.discount;
+          discount = appliedCoupon.discount;
         }
       }
 
       const discountedSubtotal = subtotal - discount;
-      const shipping = discountedSubtotal > 50 ? 0 : 5.0; // Free shipping over $50
-      const taxes = discountedSubtotal * 0.08; // 8% tax
+      const shipping = discountedSubtotal > 50 ? 0 : 5.0;
+      const taxes = discountedSubtotal * 0.08;
       const total = discountedSubtotal + shipping + taxes;
       const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -171,32 +161,37 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
     }, [cartItems, appliedCoupon]);
 
   const handleApplyCoupon = (code: string) => {
-    if (VALID_COUPONS[code as keyof typeof VALID_COUPONS]) {
-      setAppliedCoupon(code);
-      const coupon = VALID_COUPONS[code as keyof typeof VALID_COUPONS];
-      toast.success(
-        <div className='flex items-center gap-2'>
-          <Check className='h-4 w-4' />
-          <span>Coupon applied! You saved {coupon.description}</span>
-        </div>
-      );
-    } else {
-      toast.error('Invalid coupon code');
-    }
+    startCouponTransition(async () => {
+      const result = await applyCouponAction(code);
+      if (result.success) {
+        toast.success(
+          <div className='flex items-center gap-2'>
+            <Check className='h-4 w-4' />
+            <span>{result.message}</span>
+          </div>,
+        );
+      } else {
+        toast.error(result.message);
+      }
+    });
   };
 
   const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
-    toast.success('Coupon removed');
+    startCouponTransition(async () => {
+      const result = await removeCouponAction();
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    });
   };
 
   const handleClearCart = () => {
     startTransition(async () => {
       const result = await clearCartAction();
       if (result.success) {
-        setAppliedCoupon(null);
         toast.success('Cart cleared successfully');
-        router.refresh();
       } else {
         toast.error(result.message || 'Failed to clear cart');
       }
@@ -209,7 +204,6 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
       const result = await updateCartItemQuantityAction(cartItemId, quantity);
       if (result.success) {
         toast.success('Quantity updated');
-        router.refresh();
       } else {
         toast.error(result.message || 'Failed to update quantity');
       }
@@ -219,9 +213,8 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
   const handleRemoveItem = (cartItemId: string) => {
     startTransition(async () => {
       const result = await removeCartItemAction(cartItemId);
-       if (result.success) {
+      if (result.success) {
         toast.success('Item removed');
-        router.refresh();
       } else {
         toast.error(result.message || 'Failed to remove item');
       }
@@ -230,13 +223,12 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
 
   const handleSaveForLater = (cartItemId: string) => {
     startTransition(async () => {
-        const result = await saveForLaterAction(cartItemId);
-        if (result.success) {
-            toast.success('Item saved for later');
-            router.refresh();
-        } else {
-            toast.error(result.message || 'Failed to save for later');
-        }
+      const result = await saveForLaterAction(cartItemId);
+      if (result.success) {
+        toast.success('Item saved for later');
+      } else {
+        toast.error(result.message || 'Failed to save for later');
+      }
     });
   };
 
@@ -245,7 +237,6 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
       const result = await moveToCartAction(savedItemId);
       if (result.success) {
         toast.success(result.message);
-        router.refresh();
       } else {
         toast.error(result.message);
       }
@@ -257,7 +248,6 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
       const result = await removeSavedForLaterItemAction(savedItemId);
       if (result.success) {
         toast.success(result.message);
-        router.refresh();
       } else {
         toast.error(result.message);
       }
@@ -293,32 +283,32 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
             )}
           </div>
           {cartItems.length > 0 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant='outline' size='sm' disabled={isPending}>
-                <Trash2 className='h-4 w-4 mr-2' />
-                Clear Cart
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Clear Cart</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to remove all items from your cart? This
-                  action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearCart}>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant='outline' size='sm' disabled={isPending}>
+                  <Trash2 className='h-4 w-4 mr-2' />
                   Clear Cart
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear Cart</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to remove all items from your cart?
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearCart}>
+                    Clear Cart
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
-        
+
         {cartItems.length > 0 && subtotal > 0 && subtotal - discount < 50 && (
           <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 dark:bg-blue-950 dark:border-blue-900'>
             <p className='text-sm text-blue-800 dark:text-blue-200'>
@@ -378,14 +368,10 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
                         </div>
                         <div>
                           <p className='font-semibold text-green-800 dark:text-green-200'>
-                            {appliedCoupon}
+                            {appliedCoupon.code}
                           </p>
                           <p className='text-sm text-green-600 dark:text-green-400'>
-                            {
-                              VALID_COUPONS[
-                                appliedCoupon as keyof typeof VALID_COUPONS
-                              ].description
-                            }
+                            {appliedCoupon.description}
                           </p>
                         </div>
                       </div>
@@ -393,18 +379,17 @@ export function CartClient({ cartItems, savedForLaterItems }: CartClientProps) {
                         variant='ghost'
                         size='icon'
                         onClick={handleRemoveCoupon}
+                        disabled={isApplyingCoupon}
                         className='text-green-600 hover:text-green-700 hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900'
                       >
                         <X className='h-4 w-4' />
                       </Button>
                     </div>
                   ) : (
-                    <>
-                      <CouponInput onApplyCoupon={handleApplyCoupon} />
-                      <div className='text-xs text-slate-500 dark:text-slate-400'>
-                        Try: SAVE10, SAVE20, FLAT15, WELCOME
-                      </div>
-                    </>
+                    <CouponInput
+                      onApplyCoupon={handleApplyCoupon}
+                      isApplying={isApplyingCoupon}
+                    />
                   )}
                 </CardContent>
               </Card>

@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Product } from '@/lib/types';
+import { ProductWithImages } from '@/lib/types/product';
 import { cn } from '@/lib/utils';
 import { Heart } from 'lucide-react';
 import { useState, useTransition } from 'react';
@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { Label } from '../ui/label';
 
 interface ProductPurchasePanelProps {
-  product: Product;
+  product: ProductWithImages;
   selectedOptions: Record<string, string>;
   onOptionChange: (name: string, value: string) => void;
   initialIsWished: boolean;

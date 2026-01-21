@@ -37,6 +37,10 @@ model User {
   role            UserRole        @default(USER)
   bio             String?
   
+  // Coupon
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  
   // Relations with cascade delete
   accounts        Account[]
   sessions        Session[]
@@ -269,6 +273,7 @@ model Coupon {
   expiresAt DateTime?
   isActive  Boolean     @default(true)
   orders    Order[]
+    users     User[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

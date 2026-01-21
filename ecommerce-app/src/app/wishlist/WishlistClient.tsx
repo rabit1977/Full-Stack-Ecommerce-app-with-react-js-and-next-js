@@ -28,7 +28,7 @@ export function WishlistClient({
     startTransition(async () => {
       const result = await toggleWishlistAction(productId);
       if (result.success) {
-        toast.success(result.success || 'Removed from wishlist');
+        toast.success('Removed from wishlist');
         router.refresh();
       } else {
         toast.error(result.error || 'Failed to remove from wishlist');

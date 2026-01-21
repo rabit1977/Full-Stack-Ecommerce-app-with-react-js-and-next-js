@@ -26,10 +26,10 @@ export async function addItemToCartAction(
       return { success: false, message: 'Product not found' };
     }
 
-    // If the item is in the wishlist, remove it
-    await prisma.wishlistItem.deleteMany({
-      where: { userId, productId },
-    });
+    // // If the item is in the wishlist, remove it
+    // await prisma.wishlistItem.deleteMany({
+    //   where: { userId, productId },
+    // });
 
     const optionsToSave =
       options && Object.keys(options).length > 0 ? options : {};

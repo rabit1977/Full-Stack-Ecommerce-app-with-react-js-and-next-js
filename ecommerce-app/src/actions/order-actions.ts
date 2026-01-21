@@ -298,114 +298,112 @@ export async function getMyOrdersAction() {
 // =======================================
 
 export async function createOrderAction(details: {
-  items: { productId: string; quantity: number }[];
-  shippingAddress: any;
-  paymentMethod: string;
+	items: {
+		productId: string;
+		quantity: number;
+		price: number;
+		title: string;
+		thumbnail: string;
+	}[];
+	total: number;
+	subtotal: number;
+	tax: number;
+	shipping: number;
+	discount: number;
+	couponId?: string;
+	shippingAddress: string;
+	billingAddress: string;
+	shippingMethod: string;
+	paymentMethod: string;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' };
-  }
+	const session = await auth();
+	if (!session?.user?.id) {
+		return { success: false, message: 'Unauthorized' };
+	}
+	const userId = session.user.id;
 
-  const userId = session.user.id;
+	try {
+		const result = await prisma.$transaction(async (tx) => {
+			const productIds = details.items
+				.map((item) => item.productId)
+				.filter(Boolean);
+			if (productIds.length === 0) {
+				throw new Error('No valid products provided');
+			}
 
-  try {
-    const result = await prisma.$transaction(async (tx) => {
-      // ✅ map correct field + filter
-      const productIds = details.items
-        .map((item) => item.productId)
-        .filter(Boolean);
+			const productsFromDb = await tx.product.findMany({
+				where: { id: { in: productIds } },
+				select: { id: true, stock: true, title: true },
+			});
+			const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
 
-      if (productIds.length === 0) {
-        throw new Error('No valid products provided');
-      }
+			for (const item of details.items) {
+				const product = productMap.get(item.productId);
+				if (!product) {
+					throw new Error(`Product with ID ${item.productId} not found`);
+				}
+				if (product.stock < item.quantity) {
+					throw new Error(`Not enough stock for ${product.title}`);
+				}
+			}
 
-      const productsFromDb = await tx.product.findMany({
-        where: {
-          id: { in: productIds },
-        },
-      });
+			const order = await tx.order.create({
+				data: {
+					userId,
+					subtotal: details.subtotal,
+					tax: details.tax,
+					shippingCost: details.shipping,
+					discount: details.discount,
+					total: details.total,
+					status: 'Pending',
+					shippingAddress: details.shippingAddress,
+					billingAddress: details.billingAddress,
+					shippingMethod: details.shippingMethod,
+					paymentMethod: details.paymentMethod,
+					couponId: details.couponId,
+					items: {
+						create: details.items.map((item) => ({
+							productId: item.productId,
+							quantity: item.quantity,
+							priceAtPurchase: item.price,
+							title: item.title,
+							thumbnail: item.thumbnail,
+						})),
+					},
+				},
+			});
 
-      const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
+			for (const item of details.items) {
+				await tx.product.update({
+					where: { id: item.productId },
+					data: { stock: { decrement: item.quantity } },
+				});
+			}
 
-      let subtotal = 0;
-      const orderItemsData = [];
+			await tx.cartItem.deleteMany({
+				where: { userId },
+			});
 
-      for (const item of details.items) {
-        const product = productMap.get(item.productId);
+			if (details.couponId) {
+				await tx.user.update({
+					where: { id: userId },
+					data: { couponId: null },
+				});
+			}
 
-        if (!product) {
-          throw new Error(`Product with ID ${item.productId} not found`);
-        }
+			return order;
+		});
 
-        if (product.stock < item.quantity) {
-          throw new Error(`Not enough stock for ${product.title}`);
-        }
+		revalidatePath('/account/orders');
+		revalidatePath('/cart');
+		revalidatePath('/checkout');
 
-        subtotal += product.price * item.quantity;
-
-        orderItemsData.push({
-          productId: product.id,
-          quantity: item.quantity,
-          price: product.price,
-          priceAtPurchase: product.price,
-          title: product.title,
-          thumbnail: product.thumbnail,
-        });
-      }
-
-      const shippingCost = 5;
-      const tax = subtotal * 0.1;
-      const discount = 0;
-      const total = subtotal + tax + shippingCost - discount;
-
-      const order = await tx.order.create({
-        data: {
-          userId,
-          subtotal,
-          tax,
-          shippingCost,
-          discount,
-          total,
-          status: 'Pending',
-          shippingAddress: JSON.stringify(details.shippingAddress),
-          billingAddress: JSON.stringify(details.shippingAddress),
-          shippingMethod: 'standard',
-          paymentMethod: details.paymentMethod,
-          items: {
-            create: orderItemsData,
-          },
-        },
-      });
-
-      // ✅ decrement stock
-      for (const item of details.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: { decrement: item.quantity },
-          },
-        });
-      }
-
-      await tx.cartItem.deleteMany({
-        where: { userId },
-      });
-
-      return order;
-    });
-
-    revalidatePath('/account/orders');
-    revalidatePath('/cart');
-
-    return { success: true, orderId: result.id };
-  } catch (error) {
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return {
-      success: false,
-      error: 'Failed to create order',
-    };
-  }
+		return { success: true, orderId: result.id };
+	} catch (error) {
+		return {
+			success: false,
+			message:
+				error instanceof Error ? error.message : 'Failed to create order.',
+		};
+	}
 }
