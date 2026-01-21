@@ -2,6 +2,7 @@
 'use client';
 
 import { ProductWithRelations } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { ProductCard } from './product-card';
 
 interface ProductListProps {
@@ -11,7 +12,12 @@ interface ProductListProps {
 
 export const ProductList = ({ products, className }: ProductListProps) => {
   return (
-    <div className={`mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${className}`}>
+    <div
+      className={cn(
+        'mt-6 sm:mt-8 grid gap-4 xs:gap-5 sm:gap-6 lg:gap-8 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
+        className,
+      )}
+    >
       {products.length > 0 ? (
         // Render products when loaded
         products.map((product) => (

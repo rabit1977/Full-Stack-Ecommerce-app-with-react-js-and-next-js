@@ -38,15 +38,15 @@ export async function RelatedProducts({
 
   return (
     <section className='py-12' aria-labelledby='related-products-heading'>
-      <div className='container mx-auto px-4'>
+      <div className='container-wide'>
         <h2
           id='related-products-heading'
-          className='text-2xl sm:text-3xl font-bold mb-8'
+          className='mb-8'
         >
           Related Products
         </h2>
 
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
+        <div className='grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8'>
           {relatedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

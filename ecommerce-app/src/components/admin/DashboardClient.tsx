@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity,
-  DollarSign,
-  Package,
-  ShoppingCart,
-  TrendingUp,
-  Users,
+    Activity,
+    DollarSign,
+    Package,
+    ShoppingCart,
+    TrendingUp,
+    Users,
 } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 /**
  * Dashboard skeleton loader with proper animations
@@ -229,7 +229,7 @@ export default function DashboardClient({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6'
+        className='grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'
       >
         {[
           {

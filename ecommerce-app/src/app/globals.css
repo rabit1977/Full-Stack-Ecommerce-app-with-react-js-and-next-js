@@ -41,6 +41,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --breakpoint-xs: 480px;
 }
 
 :root {
@@ -116,10 +117,43 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  
+  html {
+    @apply scroll-smooth antialiased;
+    font-size: 16px;
   }
+
+  body {
+    @apply bg-background text-foreground font-sans leading-normal;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1 { @apply text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl; }
+  h2 { @apply text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl; }
+  h3 { @apply text-2xl font-bold tracking-tight sm:text-3xl; }
+  h4 { @apply text-xl font-semibold tracking-tight sm:text-2xl; }
+  h5 { @apply text-lg font-semibold sm:text-xl; }
+  h6 { @apply text-base font-semibold sm:text-lg; }
+
+  p { @apply leading-relaxed text-slate-600 dark:text-slate-400; }
+
   .body-scroll-lock {
     overflow: hidden;
+  }
+
+  /* Focus rings for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* Improved tap targets for mobile */
+  button, a {
+    @apply transition-transform active:scale-95 sm:active:scale-100;
+  }
+}
+
+@layer utilities {
+  .container-wide {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 max-w-(--breakpoint-2xl) w-full;
   }
 }

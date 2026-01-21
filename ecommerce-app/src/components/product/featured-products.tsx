@@ -41,27 +41,27 @@ export const FeaturedProducts = ({
 }: FeaturedProductsProps) => {
   return (
     <section className={className} aria-labelledby='featured-products-heading'>
-      <div className='container mx-auto px-4 py-16'>
+      <div className='container-wide py-16 sm:py-24'>
         {/* Header */}
-        <div className='mb-12 flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left'>
-          <div className='space-y-2'>
+        <div className='mb-12 flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left'>
+          <div className='space-y-3'>
             <h2
               id='featured-products-heading'
-              className='text-3xl font-bold tracking-tight sm:text-4xl'
+              className='tracking-tight'
             >
               {title}
             </h2>
             {subtitle && (
-              <p className='text-lg text-muted-foreground'>{subtitle}</p>
+              <p className='text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl'>{subtitle}</p>
             )}
           </div>
 
           {/* View All Button - Desktop */}
           {showViewAll && (
-            <Button asChild size='lg' className='hidden sm:inline-flex gap-2 '>
+            <Button asChild size='lg' className='hidden sm:inline-flex gap-2 h-14 px-8 text-base shadow-lg shadow-primary/10 transition-all active:scale-95'>
               <Link href='/products'>
                 View All Products
-                <ArrowRight className='h-4 w-4' />
+                <ArrowRight className='h-5 w-5' />
               </Link>
             </Button>
           )}

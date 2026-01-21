@@ -28,7 +28,7 @@ export const HeroHeader = () => {
   }, [router]);
 
   return (
-    <div className='container mx-auto px-4 py-12 sm:py-16 lg:py-20 text-center'>
+    <div className='container-wide py-12 sm:py-16 lg:py-24 text-center'>
       <motion.div
         initial='hidden'
         animate='visible'
@@ -39,17 +39,17 @@ export const HeroHeader = () => {
             },
           },
         }}
-        className='space-y-6'
+        className='space-y-8'
       >
         <motion.div variants={fadeInUpVariants}>
-          <Badge variant='secondary' className='text-sm font-medium px-4 py-1'>
+          <Badge variant='outline' className='text-sm font-semibold px-4 py-1.5 border-primary/30 text-primary bg-primary/5 uppercase tracking-wider'>
             🎉 New Arrivals Available
           </Badge>
         </motion.div>
 
         <motion.h1
           variants={fadeInUpVariants}
-          className='text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white'
+          className='leading-tight'
         >
           The Future of Tech, <span className='text-primary'>Today</span>
         </motion.h1>

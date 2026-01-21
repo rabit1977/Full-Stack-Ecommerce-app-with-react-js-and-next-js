@@ -48,27 +48,25 @@ function EmptyCart() {
   const router = useRouter();
 
   return (
-    <div className='container mx-auto px-4'>
-      <div className='flex flex-col items-center py-30 min-h-[calc(100lvh-440px)] text-center space-y-6'>
+    <div className='container-wide'>
+      <div className='flex flex-col items-center justify-center py-20 sm:py-30 min-h-[calc(100lvh-200px)] text-center space-y-6 sm:space-y-8'>
         <div className='relative'>
-          <div className='absolute inset-0 bg-slate-100 dark:bg-slate-800 rounded-full blur-3xl opacity-50' />
-          <ShoppingCart className='relative h-24 w-24 text-slate-300 dark:text-slate-600' />
+          <div className='absolute inset-0 bg-primary/10 rounded-full blur-3xl opacity-50' />
+          <ShoppingCart className='relative h-20 w-20 sm:h-24 sm:w-24 text-primary/40' />
         </div>
-        <div className='space-y-2'>
-          <h2 className='text-3xl font-bold dark:text-white'>
-            Your cart is empty
-          </h2>
-          <p className='text-slate-600 dark:text-slate-400 max-w-md'>
+        <div className='space-y-3'>
+          <h1 className='text-3xl sm:text-4xl font-extrabold tracking-tight'>Your cart is empty</h1>
+          <p className='text-lg text-muted-foreground max-w-md mx-auto'>
             Looks like you haven&apos;t added anything to your cart yet. Start
             exploring our products!
           </p>
         </div>
-        <div className='flex flex-col sm:flex-row gap-4'>
-          <Button size='lg' onClick={() => router.push('/products')}>
-            <Package className='h-4 w-4 mr-2' />
+        <div className='flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4'>
+          <Button size='lg' onClick={() => router.push('/products')} className='w-full sm:w-auto h-12 px-8'>
+            <Package className='h-5 w-5 mr-2' />
             Browse Products
           </Button>
-          <Button variant='outline' size='lg' onClick={() => router.push('/')}>
+          <Button variant='outline' size='lg' onClick={() => router.push('/')} className='w-full sm:w-auto h-12 px-8'>
             Back to Home
           </Button>
         </div>
@@ -262,7 +260,7 @@ export function CartClient({
 
   return (
     <div className='bg-slate-50 min-h-[70vh] dark:bg-slate-900'>
-      <div className='container mx-auto px-4 py-12'>
+      <div className='container-wide py-8 sm:py-12'>
         <div className='flex items-center justify-between mb-8'>
           <div className='space-y-1'>
             <div className='flex items-center gap-3'>

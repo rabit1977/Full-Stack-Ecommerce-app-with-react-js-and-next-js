@@ -271,10 +271,10 @@ export function AuthForm() {
                 <div className='space-y-6'>
                   {/* Title */}
                   <div className='text-center'>
-                    <h2 className='text-3xl font-bold bg-linear-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent'>
+                    <h2 className='leading-tight'>
                       {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                     </h2>
-                    <p className='text-muted-foreground mt-2'>
+                    <p className='text-muted-foreground mt-3 text-lg'>
                       {mode === 'login'
                         ? 'Enter your credentials to continue'
                         : 'Fill in your details to get started'}

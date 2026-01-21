@@ -14,7 +14,7 @@ export default function AdminLayout({
 
         {/* Main Content with bottom padding on mobile */}
         <main className='flex-1 overflow-x-hidden pb-20 lg:pb-0'>
-          <div className='container mx-auto p-6 lg:p-8'>{children}</div>
+          <div className='container-wide py-6 lg:py-8'>{children}</div>
         </main>
 
         {/* Bottom Navigation for Mobile/Tablet */}

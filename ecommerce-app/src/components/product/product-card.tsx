@@ -106,25 +106,25 @@ export const ProductCard = memo(
           <ProductImageCarousel product={product} />
 
           {/* Badges (Top Left) */}
-          <div className='absolute left-3 top-3 z-10 flex flex-col gap-1.5'>
+          <div className='absolute left-2 top-2 sm:left-3 sm:top-3 z-10 flex flex-col gap-1.5'>
             {discount && (
-              <span className='inline-flex items-center rounded-md bg-red-600 px-2 py-1 text-xs font-bold text-white shadow-sm'>
+              <span className='inline-flex items-center rounded-md bg-red-600 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-bold text-white shadow-sm'>
                 -{Math.round(discount.percentage)}%
               </span>
             )}
             {isLowStock && (
-              <span className='inline-flex items-center rounded-md bg-amber-500 px-2 py-1 text-xs font-bold text-white shadow-sm'>
+              <span className='inline-flex items-center rounded-md bg-amber-500 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-bold text-white shadow-sm'>
                 Low Stock
               </span>
             )}
           </div>
 
-          {/* Floating Actions (Top Right) - Slide in on Hover */}
-          <div className='absolute right-3 top-3 z-10 flex flex-col gap-2 translate-x-12 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100'>
+          {/* Floating Actions (Top Right) - Always visible on mobile, hover on desktop */}
+          <div className='absolute right-2 top-2 sm:right-3 sm:top-3 z-10 flex flex-col gap-2 md:translate-x-12 md:opacity-0 transition-all duration-300 md:group-hover:translate-x-0 md:group-hover:opacity-100'>
             <Button
               size='icon'
               variant='secondary'
-              className='h-9 w-9 rounded-full bg-white/90 shadow-sm hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800'
+              className='h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/95 shadow-md hover:bg-white dark:bg-slate-800/95 dark:hover:bg-slate-800'
               onClick={handleQuickView}
               title='Quick View'
             >
@@ -134,7 +134,7 @@ export const ProductCard = memo(
               size='icon'
               variant='secondary'
               className={cn(
-                'h-9 w-9 rounded-full bg-white/90 shadow-sm transition-colors hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800',
+                'h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/95 shadow-md transition-colors hover:bg-white dark:bg-slate-800/95 dark:hover:bg-slate-800',
                 isWished && 'text-red-500 hover:text-red-600',
               )}
               onClick={handleToggleWishlist}
@@ -152,24 +152,24 @@ export const ProductCard = memo(
         </div>
 
         {/* --- Content Section --- */}
-        <div className='flex flex-1 flex-col p-5'>
+        <div className='flex flex-1 flex-col p-3 sm:p-5'>
           {/* Brand & Title */}
-          <Link href={`/products/${product.id}`} className='block'>
-            <p className='text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+          <Link href={`/products/${product.id}`} className='block group/title'>
+            <p className='text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground'>
               {product.brand}
             </p>
-            <h3 className='mt-1 line-clamp-1 text-base font-semibold text-foreground transition-colors group-hover:text-primary'>
+            <h3 className='mt-0.5 sm:mt-1 line-clamp-1 text-sm sm:text-base font-semibold text-foreground transition-colors group-hover/title:text-primary'>
               {product.title}
             </h3>
           </Link>
 
           {/* Price Area */}
-          <div className='mt-3 flex items-center gap-2'>
-            <span className='text-lg font-bold text-foreground'>
+          <div className='mt-2 sm:mt-3 flex items-center gap-2'>
+            <span className='text-base sm:text-lg font-bold text-foreground'>
               {formatPrice(effectivePrice)}
             </span>
             {discount && (
-              <span className='text-sm text-muted-foreground line-through decoration-slate-400/60'>
+              <span className='text-[10px] sm:text-sm text-muted-foreground line-through decoration-slate-400/60'>
                 {formatPrice(discount.originalPrice)}
               </span>
             )}
@@ -179,13 +179,13 @@ export const ProductCard = memo(
           <div className='flex-1' />
 
           {/* --- Footer Action --- */}
-          <div className='mt-5'>
+          <div className='mt-3 sm:mt-5'>
             <Button
               className={cn(
-                'h-10 w-full rounded-lg font-medium shadow-none transition-all',
+                'h-11 sm:h-10 w-full rounded-lg font-medium shadow-none transition-all',
                 isOutOfStock
                   ? 'cursor-not-allowed bg-muted text-muted-foreground hover:bg-muted'
-                  : 'bg-primary hover:bg-primary/90 hover:shadow-md',
+                  : 'bg-primary hover:bg-primary/90 hover:shadow-md active:scale-95 sm:active:scale-100',
               )}
               onClick={handleAddToCart}
               disabled={isOutOfStock || isPending}
@@ -201,6 +201,7 @@ export const ProductCard = memo(
             </Button>
           </div>
         </div>
+
       </motion.div>
     );
   },

@@ -2,14 +2,15 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import {
-  Briefcase,
-  Headset,
-  Info,
-  LucideIcon,
-  Menu,
-  Package,
-  Zap,
+    Briefcase,
+    Headset,
+    Info,
+    LucideIcon,
+    Menu,
+    Package,
+    Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -68,32 +69,32 @@ const Header = ({
 
   return (
     <header
-      className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/80 dark:bg-slate-950 dark:supports-backdrop-filter:bg-slate-900/80 dark:border-slate-800'
+      className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 dark:bg-slate-1000/95 dark:supports-[backdrop-filter]:bg-slate-950/80 dark:border-slate-800 transition-all duration-300'
       role='banner'
     >
-      <div className='container mx-auto flex h-20 items-center justify-between gap-4 px-4'>
+      <div className='container-wide flex h-16 sm:h-20 items-center justify-between gap-1 sm:gap-4'>
         {/* Logo */}
         <Link
           href='/'
-          className='flex shrink-0 items-center gap-2 group'
+          className='flex shrink-0 items-center gap-1.5 sm:gap-2 group'
           aria-label='Electro home page'
         >
-          <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors'>
-            <Zap className='h-5 w-5 text-primary' />
+          <div className='w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300'>
+            <Zap className='h-4 w-4 sm:h-5 sm:w-5 text-primary' />
           </div>
-          <span className='hidden text-xl font-bold text-foreground sm:inline'>
-            Electro
+          <span className='text-lg sm:text-xl font-bold tracking-tight text-foreground'>
+            <span className='hidden xs:inline'>Electro</span>
           </span>
         </Link>
 
-        {/* Search Bar */}
-        <div className='flex-1 max-w-md mx-4'>
+        {/* Search Bar - Hidden on very small screens, shown from sm up */}
+        <div className='hidden sm:block flex-1 max-w-sm lg:max-w-md mx-2 sm:mx-4 transition-all duration-300'>
           <SearchBar />
         </div>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - Shown from lg up */}
         <nav
-          className='hidden items-center gap-4 lg:flex'
+          className='hidden lg:flex items-center gap-1 xl:gap-2'
           aria-label='Main navigation'
         >
           {navLinks.map((link) => {
@@ -103,30 +104,31 @@ const Header = ({
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'text-sm font-medium transition-colors relative',
+                  'px-3 py-2 text-sm font-medium transition-all rounded-md relative group/link',
                   isActive
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground',
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
-                {/* Icon */}
-                <div className='group flex items-center gap-2'>
+                <div className='flex items-center gap-2'>
                   {link.icon && (
                     <link.icon
                       className={cn(
-                        'mb-0.5 inline-block h-4 w-4 hover:text-foreground group shrink-0 items-center justify-center',
+                        'h-4 w-4 transition-colors',
                         isActive
-                          ? 'text-foreground'
-                          : 'text-muted-foreground group-hover:text-foreground',
+                          ? 'text-primary'
+                          : 'text-muted-foreground group-hover/link:text-foreground',
                       )}
                     />
                   )}
-                  {link.label}
+                  <span>{link.label}</span>
                 </div>
-
                 {isActive && (
-                  <span className='absolute -bottom-2.5 left-0 right-0 h-0.5 bg-primary' />
+                  <motion.span
+                    layoutId='activeNav'
+                    className='absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full'
+                  />
                 )}
               </Link>
             );
@@ -134,7 +136,7 @@ const Header = ({
         </nav>
 
         {/* Nav Actions (Cart, Theme, etc.) */}
-        <div className='flex items-center'>
+        <div className='flex items-center gap-0.5 sm:gap-1'>
           <NavActions
             initialWishlistCount={initialWishlistCount}
             initialCartItemCount={initialCartItemCount}
@@ -144,7 +146,7 @@ const Header = ({
           <Button
             variant='ghost'
             size='icon'
-            className='lg:hidden'
+            className='lg:hidden h-9 w-9 sm:h-10 sm:w-10 ml-0.5 sm:ml-1'
             onClick={toggleMobileMenu}
             aria-label='Open menu'
             aria-expanded={isMenuOpen}
@@ -153,8 +155,15 @@ const Header = ({
           </Button>
         </div>
       </div>
+      
+      {/* Mobile Search Bar - Visible only on mobile screens below sm */}
+      <div className='sm:hidden px-4 pb-3 pt-0'>
+        <SearchBar />
+      </div>
     </header>
   );
 };
 
+
 export { Header };
+

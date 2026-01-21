@@ -2,12 +2,12 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Stars } from '@/components/ui/stars';
 import { ProductWithRelations, Review } from '@/lib/types';
@@ -77,9 +77,9 @@ const ReviewsSection = ({
   const canShowAddForm = user && !userReview && !editingReview;
 
   return (
-    <div className='mt-12 py-8 border-t dark:border-slate-800'>
-      <div className='flex justify-between items-center'>
-        <h2 className='text-2xl font-bold tracking-tight text-slate-900 dark:text-white'>
+    <div className='mt-12 py-12 border-t dark:border-slate-800'>
+      <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10'>
+        <h2 className='tracking-tight'>
           User Reviews
         </h2>
         {user && userReview && !editingReview && (
@@ -222,3 +222,4 @@ const ReviewsSection = ({
 };
 
 export { ReviewsSection };
+

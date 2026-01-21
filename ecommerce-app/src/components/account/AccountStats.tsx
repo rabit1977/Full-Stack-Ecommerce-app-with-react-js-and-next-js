@@ -24,7 +24,7 @@ export function AccountStats({
   };
 
   return (
-    <div className='grid sm:grid-cols-2 gap-4'>
+    <div className='grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6'>
       <button
         onClick={() => handleNavigate('/orders')}
         className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700 hover:shadow-md transition-shadow text-left group'

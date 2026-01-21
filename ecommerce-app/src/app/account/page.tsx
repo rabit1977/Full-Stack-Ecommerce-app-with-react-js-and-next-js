@@ -79,7 +79,7 @@ const AccountPage = async () => {
   return (
     <AuthGuard>
       <div className='min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950'>
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16'>
+        <div className='container-wide py-8 sm:py-12 lg:py-16'>
           {/* Profile Header */}
           <header className='mb-8 sm:mb-12'>
             <div className='flex flex-col sm:flex-row items-start sm:items-center gap-6'>

@@ -155,7 +155,7 @@ export function Footer() {
       className='border-t dark:bg-slate-950/20 bg-white'
       role='contentinfo'
     >
-      <div className='container mx-auto px-4 py-12 sm:px-6 lg:px-8'>
+      <div className='container-wide py-12'>
         <div className='grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8'>
           {/* Brand Section */}
           <div className='lg:col-span-4 space-y-6'>
@@ -279,7 +279,7 @@ export function Footer() {
 
       {/* Copyright Section */}
       <div className='border-t bg-muted/30'>
-        <div className='container mx-auto px-4 py-6'>
+        <div className='container-wide py-6'>
           <div className='flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground'>
             <p>&copy; {currentYear} Electro Inc. All rights reserved.</p>
             <div className='flex gap-6'>

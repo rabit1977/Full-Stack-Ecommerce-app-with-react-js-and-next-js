@@ -122,7 +122,7 @@ export const ProductGrid = ({
   return (
     <div className='bg-slate-50 dark:bg-slate-900 min-h-screen'>
       <div
-        className='container mx-auto px-4 py-8 sm:py-12 lg:py-16'
+        className='container-wide py-8 sm:py-12 lg:py-16'
         ref={gridRef}
       >
         <ProductGridControls
@@ -141,7 +141,7 @@ export const ProductGrid = ({
           />
         )}
 
-        <div className='lg:grid lg:grid-cols-4 lg:gap-8'>
+        <div className='lg:grid lg:grid-cols-4 lg:gap-8 xl:gap-12'>
           <aside
             className='hidden lg:block lg:col-span-1 sticky top-4 self-start'
             aria-label='Product filters'
