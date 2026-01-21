@@ -1,18 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
 } from '@/components/ui/command';
-import { useRouter } from 'next/navigation';
-import { Home, ShoppingCart, Heart, Sun, Moon, Search, Loader2 } from 'lucide-react';
 import { Product } from '@/lib/types';
+import { Heart, Home, Loader2, Moon, Search, ShoppingCart, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export const CommandPalette = () => {
   const router = useRouter();
@@ -21,9 +21,15 @@ export const CommandPalette = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Toggle the menu when the user presses Ctrl+K or Command+K
   useEffect(() => {
+    if (!mounted) return;
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -64,6 +70,8 @@ export const CommandPalette = () => {
     setOpen(false);
     command();
   };
+
+  if (!mounted) return null;
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
