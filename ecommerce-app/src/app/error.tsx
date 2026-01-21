@@ -18,6 +18,7 @@ export default function ErrorBoundary({
     error !== null &&
     'error' in error
   ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     message = String((error as any).error);
   }
 

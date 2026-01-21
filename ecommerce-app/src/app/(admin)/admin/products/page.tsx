@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PaginationControls } from '@/components/ui/pagination';
 import { prisma } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 import { Package, PlusCircle } from 'lucide-react';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
@@ -21,7 +22,7 @@ interface AdminProductsPageProps {
 // Helper to check admin access
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+  if (!session?.user || session.user.role !== 'ADMIN') {
     // Better to redirect than throw error for UX
     redirect('/');
   }
@@ -59,7 +60,9 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
     // Ensure JSON fields are typed correctly if needed
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options: product.options as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     specifications: product.specifications as any,
   }));
 
@@ -107,7 +110,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
     'use server';
     await requireAdmin();
     try {
-      const where: any = {};
+      const where: Prisma.ProductWhereInput = {};
       if (data.discountType === 'category') where.category = data.category;
       if (data.discountType === 'brand') where.brand = data.brand;
 

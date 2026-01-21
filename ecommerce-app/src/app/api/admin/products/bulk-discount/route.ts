@@ -1,6 +1,7 @@
 // app/api/admin/products/bulk-discount/route.ts
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -8,7 +9,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check admin auth
     const session = await auth();
-    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
         { status: 401 }
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build where clause based on type
-    let where: any = {};
+    let where: Prisma.ProductWhereInput = {};
     let description = 'all products';
 
     if (discountType === 'category' && category) {

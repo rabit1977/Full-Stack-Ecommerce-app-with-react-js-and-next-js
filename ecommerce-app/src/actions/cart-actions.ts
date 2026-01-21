@@ -193,14 +193,14 @@ export async function clearCartAction() {
 
 export async function getCartAction() {
   const session = await auth();
-  const emptyCart = { items: [], savedForLater: [] };
+  const emptyCart = { items: [], savedForLater: [], user: null };
 
   if (!session?.user?.id) {
     return emptyCart;
   }
 
   try {
-    const [cartItems, savedForLaterItems] = await Promise.all([
+    const results = await Promise.all([
       prisma.cartItem.findMany({
         where: { userId: session.user.id },
         include: {
@@ -249,11 +249,19 @@ export async function getCartAction() {
         },
         orderBy: { createdAt: 'desc' },
       }),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        include: { coupon: true },
+      }),
     ]);
+    const [cartItems, savedForLaterItems, user] = results;
     
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       items: cartItems as any,
-      savedForLater: savedForLaterItems as any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      savedForLater: savedForLaterItems as any,
+      user,
     };
   } catch (error) {
     return emptyCart;

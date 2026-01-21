@@ -5,10 +5,10 @@ import { createOrderAction } from '@/actions/order-actions';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { CheckoutSteps } from '@/components/checkout/checkout-steps';
 import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,11 +19,11 @@ import { Loader2, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, {
-	memo,
-	useCallback,
-	useMemo,
-	useState,
-	useTransition,
+    memo,
+    useCallback,
+    useMemo,
+    useState,
+    useTransition,
 } from 'react';
 import { toast } from 'sonner';
 
@@ -244,6 +244,7 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 			};
 
 			try {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const result = await createOrderAction(orderDetails as any);
 				if (result.success && result.orderId) {
 					await clearCartAction();

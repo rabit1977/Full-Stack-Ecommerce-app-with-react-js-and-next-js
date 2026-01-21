@@ -1,10 +1,10 @@
+import { auth } from '@/auth';
 import OrderDetailsClient, {
-  OrderDetailsSkeleton,
+    OrderDetailsSkeleton,
 } from '@/components/admin/order-details-client';
 import { prisma } from '@/lib/db';
-import { Suspense } from 'react';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import { Suspense } from 'react';
 
 /**
  * Admin order details page with Suspense boundary
@@ -32,7 +32,7 @@ export default async function AdminOrderDetailsPage({
   ) {
     'use server';
     const session = await auth();
-    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    if (!session?.user || session.user.role !== 'ADMIN') {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
@@ -64,7 +64,7 @@ export default async function AdminOrderDetailsPage({
   async function deleteOrderAction() {
     'use server';
     const session = await auth();
-    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    if (!session?.user || session.user.role !== 'ADMIN') {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 

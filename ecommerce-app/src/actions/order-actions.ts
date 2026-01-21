@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 // Helper to check admin access
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+  if (!session?.user || session.user.role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required');
   }
   return session;
@@ -99,8 +99,8 @@ export async function getOrderByIdAction(id: string) {
     }
 
     // Check if user is admin or order owner
-    const isAdmin = (session?.user as any)?.role === 'ADMIN';
-    const isOwner = session?.user && (session.user as any).id === order.userId;
+    const isAdmin = session?.user?.role === 'ADMIN';
+    const isOwner = session?.user && session.user.id === order.userId;
 
     if (!isAdmin && !isOwner) {
       return {
@@ -218,12 +218,12 @@ export async function getOrderStatsAction() {
       pending: ordersByStatus.find((s) => s.status === 'Pending')?._count || 0,
       processing:
         ordersByStatus.find((s) => s.status === 'Processing')?._count || 0,
-      shipped: ordersByStatus.find((s) => s.status === 'Shipped')?._count || 0,
-      delivered:
-        ordersByStatus.find((s) => s.status === 'Delivered')?._count || 0,
-      cancelled:
-        ordersByStatus.find((s) => s.status === 'Cancelled')?._count || 0,
-      revenue: revenueData._sum.total || 0,
+        shipped: ordersByStatus.find((s) => s.status === 'Shipped')?._count || 0,
+        delivered:
+          ordersByStatus.find((s) => s.status === 'Delivered')?._count || 0,
+        cancelled:
+          ordersByStatus.find((s) => s.status === 'Cancelled')?._count || 0,
+        revenue: revenueData._sum.total || 0,
     };
 
     return {
@@ -288,122 +288,114 @@ export async function getMyOrdersAction() {
   }
 }
 
-// ❌ CURRENT PROBLEM
-// Client sends: productId
-// Server expects: id
-// Result: undefined IDs → Prisma crash
-
-// =======================================
-// ✅ FIX createOrderAction (SERVER)
-// =======================================
-
 export async function createOrderAction(details: {
-	items: {
-		productId: string;
-		quantity: number;
-		price: number;
-		title: string;
-		thumbnail: string;
-	}[];
-	total: number;
-	subtotal: number;
-	tax: number;
-	shipping: number;
-	discount: number;
-	couponId?: string;
-	shippingAddress: string;
-	billingAddress: string;
-	shippingMethod: string;
-	paymentMethod: string;
+  items: {
+    productId: string;
+    quantity: number;
+    price: number;
+    title: string;
+    thumbnail: string;
+  }[];
+  total: number;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  discount: number;
+  couponId?: string;
+  shippingAddress: string;
+  billingAddress: string;
+  shippingMethod: string;
+  paymentMethod: string;
 }) {
-	const session = await auth();
-	if (!session?.user?.id) {
-		return { success: false, message: 'Unauthorized' };
-	}
-	const userId = session.user.id;
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: 'Unauthorized' };
+  }
+  const userId = session.user.id;
 
-	try {
-		const result = await prisma.$transaction(async (tx) => {
-			const productIds = details.items
-				.map((item) => item.productId)
-				.filter(Boolean);
-			if (productIds.length === 0) {
-				throw new Error('No valid products provided');
-			}
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const productIds = details.items
+        .map((item) => item.productId)
+        .filter(Boolean);
+      if (productIds.length === 0) {
+        throw new Error('No valid products provided');
+      }
 
-			const productsFromDb = await tx.product.findMany({
-				where: { id: { in: productIds } },
-				select: { id: true, stock: true, title: true },
-			});
-			const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
+      const productsFromDb = await tx.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, stock: true, title: true },
+      });
+      const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
 
-			for (const item of details.items) {
-				const product = productMap.get(item.productId);
-				if (!product) {
-					throw new Error(`Product with ID ${item.productId} not found`);
-				}
-				if (product.stock < item.quantity) {
-					throw new Error(`Not enough stock for ${product.title}`);
-				}
-			}
+      for (const item of details.items) {
+        const product = productMap.get(item.productId);
+        if (!product) {
+          throw new Error(`Product with ID ${item.productId} not found`);
+        }
+        if (product.stock < item.quantity) {
+          throw new Error(`Not enough stock for ${product.title}`);
+        }
+      }
 
-			const order = await tx.order.create({
-				data: {
-					userId,
-					subtotal: details.subtotal,
-					tax: details.tax,
-					shippingCost: details.shipping,
-					discount: details.discount,
-					total: details.total,
-					status: 'Pending',
-					shippingAddress: details.shippingAddress,
-					billingAddress: details.billingAddress,
-					shippingMethod: details.shippingMethod,
-					paymentMethod: details.paymentMethod,
-					couponId: details.couponId,
-					items: {
-						create: details.items.map((item) => ({
-							productId: item.productId,
-							quantity: item.quantity,
-							priceAtPurchase: item.price,
-							title: item.title,
-							thumbnail: item.thumbnail,
-						})),
-					},
-				},
-			});
+      const order = await tx.order.create({
+        data: {
+          userId,
+          subtotal: details.subtotal,
+          tax: details.tax,
+          shippingCost: details.shipping,
+          discount: details.discount,
+          total: details.total,
+          status: 'Pending',
+          shippingAddress: details.shippingAddress,
+          billingAddress: details.billingAddress,
+          shippingMethod: details.shippingMethod,
+          paymentMethod: details.paymentMethod,
+          couponId: details.couponId,
+          items: {
+            create: details.items.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+              priceAtPurchase: item.price,
+              title: item.title,
+              thumbnail: item.thumbnail,
+            })),
+          },
+        },
+      });
 
-			for (const item of details.items) {
-				await tx.product.update({
-					where: { id: item.productId },
-					data: { stock: { decrement: item.quantity } },
-				});
-			}
+      for (const item of details.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } },
+        });
+      }
 
-			await tx.cartItem.deleteMany({
-				where: { userId },
-			});
+      await tx.cartItem.deleteMany({
+        where: { userId },
+      });
 
-			if (details.couponId) {
-				await tx.user.update({
-					where: { id: userId },
-					data: { couponId: null },
-				});
-			}
+      if (details.couponId) {
+        await tx.user.update({
+          where: { id: userId },
+          data: { couponId: null },
+        });
+      }
 
-			return order;
-		});
+      return order;
+    });
 
-		revalidatePath('/account/orders');
-		revalidatePath('/cart');
-		revalidatePath('/checkout');
+    revalidatePath('/account/orders');
+    revalidatePath('/cart');
+    revalidatePath('/checkout');
 
-		return { success: true, orderId: result.id };
-	} catch (error) {
-		return {
-			success: false,
-			message:
-				error instanceof Error ? error.message : 'Failed to create order.',
-		};
-	}
+    return { success: true, orderId: result.id };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : 'Failed to create order.',
+    };
+  }
 }

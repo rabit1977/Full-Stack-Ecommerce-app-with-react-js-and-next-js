@@ -1,7 +1,7 @@
 'use client';
 
 import { ProductPurchasePanel } from '@/components/product/product-purchase-panel';
-import { ProductWithRelations, ProductOption } from '@/lib/types';
+import { ProductOption, ProductWithRelations } from '@/lib/types';
 
 import { useMemo, useState } from 'react';
 
@@ -25,7 +25,7 @@ function isValidProductOptions(options: unknown): options is ProductOption[] {
       'variants' in option &&
       Array.isArray(option.variants) &&
       option.variants.every(
-        (variant: any) =>
+        (variant: unknown) =>
           variant && typeof variant === 'object' && 'value' in variant,
       ),
   );

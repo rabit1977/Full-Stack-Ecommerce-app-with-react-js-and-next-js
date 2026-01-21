@@ -10,14 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/utils/formatters';
 import {
-  Calendar,
-  Heart,
-  Mail,
-  Package,
-  Settings,
-  Shield,
-  ShoppingCart,
-  TrendingUp,
+    Calendar,
+    Heart,
+    Mail,
+    Package,
+    Settings,
+    Shield,
+    ShoppingCart,
+    TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -51,7 +51,7 @@ const AccountPage = async () => {
     totalOrders: orders.length,
     totalSpent: orders.reduce((sum: number, order) => sum + order.total, 0),
     cartItemsCount: cartItems.reduce(
-      (sum: number, item: any) => sum + item.quantity,
+      (sum: number, item: { quantity: number }) => sum + item.quantity,
       0,
     ),
     wishlistItemsCount: wishlist.length,

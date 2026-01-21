@@ -9,12 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatOrderDate, formatPrice } from '@/lib/utils/formatters';
 import {
-  ArrowRight,
-  Check,
-  Clock,
-  Mail,
-  Package,
-  ShoppingBag,
+    ArrowRight,
+    Check,
+    Clock,
+    Mail,
+    Package,
+    ShoppingBag,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
@@ -59,6 +59,7 @@ function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -151,13 +152,18 @@ function OrderConfirmationContent() {
             <CardTitle>Items in your order</CardTitle>
           </CardHeader>
           <CardContent className='space-y-4'>
-            {order.items.map((item: any) => (
+            {order.items.map((item: {
+                id: string;
+                quantity: number;
+                priceAtPurchase: number;
+                product?: { title: string; thumbnail?: string | null };
+              }) => (
               <div
                 key={item.id}
                 className='flex items-center gap-4 rounded-lg border p-4 dark:border-slate-800'
               >
                 <img
-                  src={item.product?.thumbnail}
+                  src={item.product?.thumbnail || '/placeholder.jpg'}
                   alt={item.product?.title}
                   className='h-16 w-16 rounded-md object-cover'
                 />

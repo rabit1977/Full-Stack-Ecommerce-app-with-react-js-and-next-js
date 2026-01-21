@@ -11,7 +11,7 @@ export async function applyCouponAction(couponCode: string) {
 
   const coupon = await prisma.coupon.findFirst({
     where: {
-      code: couponCode,
+      code: { equals: couponCode, mode: 'insensitive' },
       isActive: true,
       OR: [{ expiresAt: null }, { expiresAt: { gte: new Date() } }],
     },

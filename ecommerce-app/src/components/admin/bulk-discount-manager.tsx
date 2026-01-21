@@ -2,20 +2,20 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -124,7 +124,7 @@ export function BulkDiscountManager({
           <Label>Apply discount to</Label>
           <Select
             value={discountType}
-            onValueChange={(value: any) => {
+            onValueChange={(value: 'all' | 'category' | 'brand') => {
               setDiscountType(value);
               // Clear selections when changing type
               setSelectedCategory('');

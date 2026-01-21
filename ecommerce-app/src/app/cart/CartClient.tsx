@@ -1,30 +1,30 @@
 'use client';
 
 import {
-  clearCartAction,
-  moveToCartAction,
-  removeCartItemAction,
-  removeSavedForLaterItemAction,
-  saveForLaterAction,
-  updateCartItemQuantityAction,
+    clearCartAction,
+    moveToCartAction,
+    removeCartItemAction,
+    removeSavedForLaterItemAction,
+    saveForLaterAction,
+    updateCartItemQuantityAction,
 } from '@/actions/cart-actions';
 import {
-  applyCouponAction,
-  removeCouponAction,
+    applyCouponAction,
+    removeCouponAction,
 } from '@/actions/coupon-actions';
 import { CartItem } from '@/components/cart/cart-item';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { SavedItem } from '@/components/cart/saved-item';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { CartItemWithProduct } from '@/lib/types/cart';
 import {
-  ArrowLeft,
-  Check,
-  Package,
-  ShoppingCart,
-  Tag,
-  Trash2,
-  X,
+    ArrowLeft,
+    Check,
+    Package,
+    ShoppingCart,
+    Tag,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
@@ -118,10 +118,12 @@ function CouponInput({
   );
 }
 
+import { Coupon, User } from '@prisma/client';
+
 interface CartClientProps {
   cartItems: CartItemWithProduct[];
   savedForLaterItems: CartItemWithProduct[];
-  user: UserWithRelations | null;
+  user: (User & { coupon?: Coupon | null }) | null;
 }
 
 export function CartClient({
@@ -371,7 +373,9 @@ export function CartClient({
                             {appliedCoupon.code}
                           </p>
                           <p className='text-sm text-green-600 dark:text-green-400'>
-                            {appliedCoupon.description}
+                            {appliedCoupon.type === 'PERCENTAGE'
+                              ? `${appliedCoupon.discount}% off`
+                              : `$${appliedCoupon.discount} off`}
                           </p>
                         </div>
                       </div>

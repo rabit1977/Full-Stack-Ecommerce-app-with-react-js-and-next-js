@@ -7,12 +7,12 @@ import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
 import { AnimatePresence, motion, PanInfo, Variants } from 'framer-motion';
 import {
-	ChevronLeft,
-	ChevronRight,
-	Pause,
-	Play,
-	ShoppingCart,
-	Star,
+    ChevronLeft,
+    ChevronRight,
+    Pause,
+    Play,
+    ShoppingCart,
+    Star,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -165,6 +165,7 @@ export const ProductCarousel = ({
 						aria-label={`View ${currentProduct.title}`}
 					>
 						<Image
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 							src={getProductImage(currentProduct as any)}
 							alt={currentProduct.title}
 							fill
@@ -179,7 +180,7 @@ export const ProductCarousel = ({
 							<div className='max-w-4xl space-y-3 sm:space-y-4'>
 								{currentProduct.category && (
 									<div className='w-fit backdrop-blur-sm bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wide'>
-										{currentProduct.category.name}
+										{currentProduct.category}
 									</div>
 								)}
 

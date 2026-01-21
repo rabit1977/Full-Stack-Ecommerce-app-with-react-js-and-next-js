@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/db';
-import { ProductWithRelations, SortKey } from '@/lib/types';
+import { ProductOption, ProductWithRelations, SortKey } from '@/lib/types';
 import { Prisma } from '@prisma/client';
 
 /**
@@ -244,8 +244,8 @@ export async function getFiltersAction() {
 
 import { auth } from '@/auth';
 import {
-  productFormSchema,
-  ProductFormValues,
+    productFormSchema,
+    ProductFormValues,
 } from '@/lib/schemas/product-schema';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -275,8 +275,8 @@ export async function createProductAction(data: {
   discount?: number;
   tags?: string[];
   features?: string[];
-  options?: any;
-  specifications?: any;
+  options?: ProductOption[];
+  specifications?: Record<string, string>;
 }) {
   try {
     await requireAdmin();
@@ -290,8 +290,8 @@ export async function createProductAction(data: {
         thumbnail: images?.[0] || null,
         tags: productData.tags || [],
         features: productData.features || [],
-        options: productData.options || null,
-        specifications: productData.specifications || null,
+        options: (productData.options || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
+        specifications: (productData.specifications || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
         images: {
           create: images?.map((url) => ({ url })) || [],
         },

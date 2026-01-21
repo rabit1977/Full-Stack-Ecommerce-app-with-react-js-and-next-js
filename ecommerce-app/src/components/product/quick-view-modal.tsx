@@ -118,6 +118,7 @@ export function QuickViewModal({
                 {product.options && (
                   <>
                     <ProductOptions
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       options={product.options as any}
                       selectedOptions={selectedOptions}
                       onOptionChange={(name, value) =>

@@ -22,7 +22,7 @@ export async function ProductDetailContent({
 
   const initialIsWished = wishlist.includes(product.id);
   const initialQuantityInCart =
-    cart.items.find((item: any) => item.productId === product.id)?.quantity ||
+    cart.items.find((item: { productId: string; quantity: number }) => item.productId === product.id)?.quantity ||
     0;
 
   return (

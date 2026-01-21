@@ -1,54 +1,54 @@
 'use client';
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  formatDateTime,
-  formatOrderDate,
-  formatPrice,
+    formatDateTime,
+    formatOrderDate,
+    formatPrice,
 } from '@/lib/utils/formatters';
 import { Prisma } from '@prisma/client';
 import {
-  ArrowLeft,
-  Calendar,
-  CreditCard,
-  Download,
-  Loader2,
-  Mail,
-  MapPin,
-  Package,
-  Phone,
-  Printer,
-  Trash2,
-  Truck,
-  User,
+    ArrowLeft,
+    Calendar,
+    CreditCard,
+    Download,
+    Loader2,
+    Mail,
+    MapPin,
+    Package,
+    Phone,
+    Printer,
+    Trash2,
+    Truck,
+    User,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -175,7 +175,7 @@ export default function OrderDetailsClient({
         <Package className='h-16 w-16 text-slate-300 dark:text-slate-600' />
         <h2 className='text-2xl font-bold dark:text-white'>Order Not Found</h2>
         <p className='text-slate-600 dark:text-slate-400 text-center max-w-md'>
-          The order you're looking for doesn't exist or has been removed.
+          The order you&apos;re looking for doesn&apos;t exist or has been removed.
         </p>
         <Button onClick={() => router.push('/admin/orders')}>
           <ArrowLeft className='h-4 w-4 mr-2' />

@@ -2,14 +2,14 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-import { UserRole } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 
 // Helper to check admin access
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+  if (!session?.user || session.user.role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required');
   }
   return session;
@@ -193,7 +193,7 @@ export async function updateUserAction(
       }
     }
 
-    const updateData: any = {
+    const updateData: Prisma.UserUpdateInput = {
       name: data.name,
       email: data.email,
       role: data.role,

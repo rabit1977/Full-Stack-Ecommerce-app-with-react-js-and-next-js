@@ -273,7 +273,7 @@ model Coupon {
   expiresAt DateTime?
   isActive  Boolean     @default(true)
   orders    Order[]
-    users     User[]
+  users     User[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

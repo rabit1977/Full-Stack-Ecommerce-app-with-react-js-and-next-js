@@ -1,5 +1,5 @@
-import { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { SearchResultItem } from './SearchResultItem';
 
@@ -54,14 +54,14 @@ export const SearchDropdown = ({
               disabled={isPending}
               className='w-full justify-center'
             >
-              View all results for "{inputValue}"
+              View all results for &quot;{inputValue}&quot;
             </Button>
           </div>
         </>
       ) : (
         <div className='p-8 text-center'>
           <p className='text-sm text-muted-foreground'>
-            No results found for "{inputValue}"
+            No results found for &quot;{inputValue}&quot;
           </p>
           <p className='text-xs text-muted-foreground mt-1'>
             Try adjusting your search terms
