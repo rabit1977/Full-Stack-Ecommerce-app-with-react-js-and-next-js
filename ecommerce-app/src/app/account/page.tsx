@@ -4,20 +4,21 @@ import { getWishlistAction } from '@/actions/wishlist-actions';
 import { auth } from '@/auth';
 import { AccountStats } from '@/components/account/AccountStats';
 import AuthGuard from '@/components/auth/auth-guard';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/utils/formatters';
 import {
-    Calendar,
-    Heart,
-    Mail,
-    Package,
-    Settings,
-    Shield,
-    ShoppingCart,
-    TrendingUp,
+  Calendar,
+  Heart,
+  Mail,
+  Package,
+  Settings,
+  Shield,
+  ShoppingCart,
+  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -85,11 +86,16 @@ const AccountPage = async () => {
             <div className='flex flex-col sm:flex-row items-start sm:items-center gap-6'>
               {/* Avatar */}
               <div className='relative group'>
-                <div className='w-20 h-20 sm:w-24 sm:h-24 bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg ring-4 ring-white dark:ring-slate-800 transition-transform group-hover:scale-105'>
-                  <span className='text-3xl sm:text-4xl font-bold'>
+                <Avatar className='w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-lg ring-4 ring-white dark:ring-slate-800 transition-transform group-hover:scale-105'>
+                  <AvatarImage 
+                    src={user?.image || undefined} 
+                    alt={user?.name || 'User'} 
+                    className="object-cover"
+                  />
+                  <AvatarFallback className='text-3xl sm:text-4xl font-bold bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 text-white'>
                     {userInitials}
-                  </span>
-                </div>
+                  </AvatarFallback>
+                </Avatar>
                 <div className='absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full border-4 border-white dark:border-slate-800 flex items-center justify-center'>
                   <div className='w-2 h-2 bg-white rounded-full animate-pulse' />
                 </div>

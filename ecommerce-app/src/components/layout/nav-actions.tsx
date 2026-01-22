@@ -1,5 +1,6 @@
 'use client';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -58,6 +59,17 @@ export const NavActions = ({
   // Get user's first name
   const firstName = useMemo(() => {
     return user?.name?.split(' ')[0] || 'User';
+  }, [user]);
+
+  // Get user initials for avatar
+  const userInitials = useMemo(() => {
+    if (!user?.name) return 'U';
+    return user.name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }, [user]);
 
   // Handle theme toggle with transition
@@ -148,7 +160,16 @@ export const NavActions = ({
               <span className='hidden md:inline text-sm font-medium'>
                 {firstName}
               </span>
-              <User className='h-5 w-5' />
+              <Avatar className='h-7 w-7 sm:h-8 sm:w-8 border border-slate-200 dark:border-slate-800 transition-transform group-hover:scale-105'>
+                <AvatarImage 
+                  src={user.image || undefined} 
+                  alt={user.name || 'User'} 
+                  className="object-cover"
+                />
+                <AvatarFallback className='text-xs font-bold bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 text-white'>
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           </HoverCardTrigger>
           <HoverCardContent align='end' className='w-56 p-0' sideOffset={8}>

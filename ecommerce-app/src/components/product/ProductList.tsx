@@ -14,7 +14,7 @@ export const ProductList = ({ products, className }: ProductListProps) => {
   return (
     <div
       className={cn(
-        'mt-6 sm:mt-8 grid gap-4 xs:gap-5 sm:gap-6 lg:gap-8 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
+        'mt-6 sm:mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4 xs:gap-5 sm:gap-6 lg:gap-8 grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
         className,
       )}
     >

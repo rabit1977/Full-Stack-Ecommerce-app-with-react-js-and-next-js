@@ -99,10 +99,10 @@ export const ProductCard = memo(
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className='group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg dark:border-slate-800'
+        className='group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg dark:bg-slate-800 dark:border-slate-800'
       >
         {/* --- Image Section --- */}
-        <div className='relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-900'>
+        <div className='relative aspect-square h-64 w-full overflow-hidden bg-slate-100 dark:bg-slate-900'>
           <ProductImageCarousel product={product} />
 
           {/* Badges (Top Left) */}
@@ -164,13 +164,24 @@ export const ProductCard = memo(
           </Link>
 
           {/* Price Area */}
-          <div className='mt-2 sm:mt-3 flex items-center gap-2'>
+          <div className='mt-2 sm:mt-3 flex items-center justify-between gap-2'>
+            <div className='flex items-center gap-2'>
             <span className='text-base sm:text-lg font-bold text-foreground'>
               {formatPrice(effectivePrice)}
             </span>
             {discount && (
               <span className='text-[10px] sm:text-sm text-muted-foreground line-through decoration-slate-400/60'>
                 {formatPrice(discount.originalPrice)}
+              </span>
+            )}
+            </div>
+            {product.stock === 0 ? (
+              <span className='text-[10px] sm:text-sm text-muted-foreground'>
+                Out of Stock
+              </span>
+            ) : (
+              <span className='text-[10px] sm:text-sm text-muted-foreground'>
+                In stock <span  className='text-primary font-semibold'>{product.stock}</span>
               </span>
             )}
           </div>

@@ -16,66 +16,74 @@ export async function addItemToCartAction(
   }
   const userId = session.user.id;
 
-  try {
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
-      select: { stock: true },
-    });
-
-    if (!product) {
-      return { success: false, message: 'Product not found' };
-    }
-
-    // If the item is in the wishlist, remove it
-    await prisma.wishlistItem.deleteMany({
-      where: { userId, productId },
-    });
-
-    const optionsToSave =
-      options && Object.keys(options).length > 0 ? options : {};
-
-    // Check if item is in saved for later and remove it
-    await prisma.savedForLater.deleteMany({
-      where: { userId, productId },
-    });
-
-    const existingCartItem = await prisma.cartItem.findFirst({
-      where: { userId, productId, selectedOptions: optionsToSave },
-    });
-
-    const newQuantity = existingCartItem
-      ? existingCartItem.quantity + quantity
-      : quantity;
-
-    if (newQuantity > product.stock) {
-      return {
-        success: false,
-        message: `Only ${product.stock} items available`,
-      };
-    }
-
-    if (existingCartItem) {
-      await prisma.cartItem.update({
-        where: { id: existingCartItem.id },
-        data: { quantity: newQuantity },
+   try {
+    // Start a transaction to ensure data integrity
+    return await prisma.$transaction(async (tx) => {
+      // 1. Check current stock with a read (or use update with a where clause)
+      const product = await tx.product.findUnique({
+        where: { id: productId },
+        select: { id: true, stock: true },
       });
-    } else {
-      await prisma.cartItem.create({
+
+      if (!product) throw new Error('Product not found');
+      
+      // 2. Validate stock availability
+      if (product.stock < quantity) {
+        return {
+          success: false,
+          message: `Only ${product.stock} items available`,
+        };
+      }
+
+      // 3. Decrease the stock immediately
+      await tx.product.update({
+        where: { id: productId },
         data: {
-          userId,
-          productId,
-          quantity,
-          selectedOptions: optionsToSave,
+          stock: {
+            decrement: quantity,
+          },
         },
       });
-    }
 
-    revalidatePath('/cart');
-    revalidatePath('/wishlist');
-    return { success: true, message: 'Item added to cart' };
-  } catch (error) {
+      // 4. Handle cleanup (Wishlist/Saved for Later)
+      const optionsToSave = options && Object.keys(options).length > 0 ? options : {};
+      
+      await tx.wishlistItem.deleteMany({ where: { userId, productId } });
+      await tx.savedForLater.deleteMany({ where: { userId, productId } });
+
+      // 5. Update or Create Cart Item
+      const existingCartItem = await tx.cartItem.findFirst({
+        where: { userId, productId, selectedOptions: optionsToSave },
+      });
+
+      if (existingCartItem) {
+        await tx.cartItem.update({
+          where: { id: existingCartItem.id },
+          data: { quantity: existingCartItem.quantity + quantity },
+        });
+      } else {
+        await tx.cartItem.create({
+          data: {
+            userId,
+            productId,
+            quantity,
+            selectedOptions: optionsToSave,
+          },
+        });
+      }
+
+      revalidatePath('/cart');
+      revalidatePath('/wishlist');
+      revalidatePath(`/product/${productId}`); // Revalidate product page to show new stock
+      
+      return { success: true, message: 'Item added to cart and stock updated' };
+    });
+  } catch (error: any) {
     console.error('Error in addItemToCartAction:', error);
-    return { success: false, message: 'Failed to add to cart' };
+    return { 
+      success: false, 
+      message: error.message === 'Product not found' ? error.message : 'Failed to add to cart' 
+    };
   }
 }
 

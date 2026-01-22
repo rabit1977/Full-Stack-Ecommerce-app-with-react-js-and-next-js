@@ -86,9 +86,9 @@ export function WishlistClient({
           {products.map((product) => (
             <div
               key={product.id}
-              className='border rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col dark:bg-slate-900 dark:border-slate-800'
+              className='border rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col dark:bg-muted dark:border-slate-800'
             >
-              <div className='h-48 w-full overflow-hidden relative bg-slate-100 dark:bg-slate-800'>
+              <div className='h-64 w-full overflow-hidden relative bg-slate-100 dark:bg-muted'>
                 <Image
                   src={getProductImage(product)}
                   alt={product.title}

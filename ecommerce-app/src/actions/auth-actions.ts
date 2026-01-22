@@ -171,6 +171,7 @@ export async function updateUserAction(
     email?: string;
     role?: UserRole;
     bio?: string;
+    image?: string;
     password?: string;
   },
 ) {
@@ -198,6 +199,7 @@ export async function updateUserAction(
       email: data.email,
       role: data.role,
       bio: data.bio,
+      image: data.image,
     };
 
     if (data.password && data.password.trim() !== '') {
@@ -238,6 +240,7 @@ export async function updateProfileAction(data: {
   name?: string;
   email?: string;
   bio?: string;
+  image?: string;
 }) {
   try {
     const session = await auth();

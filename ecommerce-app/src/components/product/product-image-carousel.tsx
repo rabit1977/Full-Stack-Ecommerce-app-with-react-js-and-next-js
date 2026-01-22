@@ -49,7 +49,7 @@ export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
   }, [product.stock]);
 
   return (
-    <div className='relative aspect-square h-80 w-full overflow-hidden bg-slate-100 dark:bg-slate-600'>
+    <div className='relative aspect-square h-64 w-full overflow-hidden bg-slate-100 dark:bg-muted'>
       {/* Main Image */}
       <Link
         href={`/products/${product.id}`}

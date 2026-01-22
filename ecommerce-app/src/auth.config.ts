@@ -46,6 +46,7 @@ export const authConfig = {
             select: {
               role: true,
               bio: true,
+              image: true,
               helpfulReviews: true,
               createdAt: true, // 🔥 Fetch createdAt from database
             },
@@ -61,6 +62,9 @@ export const authConfig = {
 
           session.user.bio =
             dbUser?.bio || (token.bio as string | null) || null;
+
+          session.user.image =
+            dbUser?.image || (token.picture as string | null) || null;
 
           // 🔥 Add createdAt to session (prefer DB value, fallback to token)
           session.user.createdAt =

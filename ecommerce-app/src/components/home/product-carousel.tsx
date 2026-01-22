@@ -7,12 +7,12 @@ import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
 import { AnimatePresence, motion, PanInfo, Variants } from 'framer-motion';
 import {
-    ChevronLeft,
-    ChevronRight,
-    Pause,
-    Play,
-    ShoppingCart,
-    Star,
+	ChevronLeft,
+	ChevronRight,
+	Pause,
+	Play,
+	ShoppingCart,
+	Star,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -134,7 +134,7 @@ export const ProductCarousel = ({
 
 	return (
 		<div
-			className='relative w-full aspect-video sm:aspect-21/9 max-h-150 overflow-hidden bg-slate-900 focus:outline-none rounded-xl'
+			className='relative w-full aspect-video sm:aspect-21/9 max-h-150 overflow-hidden bg-slate-900 focus:outline-none'
 			onMouseEnter={() => setIsPaused(true)}
 			onMouseLeave={() => setIsPaused(false)}
 			onKeyDown={handleKeyDown}
@@ -157,6 +157,7 @@ export const ProductCarousel = ({
 					dragElastic={1}
 					onDragEnd={handleDragEnd}
 				>
+					
 					<div
 						className='relative w-full h-full cursor-pointer'
 						onClick={() => navigateToProduct(currentProduct.id)}
@@ -176,10 +177,10 @@ export const ProductCarousel = ({
 						/>
 						<div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent' />
 
-						<div className='absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-12'>
+						<div className='absolute inset-0 flex flex-col justify-end p-6  sm:p-8 lg:p-12'>
 							<div className='max-w-4xl space-y-3 sm:space-y-4'>
 								{currentProduct.category && (
-									<div className='w-fit backdrop-blur-sm bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wide'>
+									<div className='w-fit  backdrop-blur-sm bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wide'>
 										{currentProduct.category}
 									</div>
 								)}
@@ -257,18 +258,18 @@ export const ProductCarousel = ({
 				<>
 					<button
 						onClick={() => paginate(-1)}
-						className='absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 transition-all duration-200 z-10 group focus:outline-none focus:ring-2 focus:ring-white/50'
+						className='absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full transparent  text-white hover:bg-black/70 transition-all duration-200 z-10 focus:outline-none focus:ring-2 focus:ring-white/50 group group-hover:opacity-100'
 						aria-label='Previous product'
 					>
-						<ChevronLeft className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform' />
+						<ChevronLeft className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform opacity-0 group-hover:opacity-100' />
 					</button>
 
 					<button
 						onClick={() => paginate(1)}
-						className='absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 transition-all duration-200 z-10 group focus:outline-none focus:ring-2 focus:ring-white/50'
+						className='absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full transparent text-white hover:bg-black/70 transition-all duration-200 z-10 group focus:outline-none focus:ring-2 focus:ring-white/50'
 						aria-label='Next product'
 					>
-						<ChevronRight className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform' />
+						<ChevronRight className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform opacity-0 group-hover:opacity-100' />
 					</button>
 
 					<div className='absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10'>
