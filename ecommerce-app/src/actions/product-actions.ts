@@ -110,40 +110,40 @@ export async function getProductsAction(
   const skip = (page - 1) * limit;
 
   try {
-    const [products, totalCount] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        include: {
-          images: {
-            select: {
-              id: true,
-              url: true,
-            },
+    // Run queries sequentially to stay within Supabase connection limits (max: 1)
+    const products = await prisma.product.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        images: {
+          select: {
+            id: true,
+            url: true,
           },
-          reviews: {
-            select: {
-              id: true,
-              userId: true,
-              rating: true,
-              title: true,
-              comment: true,
-              helpful: true,
-              verifiedPurchase: true,
-              createdAt: true,
-              user: {
-                select: {
-                  name: true,
-                },
+        },
+        reviews: {
+          select: {
+            id: true,
+            userId: true,
+            rating: true,
+            title: true,
+            comment: true,
+            helpful: true,
+            verifiedPurchase: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
               },
             },
           },
         },
-      }),
-      prisma.product.count({ where }),
-    ]);
+      },
+    });
+
+    const totalCount = await prisma.product.count({ where });
 
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -220,23 +220,21 @@ export async function getFiltersAction(selectedCategories?: string) {
       }
     }
 
-    const [categoriesAgg, brandsAgg, priceAgg] = await Promise.all([
-      // Categories always show all available options
-      prisma.product.groupBy({
-        by: ['category'],
-      }),
-      // Brands are filtered by selected categories
-      prisma.product.groupBy({
-        by: ['brand'],
-        where,
-      }),
-      // Price range is filtered by selected categories
-      prisma.product.aggregate({
-        where,
-        _min: { price: true },
-        _max: { price: true },
-      }),
-    ]);
+    // Run queries sequentially to respect the connection limit of 1
+    const categoriesAgg = await prisma.product.groupBy({
+      by: ['category'],
+    });
+
+    const brandsAgg = await prisma.product.groupBy({
+      by: ['brand'],
+      where,
+    });
+
+    const priceAgg = await prisma.product.aggregate({
+      where,
+      _min: { price: true },
+      _max: { price: true },
+    });
 
     return {
       categories: categoriesAgg.map((c) => c.category).sort(),
