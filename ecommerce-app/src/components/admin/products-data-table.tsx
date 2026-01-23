@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { formatPrice } from '@/lib/utils/formatters';
-import { Product } from '@prisma/client';
+import { Product } from '@/generated/prisma/client';
 import { MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

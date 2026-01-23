@@ -117,7 +117,7 @@ function CouponInput({
   );
 }
 
-import { Coupon, User } from '@prisma/client';
+import { Coupon, User } from '@/generated/prisma/client';
 
 interface CartClientProps {
   cartItems: CartItemWithProduct[];

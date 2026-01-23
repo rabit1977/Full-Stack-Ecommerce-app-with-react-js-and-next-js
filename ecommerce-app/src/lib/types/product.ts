@@ -1,5 +1,5 @@
 // types/product.ts
-import { Product as PrismaProduct } from '@prisma/client';
+import { Product as PrismaProduct } from '@/generated/prisma/client';
 
 /**
  * Product option variant (single variant within an option)

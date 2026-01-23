@@ -1,7 +1,7 @@
 // app/api/admin/products/bulk-discount/route.ts
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/generated/prisma/client';
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 

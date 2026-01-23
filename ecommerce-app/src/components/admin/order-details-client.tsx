@@ -34,7 +34,7 @@ import {
     formatOrderDate,
     formatPrice,
 } from '@/lib/utils/formatters';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/generated/prisma/client';
 import {
     ArrowLeft,
     Calendar,

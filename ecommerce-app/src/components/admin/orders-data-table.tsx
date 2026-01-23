@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatPrice } from '@/lib/utils/formatters';
-import { Order, OrderStatus } from '@prisma/client';
+import { Order, OrderStatus } from '@/generated/prisma/client';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';

@@ -1,6 +1,6 @@
 // import { prisma } from '@/lib/db';
 // import { Product, Review, SortKey } from '@/lib/types';
-// import { Prisma } from '@prisma/client';
+// import { Prisma } from '@/generated/prisma/client';
 
 // /**
 //  * Available sort options for products

@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/db';
 import { ProductOption, ProductWithRelations, SortKey } from '@/lib/types';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/generated/prisma/client';
 
 /**
  * Sort options

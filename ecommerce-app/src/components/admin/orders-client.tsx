@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatPrice } from '@/lib/utils/formatters';
-import { Order } from '@prisma/client';
+import { Order } from '@/generated/prisma/client';
 import { Clock, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
