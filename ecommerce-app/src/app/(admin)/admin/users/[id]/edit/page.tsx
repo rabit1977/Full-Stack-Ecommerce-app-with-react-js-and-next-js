@@ -1,21 +1,21 @@
 // app/admin/users/[id]/edit/page.tsx
 
 import { getUserByIdAction } from '@/actions/user-actions';
+import { auth } from '@/auth';
 import { EditUserForm } from '@/components/admin/edit-user-form';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { ArrowLeft, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { auth } from '@/auth';
 
 interface EditUserPageProps {
   params: Promise<{ id: string }>;
@@ -101,7 +101,7 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
           <CardHeader>
             <CardTitle>User Information</CardTitle>
             <CardDescription>
-              Update the user's account details
+              Update the user&apos;s account details
             </CardDescription>
           </CardHeader>
           <CardContent>

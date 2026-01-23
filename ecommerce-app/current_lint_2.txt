@@ -1,0 +1,81 @@
+
+> ecommerce-app@0.1.0 lint C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app
+> eslint
+
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\actions\auth-actions.ts
+  105:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  218:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  234:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  276:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\actions\cart-actions.ts
+  128:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  146:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  180:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  198:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  275:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  292:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  325:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\actions\wishlist-actions.ts
+  31:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\app\(admin)\admin\products\page.tsx
+   87:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+   99:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  127:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\app\checkout\CheckoutClient.tsx
+  256:13  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\app\order-confirmation\page.tsx
+  165:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\app\products\page.tsx
+  15:10  warning  'isProductLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\admin\order-details-client.tsx
+   58:7  warning  'orderWithDetails' is assigned a value but only used as a type  @typescript-eslint/no-unused-vars
+  192:9  warning  'billingAddress' is assigned a value but never used             @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\admin\product-form.tsx
+   85:16  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  281:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  333:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\admin\product-image.tsx
+  11:5  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\admin\products-client.tsx
+  74:9  warning  'isSomeSelected' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\admin\products-list.tsx
+  63:9  warning  'isSomeSelected' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\admin\user-form.tsx
+  51:52  warning  'mode' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\admin\users-data-table.tsx
+  117:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\auth\auth-guard.tsx
+  28:17  warning  'session' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\data-recovery.tsx
+  21:14  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\layout\footer.tsx
+  130:18  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\product\reviews-section.tsx
+  58:32  warning  'reviewId' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\components\ui\command-palette.tsx
+  42:6  warning  React Hook useEffect has a missing dependency: 'mounted'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\rabit\OneDrive\Desktop\Nextjs Projects\Full Stack ecommerce app\ecommerce-app\src\lib\types\product.ts
+  2:36  warning  'Prisma' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 34 problems (0 errors, 34 warnings)
+

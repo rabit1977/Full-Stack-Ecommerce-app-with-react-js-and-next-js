@@ -2,8 +2,9 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-import { revalidatePath } from 'next/cache';
 import { UserRole } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Helper to check admin access
@@ -333,7 +334,6 @@ export async function createUserAction(data: {
     }
 
     // Hash password
-    const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     // Create user

@@ -1,13 +1,13 @@
 import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Section,
-  Tailwind,
-  Text,
+    Body,
+    Container,
+    Head,
+    Heading,
+    Hr,
+    Html,
+    Section,
+    Tailwind,
+    Text,
 } from '@react-email/components';
 
 interface SubscriptionConfirmationEmailProps {
@@ -55,7 +55,7 @@ export const SubscriptionConfirmationEmail = ({
           </Heading>
 
           <Text className='text-gray-600 text-base leading-relaxed m-0 mb-8 px-10 text-center'>
-            You've successfully joined our community! Get ready for exclusive
+            You&apos;ve successfully joined our community! Get ready for exclusive
             content, early access to new products, insider tips, and special
             offers delivered straight to your inbox.
           </Text>

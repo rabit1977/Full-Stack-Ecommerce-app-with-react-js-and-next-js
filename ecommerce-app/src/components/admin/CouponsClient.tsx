@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Ticket } from 'lucide-react';
 import Link from 'next/link';
-import { CouponsDataTable } from './coupons-data-table';
+import { CouponWithStats, CouponWithStats, CouponsDataTable } from './coupons-data-table';
 
 export function CouponsListSkeleton() {
   return (
@@ -21,7 +21,7 @@ export function CouponsListSkeleton() {
   );
 }
 
-export default function CouponsClient({ coupons }: { coupons: any[] }) {
+export default function CouponsClient({ coupons }: { coupons: CouponWithStats[] }) {
   return (
     <div className='space-y-8'>
       <div className='flex items-center justify-between'>

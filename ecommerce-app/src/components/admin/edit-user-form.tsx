@@ -3,21 +3,21 @@
 import { updateUserAction } from '@/actions/user-actions';
 import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { User } from '@/lib/types';
@@ -113,7 +113,7 @@ export function EditUserForm({
                 <Input placeholder='John Doe' {...field} disabled={isPending} />
               </FormControl>
               <FormDescription>
-                The user's full name as it appears in the system
+                The user&apos;s full name as it appears in the system
               </FormDescription>
               <FormMessage />
             </FormItem>

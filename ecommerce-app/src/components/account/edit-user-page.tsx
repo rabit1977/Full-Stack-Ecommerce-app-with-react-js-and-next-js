@@ -5,21 +5,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  ArrowLeft,
-  Calendar,
-  Camera,
-  Mail,
-  Shield,
-  User as UserIcon
+    ArrowLeft,
+    Calendar,
+    Camera,
+    Mail,
+    Shield,
+    User as UserIcon
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -236,7 +236,7 @@ export default function EditProfilePage() {
                     <span>Role</span>
                   </div>
                   <Badge variant='secondary' className='capitalize'>
-                    {(user as any).role?.toLowerCase() || 'User'}
+                    {(user as { role?: string }).role?.toLowerCase() || 'User'}
                   </Badge>
                 </div>
 
@@ -248,8 +248,8 @@ export default function EditProfilePage() {
                     <span>Member Since</span>
                   </div>
                   <p className='font-medium'>
-                    {(user as any).createdAt
-                      ? new Date((user as any).createdAt).toLocaleDateString('en-US', {
+                    {(user as { createdAt?: string | Date }).createdAt
+                      ? new Date((user as { createdAt?: string | Date }).createdAt!).toLocaleDateString('en-US', {
                           month: 'long',
                           year: 'numeric',
                         })

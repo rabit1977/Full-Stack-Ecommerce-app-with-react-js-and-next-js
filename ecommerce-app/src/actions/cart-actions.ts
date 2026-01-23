@@ -78,11 +78,12 @@ export async function addItemToCartAction(
       
       return { success: true, message: 'Item added to cart and stock updated' };
     });
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in addItemToCartAction:', error);
     return { 
       success: false, 
-      message: error.message === 'Product not found' ? error.message : 'Failed to add to cart' 
+      message: errorMessage === 'Product not found' ? errorMessage : 'Failed to add to cart' 
     };
   }
 }

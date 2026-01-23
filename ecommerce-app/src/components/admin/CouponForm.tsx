@@ -79,7 +79,7 @@ export default function CouponForm() {
               <Label htmlFor="type" className="text-sm font-semibold">Discount Type</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                onValueChange={(value: 'PERCENTAGE' | 'FIXED') => setFormData({ ...formData, type: value })}
               >
                 <SelectTrigger className="h-11">
                   <SelectValue />
