@@ -102,7 +102,7 @@ export async function getUsersAction() {
 
     const users = await prisma.user.findMany();
     return { success: true, users };
-  } catch (error) {
+  } catch {
     return { success: false, message: 'Failed to fetch users' };
   }
 }
@@ -215,7 +215,7 @@ export async function updateUserAction(
     revalidatePath(`/admin/users/${id}`);
 
     return { success: true, message: 'User updated successfully.', user };
-  } catch (error) {
+  } catch {
     return { success: false, message: 'Failed to update user' };
   }
 }
@@ -231,7 +231,7 @@ export async function deleteUserAction(id: string) {
     revalidatePath('/admin/users');
 
     return { success: true, message: 'User deleted successfully.' };
-  } catch (error) {
+  } catch {
     return { success: false, message: 'Failed to delete user' };
   }
 }
@@ -273,7 +273,7 @@ export async function updateProfileAction(data: {
     revalidatePath('/account');
 
     return { success: true, message: 'Profile updated successfully.', user };
-  } catch (error) {
+  } catch {
     return { success: false, message: 'Failed to update profile' };
   }
 }

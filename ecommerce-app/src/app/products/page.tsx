@@ -12,7 +12,6 @@ const ProductsPage = () => {
   // Product Data States
   const [products, setProducts] = useState<ProductWithImages[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [isProductLoading, setIsProductLoading] = useState(true);
 
   // Filter Data States (Fetch once and keep)
   const [allCategories, setAllCategories] = useState<string[]>([]);
@@ -38,7 +37,6 @@ const ProductsPage = () => {
   // 2. Fetch Products whenever searchParams change
   useEffect(() => {
     const fetchProducts = async () => {
-      setIsProductLoading(true);
       const params = searchParams || new URLSearchParams();
 
       const query = (params.get('search') as string) || '';
@@ -66,8 +64,6 @@ const ProductsPage = () => {
         setTotalCount(newTotal);
       } catch (error) {
         console.error('Failed to load products', error);
-      } finally {
-        setIsProductLoading(false);
       }
     };
 

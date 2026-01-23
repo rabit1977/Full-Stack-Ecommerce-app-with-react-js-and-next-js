@@ -28,7 +28,7 @@ export async function getWishlistAction(): Promise<WishlistActionResult> {
       success: true,
       wishlist: wishlistItems.map((item) => item.productId),
     };
-  } catch (error) {
+  } catch {
     return { success: false, error: 'Failed to fetch wishlist.', wishlist: [] };
   }
 }

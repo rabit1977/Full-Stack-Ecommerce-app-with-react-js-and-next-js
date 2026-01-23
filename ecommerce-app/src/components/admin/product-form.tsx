@@ -1,25 +1,26 @@
 // components/admin/product-form.tsx
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  productFormSchema,
-  type ProductFormValues,
+    productFormSchema,
+    type ProductFormValues,
 } from '@/lib/schemas/product-schema';
 import { ProductWithRelations } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -82,7 +83,7 @@ export const ProductForm = ({
         } else {
           toast.error(`Failed to upload ${file.name}: ${result.error}`);
         }
-      } catch (error) {
+      } catch {
         toast.error(`An error occurred while uploading ${file.name}`);
       }
     }
@@ -276,18 +277,15 @@ export const ProductForm = ({
                 onChange={(e) => setImageUrls([e.target.value])}
                 disabled={isSubmitting || isUploading}
               />
-              {imageUrls[0] && (
-                <div className="mt-2">
-                  <img 
+                <div className="mt-2 relative h-32 w-32 overflow-hidden rounded-lg border dark:border-slate-700">
+                  <Image 
                     src={imageUrls[0]} 
                     alt="Preview" 
-                    className="h-32 w-32 object-cover rounded-lg border dark:border-slate-700"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/150?text=Invalid+URL';
-                    }}
+                    fill
+                    className="object-cover"
+                    unoptimized // Previews might be blobs or external URLs
                   />
                 </div>
-              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -330,11 +328,15 @@ export const ProductForm = ({
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {imageUrls.map((url, index) => (
                     <div key={index} className="relative group">
-                      <img
-                        src={url}
-                        alt={`Preview ${index + 1}`}
-                        className="h-24 w-full object-cover rounded-lg border dark:border-slate-700"
-                      />
+                      <div className="relative h-24 w-full overflow-hidden rounded-lg border dark:border-slate-700">
+                        <Image
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
                       <Button
                         type="button"
                         variant="destructive"

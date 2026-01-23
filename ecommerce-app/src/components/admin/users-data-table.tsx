@@ -1,31 +1,32 @@
 'use client';
 
+import { deleteUserFromAdminAction } from '@/actions/user-actions';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 import { User } from '@/lib/types';
-import { deleteUserFromAdminAction } from '@/actions/user-actions';
-import { MoreHorizontal, Trash2, Eye, Edit, UserCog } from 'lucide-react';
+import { Edit, Eye, MoreHorizontal, Trash2, UserCog } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useTransition, useCallback } from 'react';
-import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useCallback, useState, useTransition } from 'react';
+import { toast } from 'sonner';
 
 interface UsersDataTableProps {
   users: User[];
@@ -114,11 +115,14 @@ export function UsersDataTable({ users }: UsersDataTableProps) {
       cell: (user: User) => (
         <div className='flex items-center gap-2'>
           {user.image ? (
-            <img 
-              src={user.image} 
-              alt={user.name || 'User'} 
-              className='h-8 w-8 rounded-full object-cover'
-            />
+            <div className='h-8 w-8 relative shrink-0'>
+              <Image 
+                src={user.image} 
+                alt={user.name || 'User'} 
+                fill
+                className='rounded-full object-cover'
+              />
+            </div>
           ) : (
             <div className='h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center'>
               <span className='text-sm font-semibold text-primary'>

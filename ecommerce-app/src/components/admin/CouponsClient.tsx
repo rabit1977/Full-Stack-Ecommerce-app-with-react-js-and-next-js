@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Ticket } from 'lucide-react';
 import Link from 'next/link';
-import { CouponWithStats, CouponWithStats, CouponsDataTable } from './coupons-data-table';
+import { CouponWithStats, CouponsDataTable } from './coupons-data-table';
 
 export function CouponsListSkeleton() {
   return (

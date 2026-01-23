@@ -39,7 +39,7 @@ export const CommandPalette = () => {
 
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [mounted]);
 
   // Fetch search results when query changes (with debounce)
   useEffect(() => {

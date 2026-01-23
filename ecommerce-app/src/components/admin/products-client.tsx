@@ -71,8 +71,6 @@ export function ProductsClient({
 
   const isAllSelected =
     selectedIds.length > 0 && selectedIds.length === products.length;
-  const isSomeSelected =
-    selectedIds.length > 0 && selectedIds.length < products.length;
 
   return (
     <div className='space-y-4'>

@@ -125,7 +125,7 @@ export async function updateCartItemQuantityAction(
 
     revalidatePath('/cart');
     return { success: true, message: 'Quantity updated' };
-  } catch (error) {
+  } catch {
     return { success: false, message: 'Failed to update quantity' };
   }
 }
@@ -143,7 +143,7 @@ export async function removeCartItemAction(cartItemId: string) {
 
     revalidatePath('/cart');
     return { success: true, message: 'Item removed from cart' };
-  } catch (error) {
+  } catch {
     return { success: false, message: 'Failed to remove item' };
   }
 }
@@ -177,7 +177,7 @@ export async function saveForLaterAction(cartItemId: string) {
 
     revalidatePath('/cart');
     return { success: true, message: 'Item saved for later' };
-  } catch (error) {
+  } catch {
     // Handle potential unique constraint violation if item already saved
     return { success: false, message: 'Failed to save item for later' };
   }
@@ -195,7 +195,7 @@ export async function clearCartAction() {
     });
     revalidatePath('/cart');
     return { success: true, message: 'Cart cleared' };
-  } catch (error) {
+  } catch {
     return { success: false, message: 'Failed to clear cart' };
   }
 }
@@ -272,7 +272,7 @@ export async function getCartAction() {
       savedForLater: savedForLaterItems as any,
       user,
     };
-  } catch (error) {
+  } catch {
     return emptyCart;
   }
 }
@@ -289,7 +289,7 @@ export async function removeSavedForLaterItemAction(savedItemId: string) {
         });
         revalidatePath('/cart');
         return { success: true, message: 'Item removed from saved for later' };
-    } catch (error) {
+    } catch {
         return { success: false, message: 'Failed to remove item' };
     }
 }
@@ -322,7 +322,7 @@ export async function moveToCartAction(savedItemId: string) {
         
         revalidatePath('/cart');
         return { success: true, message: 'Item moved to cart' };
-    } catch (error) {
+    } catch {
         return { success: false, message: 'Failed to move item to cart' };
     }
 }

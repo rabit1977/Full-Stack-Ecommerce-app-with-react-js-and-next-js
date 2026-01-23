@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface ProductImageProps {
   src: string;
   alt: string;
@@ -8,13 +10,14 @@ interface ProductImageProps {
 
 export function ProductImage({ src, alt, className }: ProductImageProps) {
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      onError={(e) => {
-        e.currentTarget.src = 'https://via.placeholder.com/64?text=No+Image';
-      }}
-    />
+    <div className={`relative overflow-hidden ${className}`}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className='object-cover'
+        sizes='(max-width: 768px) 64px, 128px'
+      />
+    </div>
   );
 }

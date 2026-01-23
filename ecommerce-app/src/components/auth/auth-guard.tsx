@@ -1,9 +1,9 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
   redirectTo = '/auth',
   fallback,
 }) => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {

@@ -2,12 +2,12 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Stars } from '@/components/ui/stars';
 import { ProductWithRelations, Review } from '@/lib/types';
@@ -55,7 +55,7 @@ const ReviewsSection = ({
     setEditingReview(null);
   };
 
-  const handleToggleHelpful = (reviewId: string) => {
+  const handleToggleHelpful = () => {
     // TODO: Implement toggleHelpfulReview action
     // dispatch(toggleHelpfulReview({ productId, reviewId }));
   };
@@ -169,7 +169,7 @@ const ReviewsSection = ({
                   </p>
                   <div className='flex items-center mt-2 text-sm text-slate-500 dark:text-slate-400'>
                     <button
-                      onClick={() => handleToggleHelpful(review.id)}
+                      onClick={() => handleToggleHelpful()}
                       disabled={isUserReview as boolean | undefined} // Disable helpful button on user's own review
                       className={cn(
                         'flex items-center gap-1 transition-colors',

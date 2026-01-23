@@ -5,11 +5,11 @@ import { createUserAction } from '@/actions/user-actions';
 import { UserForm } from '@/components/admin/user-form';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import Link from 'next/link';
@@ -105,7 +105,6 @@ export default function CreateUserPage() {
             <UserForm 
               onSubmit={handleSubmit} 
               isSubmitting={isPending}
-              mode='create'
             />
           </CardContent>
         </Card>

@@ -55,11 +55,15 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 
-const orderWithDetails = Prisma.validator<Prisma.OrderDefaultArgs>()({
-  include: { user: true, items: true },
-});
+// Define the inclusion type for Prisma
+type OrderWithDetailsInclude = {
+  user: true;
+  items: true;
+};
 
-export type OrderWithDetails = Prisma.OrderGetPayload<typeof orderWithDetails>;
+export type OrderWithDetails = Prisma.OrderGetPayload<{
+  include: OrderWithDetailsInclude;
+}>;
 
 type OrderStatus = OrderWithDetails['status'];
 
@@ -189,10 +193,6 @@ export default function OrderDetailsClient({
     typeof order.shippingAddress === 'string'
       ? JSON.parse(order.shippingAddress)
       : order.shippingAddress;
-  const billingAddress =
-    typeof order.billingAddress === 'string'
-      ? JSON.parse(order.billingAddress)
-      : order.billingAddress;
 
   return (
     <div className='space-y-6'>

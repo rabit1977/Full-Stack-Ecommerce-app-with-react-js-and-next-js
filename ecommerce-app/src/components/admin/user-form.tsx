@@ -2,21 +2,21 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,7 +40,6 @@ type UserFormValues = z.infer<typeof userFormSchema>;
 interface UserFormProps {
   onSubmit: (values: UserFormValues) => void | Promise<void>;
   isSubmitting: boolean;
-  mode?: 'create' | 'edit';
 }
 
 /**
@@ -48,7 +47,7 @@ interface UserFormProps {
  * 
  * Form for creating new users with validation
  */
-export function UserForm({ onSubmit, isSubmitting, mode = 'create' }: UserFormProps) {
+export function UserForm({ onSubmit, isSubmitting }: UserFormProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {

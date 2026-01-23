@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
 
 const DataRecovery = () => {
   const [showRecovery, setShowRecovery] = useState(false);
@@ -18,7 +18,7 @@ const DataRecovery = () => {
           setShowRecovery(true);
         }
       }
-    } catch (e) {
+    } catch {
       setShowRecovery(true);
     }
   };

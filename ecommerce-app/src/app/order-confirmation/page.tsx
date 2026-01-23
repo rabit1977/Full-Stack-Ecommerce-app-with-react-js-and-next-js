@@ -16,6 +16,7 @@ import {
     Package,
     ShoppingBag,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -162,11 +163,14 @@ function OrderConfirmationContent() {
                 key={item.id}
                 className='flex items-center gap-4 rounded-lg border p-4 dark:border-slate-800'
               >
-                <img
-                  src={item.product?.thumbnail || '/placeholder.jpg'}
-                  alt={item.product?.title}
-                  className='h-16 w-16 rounded-md object-cover'
-                />
+                <div className='h-16 w-16 relative overflow-hidden rounded-md shrink-0'>
+                  <Image
+                    src={item.product?.thumbnail || '/placeholder.jpg'}
+                    alt={item.product?.title || 'Product'}
+                    fill
+                    className='object-cover'
+                  />
+                </div>
                 <div className='flex-1'>
                   <p className='font-semibold dark:text-white'>
                     {item.product?.title}

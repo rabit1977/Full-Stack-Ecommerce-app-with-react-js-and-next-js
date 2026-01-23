@@ -127,7 +127,7 @@ export function Footer() {
           setSuccess(data.message);
           setEmail('');
           setError('');
-        } catch (err) {
+        } catch {
           setError('Something went wrong');
         }
       });

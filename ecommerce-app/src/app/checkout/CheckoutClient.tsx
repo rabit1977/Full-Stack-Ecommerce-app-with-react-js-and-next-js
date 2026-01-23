@@ -253,7 +253,7 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 				} else {
 					toast.error(result.message || 'Failed to place order.');
 				}
-			} catch (error) {
+			} catch {
 				toast.error('An unexpected error occurred.');
 			}
 		});

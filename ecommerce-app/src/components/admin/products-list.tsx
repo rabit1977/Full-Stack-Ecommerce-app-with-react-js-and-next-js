@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  deleteMultipleProductsAction,
-  deleteProductAction,
+    deleteMultipleProductsAction,
+    deleteProductAction,
 } from '@/actions/product-actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -60,8 +60,6 @@ export function ProductsList({ products }: ProductsListProps) {
 
   const isAllSelected =
     selectedIds.length > 0 && selectedIds.length === products.length;
-  const isSomeSelected =
-    selectedIds.length > 0 && selectedIds.length < products.length;
 
   return (
     <div className='space-y-4'>

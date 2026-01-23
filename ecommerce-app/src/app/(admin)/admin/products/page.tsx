@@ -84,7 +84,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
       await prisma.product.delete({ where: { id } });
       revalidatePath('/admin/products');
       return { success: true, message: 'Product deleted' };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'Failed to delete product' };
     }
   }
@@ -96,7 +96,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
       await prisma.product.deleteMany({ where: { id: { in: ids } } });
       revalidatePath('/admin/products');
       return { success: true, message: `${ids.length} products deleted` };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'Failed to delete products' };
     }
   }
@@ -124,7 +124,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
         message: 'Discount applied',
         count: result.count,
       };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'Failed to apply discount' };
     }
   }
