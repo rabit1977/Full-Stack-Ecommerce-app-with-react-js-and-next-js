@@ -65,12 +65,6 @@ importers:
       '@react-email/components':
         specifier: ^1.0.3
         version: 1.0.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      add:
-        specifier: ^2.0.6
-        version: 2.0.6
-      alert:
-        specifier: ^6.0.2
-        version: 6.0.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -116,9 +110,6 @@ importers:
       resend:
         specifier: ^6.6.0
         version: 6.6.0(@react-email/render@2.0.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1))
-      separator:
-        specifier: ^0.1.0
-        version: 0.1.0
       shadcn:
         specifier: ^3.3.1
         version: 3.6.3(@types/node@20.19.27)(hono@4.11.4)(typescript@5.9.3)
@@ -2312,9 +2303,6 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  add@2.0.6:
-    resolution: {integrity: sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==}
-
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
@@ -2332,12 +2320,6 @@ packages:
 
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
-
-  alert@6.0.2:
-    resolution: {integrity: sha512-Oi8u2HRNN6mzpjgKGii2Uuf9iOhyfbeUAHH/5MwnVmC8DS9GrEBjZBFpoavkNj+ZKnBr/Lqx+6YKLDKrggKfPA==}
-    peerDependencies:
-      react: ^18.0.0
-      react-dom: ^18.0.0
 
   ansi-escapes@4.3.2:
     resolution: {integrity: sha512-gKXj5ALrKWQLsYG9jlTRmR/xKluxHV+Z9QEwNIgCfM1/uwPMCuzVVnh5mwTd+OuBZcwSIMbqssNWRm1lE51QaQ==}
@@ -4827,9 +4809,6 @@ packages:
   send@1.2.1:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
-
-  separator@0.1.0:
-    resolution: {integrity: sha512-cyN9CDc8Eniaeuv4G1Ec+edO/mSu0SdlLl6+nBXKgaprYpuBEnbHyPAqa5sD+vl1fLbYXxoDSpyjmA3SD25fLg==}
 
   seq-queue@0.0.5:
     resolution: {integrity: sha512-hr3Wtp/GZIc/6DAGPDcV4/9WoZhjrkXsi5B/07QgX8tsdc6ilr7BFM6PM6rbdAX1kFSDYeZGLipIZZKyQP0O5Q==}
@@ -7597,8 +7576,6 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  add@2.0.6: {}
-
   agent-base@7.1.4: {}
 
   ajv-formats@3.0.1(ajv@8.17.1):
@@ -7618,11 +7595,6 @@ snapshots:
       fast-uri: 3.1.0
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
-
-  alert@6.0.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
-    dependencies:
-      react: 19.2.1
-      react-dom: 19.2.1(react@19.2.1)
 
   ansi-escapes@4.3.2:
     dependencies:
@@ -10450,8 +10422,6 @@ snapshots:
       statuses: 2.0.2
     transitivePeerDependencies:
       - supports-color
-
-  separator@0.1.0: {}
 
   seq-queue@0.0.5: {}
 

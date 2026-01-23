@@ -1,8 +1,8 @@
 'use server';
 
+import { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { ProductOption, ProductWithRelations, SortKey } from '@/lib/types';
-import { Prisma } from '@/generated/prisma/client';
 
 /**
  * Sort options
@@ -206,24 +206,41 @@ export async function getProductByIdAction(
 /**
  * Get filter options (categories, brands, price range)
  */
-export async function getFiltersAction() {
+export async function getFiltersAction(selectedCategories?: string) {
   try {
-    const [categories, brands, priceAgg] = await Promise.all([
+    const where: Prisma.ProductWhereInput = {};
+    
+    if (selectedCategories) {
+      const categoryList = selectedCategories
+        .split(',')
+        .map((c) => c.trim())
+        .filter(Boolean);
+      if (categoryList.length > 0) {
+        where.category = { in: categoryList };
+      }
+    }
+
+    const [categoriesAgg, brandsAgg, priceAgg] = await Promise.all([
+      // Categories always show all available options
       prisma.product.groupBy({
         by: ['category'],
       }),
+      // Brands are filtered by selected categories
       prisma.product.groupBy({
         by: ['brand'],
+        where,
       }),
+      // Price range is filtered by selected categories
       prisma.product.aggregate({
+        where,
         _min: { price: true },
         _max: { price: true },
       }),
     ]);
 
     return {
-      categories: categories.map((c) => c.category),
-      brands: brands.map((b) => b.brand),
+      categories: categoriesAgg.map((c) => c.category).sort(),
+      brands: brandsAgg.map((b) => b.brand).sort(),
       minPrice: priceAgg._min.price || 0,
       maxPrice: priceAgg._max.price || 0,
     };
