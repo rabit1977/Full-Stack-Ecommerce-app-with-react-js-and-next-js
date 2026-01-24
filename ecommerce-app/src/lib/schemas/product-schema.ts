@@ -9,22 +9,44 @@ export const productFormSchema = z.object({
   description: z
     .string()
     .min(10, { message: 'Description must be at least 10 characters.' }),
-  price: z
+  price: z.coerce
     .number({ message: 'Price must be a number' })
     .min(0, { message: 'Price must be a positive number.' }),
-  stock: z
+  stock: z.coerce
     .number({ message: 'Stock must be a number' })
     .int({ message: 'Stock must be a whole number' })
     .min(0, { message: 'Stock must be a positive integer.' }),
   brand: z.string().min(2, { message: 'Brand is required.' }),
   category: z.string().min(2, { message: 'Category is required.' }),
-  // --- NEW FIELDS ADDED BELOW ---
+  
+  // Advanced Fields
+  subCategory: z.string().optional(),
+  sku: z.string().optional(),
+  barcode: z.string().optional(),
+  weight: z.coerce.number().min(0).optional(),
+  dimensions: z.object({
+    length: z.coerce.number().min(0).optional(),
+    width: z.coerce.number().min(0).optional(),
+    height: z.coerce.number().min(0).optional(),
+  }).optional(),
+  
+  isFeatured: z.boolean().default(false).optional(),
+  isArchived: z.boolean().default(false).optional(),
+  
+  // JSON & Arrays
   images: z.array(z.string()).optional(),
-  imageUrl: z.string().optional(),
-  discount: z.number().min(0).max(100).optional(),
+  imageUrl: z.string().optional(), // For legacy or single url handling
+  discount: z.coerce.number().min(0).max(100).optional(),
   tags: z.array(z.string()).optional(),
   thumbnail: z.string().optional(),
-  options: z.any().optional(), // Using 'any' for flexibility with custom JSON options
+  
+  // Structured Data
+  specifications: z.array(z.object({
+    key: z.string().min(1, "Key required"),
+    value: z.string().min(1, "Value required")
+  })).optional(),
+  
+  options: z.any().optional(),
 });
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;

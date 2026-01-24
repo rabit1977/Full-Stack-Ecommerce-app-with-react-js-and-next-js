@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 const AboutPage = () => {
   return (
-    <div className='bg-slate-50 dark:bg-slate-900 min-h-screen'>
+    <div className='bg-background min-h-screen'>
       <div className='container mx-auto px-4 py-12 sm:py-16 lg:py-20 max-w-6xl'>
         <Suspense fallback={<AboutSkeleton />}>
           <AboutContent />

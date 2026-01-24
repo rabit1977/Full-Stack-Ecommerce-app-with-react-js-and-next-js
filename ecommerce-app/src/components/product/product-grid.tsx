@@ -124,7 +124,7 @@ export const ProductGrid = ({
   };
 
   return (
-    <div className='bg-slate-50 dark:bg-slate-900 min-h-screen'>
+    <div className='bg-background min-h-screen'>
       <div
         className='container-wide py-8 sm:py-12 lg:py-16'
         ref={gridRef}
@@ -150,7 +150,7 @@ export const ProductGrid = ({
             className='hidden lg:block lg:col-span-1 sticky top-4 self-start'
             aria-label='Product filters'
           >
-            <div className='rounded-lg border bg-card p-4 shadow-sm'>
+            <div className='rounded-lg border bg-background p-4 shadow-sm'>
               {filterSidebar}
             </div>
           </aside>

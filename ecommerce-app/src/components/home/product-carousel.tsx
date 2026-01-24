@@ -7,12 +7,12 @@ import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
 import { AnimatePresence, motion, PanInfo, Variants } from 'framer-motion';
 import {
-	ChevronLeft,
-	ChevronRight,
-	Pause,
-	Play,
-	ShoppingCart,
-	Star,
+    ChevronLeft,
+    ChevronRight,
+    Pause,
+    Play,
+    ShoppingCart,
+    Star,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -134,7 +134,7 @@ export const ProductCarousel = ({
 
 	return (
 		<div
-			className='relative w-full aspect-video sm:aspect-21/9 max-h-150 overflow-hidden bg-slate-900 focus:outline-none'
+			className='relative w-full aspect-video sm:aspect-21/9 max-h-150 overflow-hidden bg-black focus:outline-none'
 			onMouseEnter={() => setIsPaused(true)}
 			onMouseLeave={() => setIsPaused(false)}
 			onKeyDown={handleKeyDown}
@@ -143,7 +143,7 @@ export const ProductCarousel = ({
 			aria-label='Featured products carousel'
 			aria-live='polite'
 		>
-			<AnimatePresence initial={false} custom={direction} mode='wait'>
+			<AnimatePresence initial={false} custom={direction}>
 				<motion.div
 					key={page}
 					custom={direction}

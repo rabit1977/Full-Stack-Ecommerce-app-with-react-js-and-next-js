@@ -1,6 +1,7 @@
 // components/admin/product-form.tsx
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Form,
@@ -12,6 +13,8 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import {
     productFormSchema,
@@ -19,11 +22,23 @@ import {
 } from '@/lib/schemas/product-schema';
 import { ProductWithRelations } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion } from 'framer-motion';
-import { DollarSign, Image as ImageIcon, Layers, Loader2, Package, Percent, Tag, Type, Upload, X } from 'lucide-react';
+import {
+    DollarSign,
+    Image as ImageIcon,
+    Layers,
+    LayoutList,
+    Loader2,
+    Plus,
+    Ruler,
+    Save,
+    Trash2,
+    Type,
+    Upload,
+    X
+} from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface ProductFormProps {
@@ -31,6 +46,19 @@ interface ProductFormProps {
   onSubmit: (values: ProductFormValues) => void | Promise<void>;
   isSubmitting?: boolean;
 }
+
+// Predefined Categories for Quick Selection
+const CATEGORIES = [
+    "Electronics", "Computers", "Smartphones", "Home & Kitchen", 
+    "Appliances", "Fashion", "Sports", "Toys", "Beauty", "Automotive"
+];
+
+const SUB_CATEGORIES: Record<string, string[]> = {
+    "Electronics": ["TVs", "Audio", "Cameras", "Wearables"],
+    "Computers": ["Laptops", "Desktops", "Monitors", "Components"],
+    "Smartphones": ["Android", "iOS", "Accessories"],
+    "Appliances": ["White Goods", "Small Appliances", "Vacuum Cleaners"],
+};
 
 export const ProductForm = ({
   product,
@@ -41,8 +69,10 @@ export const ProductForm = ({
   const [imageUrls, setImageUrls] = useState<string[]>(
     product?.images?.map(img => img.url) || []
   );
+  const [tagInput, setTagInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
+  // Initialize form
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -52,8 +82,28 @@ export const ProductForm = ({
       stock: product?.stock || 0,
       brand: product?.brand || '',
       category: product?.category || '',
+      subCategory: product?.subCategory || '',
       discount: product?.discount || undefined,
+      sku: product?.sku || '',
+      barcode: product?.barcode || '',
+      weight: product?.weight || undefined,
+      isFeatured: product?.isFeatured || false,
+      isArchived: product?.isArchived || false,
+      tags: product?.tags || [],
+      dimensions: {
+        length: product?.dimensions && typeof product.dimensions === 'object' && 'length' in product.dimensions ? Number((product.dimensions as any).length) : undefined,
+        width: product?.dimensions && typeof product.dimensions === 'object' && 'width' in product.dimensions ? Number((product.dimensions as any).width) : undefined,
+        height: product?.dimensions && typeof product.dimensions === 'object' && 'height' in product.dimensions ? Number((product.dimensions as any).height) : undefined,
+      },
+      specifications: product?.specifications && Array.isArray(product.specifications) 
+        ? product.specifications 
+        : [],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+      control: form.control,
+      name: "specifications",
   });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,6 +148,22 @@ export const ProductForm = ({
     setImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleAddTag = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && tagInput.trim()) {
+          e.preventDefault();
+          const currentTags = form.getValues('tags') || [];
+          if (!currentTags.includes(tagInput.trim())) {
+              form.setValue('tags', [...currentTags, tagInput.trim()]);
+          }
+          setTagInput('');
+      }
+  };
+
+  const removeTag = (tag: string) => {
+      const currentTags = form.getValues('tags') || [];
+      form.setValue('tags', currentTags.filter(t => t !== tag));
+  };
+
   const handleFormSubmit = async (values: ProductFormValues) => {
     const finalValues = {
       ...values,
@@ -108,426 +174,592 @@ export const ProductForm = ({
     await onSubmit(finalValues);
   };
 
+  // Watch category to update subcategories if needed (optional enhancement)
+  const selectedCategory = form.watch('category');
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className='space-y-8'>
-        {/* Basic Information Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className='card-premium p-6 space-y-6'
-        >
-          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
-            <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
-              <Package className='h-5 w-5 text-primary' />
+        
+        <div className="flex flex-col md:flex-row gap-8">
+            {/* Left Column: Main Tabs */}
+            <div className="flex-1">
+                <Tabs defaultValue="general" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5 h-auto p-1 bg-muted/60 backdrop-blur rounded-xl">
+                        <TabsTrigger value="general" className="rounded-lg py-2">General</TabsTrigger>
+                        <TabsTrigger value="organize" className="rounded-lg py-2">Organize</TabsTrigger>
+                        <TabsTrigger value="pricing" className="rounded-lg py-2">Pricing</TabsTrigger>
+                        <TabsTrigger value="specs" className="rounded-lg py-2">Specs</TabsTrigger>
+                        <TabsTrigger value="media" className="rounded-lg py-2">Media</TabsTrigger>
+                    </TabsList>
+                    
+                    {/* --- GENERAL TAB --- */}
+                    <TabsContent value="general" className="space-y-6 mt-6">
+                         <div className='card-premium p-6 space-y-6'>
+                            <div className="flex items-center justify-between pb-4 border-b border-border/50">
+                                <div className='flex items-center gap-3'>
+                                    <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
+                                        <Type className='h-5 w-5 text-primary' />
+                                    </div>
+                                    <div>
+                                        <h3 className='font-semibold text-foreground'>Basic Details</h3>
+                                        <p className='text-sm text-muted-foreground'>Title and Description</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <FormField
+                                control={form.control}
+                                name='title'
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Product Title</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder='e.g. Ultra HD 4K Smart TV' className='input-premium' {...field} disabled={isSubmitting} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name='description'
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Description</FormLabel>
+                                    <FormControl>
+                                    <Textarea 
+                                        placeholder='Detailed description of the product...' 
+                                        rows={6} 
+                                        className='input-premium resize-y min-h-[150px]' 
+                                        {...field} 
+                                        disabled={isSubmitting} 
+                                    />
+                                    </FormControl>
+                                    <FormDescription>Supports basic formatting.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+
+                            <div className="flex items-center gap-8 pt-4">
+                                <FormField
+                                    control={form.control}
+                                    name="isFeatured"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center justify-between rounded-xl border border-border/50 p-4 shadow-sm w-full">
+                                            <div className="space-y-0.5">
+                                                <FormLabel className="text-base">Featured Product</FormLabel>
+                                                <FormDescription>Show on homepage and featured lists.</FormDescription>
+                                            </div>
+                                            <FormControl>
+                                                <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isSubmitting} />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="isArchived"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center justify-between rounded-xl border border-border/50 p-4 shadow-sm w-full">
+                                            <div className="space-y-0.5">
+                                                <FormLabel className="text-base">Archived</FormLabel>
+                                                <FormDescription>Hide from store without deleting.</FormDescription>
+                                            </div>
+                                            <FormControl>
+                                                <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isSubmitting} />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* --- ORGANIZATION TAB --- */}
+                    <TabsContent value="organize" className="space-y-6 mt-6">
+                        <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+                                <div className='w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center'>
+                                    <Layers className='h-5 w-5 text-blue-600 dark:text-blue-400' />
+                                </div>
+                                <div>
+                                    <h3 className='font-semibold text-foreground'>Categorization</h3>
+                                    <p className='text-sm text-muted-foreground'>Organize your catalog</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FormField
+                                    control={form.control}
+                                    name='category'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Category</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Input placeholder='Select or type...' list="categories" className='input-premium' {...field} disabled={isSubmitting} />
+                                                <datalist id="categories">
+                                                    {CATEGORIES.map(cat => <option key={cat} value={cat} />)}
+                                                </datalist>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name='subCategory'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Sub-Category</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder='e.g. 4K TVs' list="subcategories" className='input-premium' {...field} disabled={isSubmitting} />
+                                        </FormControl>
+                                        <datalist id="subcategories">
+                                            {selectedCategory && SUB_CATEGORIES[selectedCategory]?.map(sub => <option key={sub} value={sub} />)}
+                                        </datalist>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name='brand'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Brand</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder='e.g. Samsung, Apple' className='input-premium' {...field} disabled={isSubmitting} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <FormField
+                                name="tags"
+                                render={() => (
+                                    <FormItem>
+                                        <FormLabel>Tags (SEO)</FormLabel>
+                                        <FormControl>
+                                            <div className="flex flex-col gap-3">
+                                                <Input 
+                                                    placeholder="Type and press Enter to add..." 
+                                                    value={tagInput}
+                                                    onChange={(e) => setTagInput(e.target.value)}
+                                                    onKeyDown={handleAddTag}
+                                                    className="input-premium"
+                                                    disabled={isSubmitting}
+                                                />
+                                                <div className="flex flex-wrap gap-2 min-h-[30px]">
+                                                    {form.watch('tags')?.map((tag, i) => (
+                                                        <Badge key={i} variant="secondary" className="px-3 py-1 flex items-center gap-1">
+                                                            {tag}
+                                                            <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => removeTag(tag)} />
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </TabsContent>
+
+                    {/* --- PRICING TAB --- */}
+                    <TabsContent value="pricing" className="space-y-6 mt-6">
+                        <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+                                <div className='w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center'>
+                                    <DollarSign className='h-5 w-5 text-emerald-600 dark:text-emerald-400' />
+                                </div>
+                                <div>
+                                    <h3 className='font-semibold text-foreground'>Pricing & Inventory</h3>
+                                    <p className='text-sm text-muted-foreground'>Manage costs and stock</p>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <FormField
+                                    control={form.control}
+                                    name='price'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Price ($)</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' step='0.01' className='input-premium' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name='discount'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Discount (%)</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' className='input-premium' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name='stock'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Stock Quantity</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' className='input-premium' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border/50">
+                                <FormField
+                                    control={form.control}
+                                    name='sku'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>SKU (Stock Keeping Unit)</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g. ELE-TV-001" className='input-premium' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name='barcode'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Barcode / UPC</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Scan or type..." className='input-premium' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* --- SPECIFICATIONS TAB --- */}
+                    <TabsContent value="specs" className="space-y-6 mt-6">
+                         <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+                                <div className='w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center'>
+                                    <Ruler className='h-5 w-5 text-amber-600 dark:text-amber-400' />
+                                </div>
+                                <div>
+                                    <h3 className='font-semibold text-foreground'>Physical Specs</h3>
+                                    <p className='text-sm text-muted-foreground'>Dimensions and weight</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                <FormField
+                                    control={form.control}
+                                    name='weight'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Weight (kg)</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' step="0.1" className='input-premium' {...field} />
+                                        </FormControl>
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name='dimensions.length'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Length (cm)</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' step="0.1" className='input-premium' {...field} />
+                                        </FormControl>
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name='dimensions.width'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Width (cm)</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' step="0.1" className='input-premium' {...field} />
+                                        </FormControl>
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name='dimensions.height'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Height (cm)</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' step="0.1" className='input-premium' {...field} />
+                                        </FormControl>
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center justify-between pb-4 border-b border-border/50'>
+                                <div className='flex items-center gap-3'>
+                                    <div className='w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950/50 flex items-center justify-center'>
+                                        <LayoutList className='h-5 w-5 text-indigo-600 dark:text-indigo-400' />
+                                    </div>
+                                    <div>
+                                        <h3 className='font-semibold text-foreground'>Technical Specifications</h3>
+                                        <p className='text-sm text-muted-foreground'>Add custom attributes key-value pairs</p>
+                                    </div>
+                                </div>
+                                <Button type="button" size="sm" onClick={() => append({ key: '', value: '' })} className="gap-2">
+                                    <Plus className="h-4 w-4" /> Add Spec
+                                </Button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {fields.map((field, index) => (
+                                    <div key={field.id} className="flex gap-4 items-start">
+                                        <FormField
+                                            control={form.control}
+                                            name={`specifications.${index}.key`}
+                                            render={({ field }) => (
+                                            <FormItem className="flex-1">
+                                                <FormControl>
+                                                    <Input placeholder="Feature (e.g. Screen Size)" className="input-premium" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name={`specifications.${index}.value`}
+                                            render={({ field }) => (
+                                            <FormItem className="flex-1">
+                                                <FormControl>
+                                                    <Input placeholder="Value (e.g. 55 inch)" className="input-premium" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="text-muted-foreground hover:text-destructive transition-colors">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                {fields.length === 0 && (
+                                    <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border">
+                                        No specifications added yet. Click "Add Spec" to define custom features.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* --- MEDIA TAB --- */}
+                    <TabsContent value="media" className="space-y-6 mt-6">
+                        <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+                                <div className='w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center'>
+                                    <ImageIcon className='h-5 w-5 text-purple-600 dark:text-purple-400' />
+                                </div>
+                                <div>
+                                    <h3 className='font-semibold text-foreground'>Product Gallery</h3>
+                                    <p className='text-sm text-muted-foreground'>High quality images</p>
+                                </div>
+                            </div>
+
+                            <div className='flex gap-2'>
+                                <Button
+                                type='button'
+                                variant={useUrlInput ? 'default' : 'outline'}
+                                size='sm'
+                                onClick={() => setUseUrlInput(true)}
+                                disabled={isUploading}
+                                className='rounded-xl'
+                                >
+                                <ImageIcon className='h-4 w-4 mr-2' />
+                                Image URL
+                                </Button>
+                                <Button
+                                type='button'
+                                variant={!useUrlInput ? 'default' : 'outline'}
+                                size='sm'
+                                onClick={() => setUseUrlInput(false)}
+                                disabled={isUploading}
+                                className='rounded-xl'
+                                >
+                                <Upload className='h-4 w-4 mr-2' />
+                                File Upload
+                                </Button>
+                            </div>
+
+                            {/* ... Image Input Logic Repeated for consistency but wrapped in Tabs ... */}
+                             {useUrlInput ? (
+                                <div className='space-y-4'>
+                                <Input
+                                    type='url'
+                                    placeholder='https://example.com/image.jpg'
+                                    value={imageUrls[0] || ''}
+                                    onChange={(e) => setImageUrls([e.target.value])}
+                                    disabled={isSubmitting || isUploading}
+                                    className='input-premium'
+                                />
+                                {imageUrls[0] && (
+                                    <div className='relative h-60 w-full overflow-hidden rounded-2xl border border-border/50 shadow-sm bg-muted/10'>
+                                    <Image 
+                                        src={imageUrls[0]} 
+                                        alt='Preview' 
+                                        fill
+                                        className='object-contain'
+                                        unoptimized
+                                    />
+                                    </div>
+                                )}
+                                </div>
+                            ) : (
+                                <div className='space-y-4'>
+                                <div className='border-2 border-dashed border-border/50 rounded-2xl p-10 text-center hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 cursor-pointer group'>
+                                    <Input
+                                    id='images'
+                                    type='file'
+                                    accept='image/*'
+                                    multiple
+                                    onChange={handleImageUpload}
+                                    disabled={isSubmitting || isUploading}
+                                    className='hidden'
+                                    />
+                                    <label htmlFor='images' className='cursor-pointer flex flex-col items-center gap-4'>
+                                    {isUploading ? (
+                                        <>
+                                            <Loader2 className='h-10 w-10 text-primary animate-spin' />
+                                            <span className='text-sm font-medium text-muted-foreground'>Uploading...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className='w-16 h-16 rounded-full bg-muted group-hover:bg-primary/10 transition-colors flex items-center justify-center'>
+                                                <Upload className='h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors' />
+                                            </div>
+                                            <div>
+                                                <span className='text-base font-semibold text-foreground'>Drop images here or click to upload</span>
+                                                <p className='text-xs text-muted-foreground mt-1'>Supports PNG, JPG, WEBP (Max 5MB)</p>
+                                            </div>
+                                        </>
+                                    )}
+                                    </label>
+                                </div>
+
+                                {imageUrls.length > 0 && (
+                                    <div className='grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4'>
+                                    {imageUrls.map((url, index) => (
+                                        <div key={index} className='relative group aspect-square'>
+                                        <div className='relative h-full w-full overflow-hidden rounded-xl border border-border/50 bg-background'>
+                                            <Image
+                                            src={url}
+                                            alt={`Preview ${index + 1}`}
+                                            fill
+                                            className='object-cover'
+                                            unoptimized
+                                            />
+                                        </div>
+                                        <Button
+                                            type='button'
+                                            variant='destructive'
+                                            size='icon'
+                                            className='absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg'
+                                            onClick={() => removeImage(index)}
+                                        >
+                                            <X className='h-4 w-4' />
+                                        </Button>
+                                        </div>
+                                    ))}
+                                    </div>
+                                )}
+                                </div>
+                            )}
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </div>
-            <div>
-              <h3 className='font-semibold text-foreground'>Basic Information</h3>
-              <p className='text-sm text-muted-foreground'>Product details and description</p>
+
+            {/* Right Column: Key Status and Actions (Sticky) */}
+            <div className="w-full md:w-80 space-y-6">
+                 {/* ID and Status Card */}
+                 <div className="card-premium p-6 space-y-4 sticky top-24">
+                     <div>
+                        <h3 className="font-bold text-lg">Publishing</h3>
+                        <p className="text-xs text-muted-foreground">Manage visibility and status</p>
+                     </div>
+                     
+                     <div className="space-y-4 pt-2">
+                        <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg border border-border/50">
+                            <span className="text-sm font-medium">Status</span>
+                            <Badge variant={form.watch('isArchived') ? 'destructive' : 'default'} className="uppercase text-[10px]">
+                                {form.watch('isArchived') ? 'Archived' : 'Active'}
+                            </Badge>
+                        </div>
+                        
+                        <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg border border-border/50">
+                            <span className="text-sm font-medium">Featured</span>
+                            <Badge variant={form.watch('isFeatured') ? 'default' : 'secondary'} className="uppercase text-[10px]">
+                                {form.watch('isFeatured') ? 'Yes' : 'No'}
+                            </Badge>
+                        </div>
+
+                        <div className="pt-4 space-y-3">
+                            <Button 
+                                type="submit" 
+                                className="w-full rounded-xl gap-2 font-bold shadow-lg shadow-primary/20" 
+                                size="lg"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Save className="h-4 w-4" />
+                                )}
+                                {product ? 'Save Changes' : 'Publish Product'}
+                            </Button>
+                            
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                className="w-full rounded-xl gap-2"
+                                onClick={() => window.history.back()}
+                            >
+                                Discard
+                            </Button>
+                        </div>
+                     </div>
+                 </div>
             </div>
-          </div>
-
-          {/* Title */}
-          <FormField
-            control={form.control}
-            name='title'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='flex items-center gap-2'>
-                  <Type className='h-4 w-4 text-muted-foreground' />
-                  Product Title
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='e.g. Quantum QLED 65" Smart TV'
-                    className='input-premium'
-                    disabled={isSubmitting || isUploading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  A clear, compelling title that describes your product
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Description */}
-          <FormField
-            control={form.control}
-            name='description'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='flex items-center gap-2'>
-                  <Layers className='h-4 w-4 text-muted-foreground' />
-                  Description
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder='Describe the product features, specifications, and benefits...'
-                    rows={5}
-                    className='input-premium resize-none'
-                    disabled={isSubmitting || isUploading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Detailed description helps customers make informed decisions
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </motion.div>
-
-        {/* Pricing & Inventory Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className='card-premium p-6 space-y-6'
-        >
-          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
-            <div className='w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center'>
-              <DollarSign className='h-5 w-5 text-emerald-600 dark:text-emerald-400' />
-            </div>
-            <div>
-              <h3 className='font-semibold text-foreground'>Pricing & Inventory</h3>
-              <p className='text-sm text-muted-foreground'>Set pricing and stock levels</p>
-            </div>
-          </div>
-
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-            <FormField
-              control={form.control}
-              name='price'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className='flex items-center gap-2'>
-                    <DollarSign className='h-4 w-4 text-muted-foreground' />
-                    Price
-                  </FormLabel>
-                  <FormControl>
-                    <div className='relative'>
-                      <span className='absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium'>$</span>
-                      <Input
-                        type='number'
-                        step='0.01'
-                        min='0'
-                        placeholder='0.00'
-                        className='input-premium pl-8'
-                        disabled={isSubmitting || isUploading}
-                        {...field}
-                        value={field.value === 0 ? '' : field.value}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                          field.onChange(isNaN(value) ? 0 : value);
-                        }}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='discount'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className='flex items-center gap-2'>
-                    <Percent className='h-4 w-4 text-muted-foreground' />
-                    Discount (%)
-                  </FormLabel>
-                  <FormControl>
-                    <div className='relative'>
-                      <Input
-                        type='number'
-                        min='0'
-                        max='100'
-                        placeholder='0'
-                        className='input-premium pr-8'
-                        disabled={isSubmitting || isUploading}
-                        {...field}
-                        value={field.value === undefined || field.value === 0 ? '' : field.value}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                          field.onChange(value);
-                        }}
-                      />
-                      <span className='absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground'>%</span>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='stock'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className='flex items-center gap-2'>
-                    <Package className='h-4 w-4 text-muted-foreground' />
-                    Stock Quantity
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      min='0'
-                      placeholder='0'
-                      className='input-premium'
-                      disabled={isSubmitting || isUploading}
-                      {...field}
-                      value={field.value === 0 ? '' : field.value}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-                        field.onChange(isNaN(value) ? 0 : value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </motion.div>
-
-        {/* Organization Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className='card-premium p-6 space-y-6'
-        >
-          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
-            <div className='w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center'>
-              <Tag className='h-5 w-5 text-blue-600 dark:text-blue-400' />
-            </div>
-            <div>
-              <h3 className='font-semibold text-foreground'>Organization</h3>
-              <p className='text-sm text-muted-foreground'>Brand and category classification</p>
-            </div>
-          </div>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <FormField
-              control={form.control}
-              name='brand'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Brand</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='e.g. AuroVision, TechPro, SoundMax'
-                      className='input-premium'
-                      disabled={isSubmitting || isUploading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='category'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='e.g. TVs, Laptops, Audio, Phones'
-                      className='input-premium'
-                      disabled={isSubmitting || isUploading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </motion.div>
-
-        {/* Product Images Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className='card-premium p-6 space-y-6'
-        >
-          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
-            <div className='w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center'>
-              <ImageIcon className='h-5 w-5 text-purple-600 dark:text-purple-400' />
-            </div>
-            <div>
-              <h3 className='font-semibold text-foreground'>Product Images</h3>
-              <p className='text-sm text-muted-foreground'>Add images to showcase your product</p>
-            </div>
-          </div>
-          
-          <div className='flex gap-2'>
-            <Button
-              type='button'
-              variant={useUrlInput ? 'default' : 'outline'}
-              size='sm'
-              onClick={() => setUseUrlInput(true)}
-              disabled={isUploading}
-              className='rounded-xl'
-            >
-              <ImageIcon className='h-4 w-4 mr-2' />
-              Image URL
-            </Button>
-            <Button
-              type='button'
-              variant={!useUrlInput ? 'default' : 'outline'}
-              size='sm'
-              onClick={() => setUseUrlInput(false)}
-              disabled={isUploading}
-              className='rounded-xl'
-            >
-              <Upload className='h-4 w-4 mr-2' />
-              Upload Files
-            </Button>
-          </div>
-
-          {useUrlInput ? (
-            <div className='space-y-4'>
-              <Input
-                type='url'
-                placeholder='https://example.com/image.jpg'
-                value={imageUrls[0] || ''}
-                onChange={(e) => setImageUrls([e.target.value])}
-                disabled={isSubmitting || isUploading}
-                className='input-premium'
-              />
-              {imageUrls[0] && (
-                <div className='relative h-40 w-40 overflow-hidden rounded-2xl border border-border/50 shadow-sm'>
-                  <Image 
-                    src={imageUrls[0]} 
-                    alt='Preview' 
-                    fill
-                    className='object-cover'
-                    unoptimized
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className='space-y-4'>
-              <div className='border-2 border-dashed border-border/50 rounded-2xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 cursor-pointer group'>
-                <Input
-                  id='images'
-                  type='file'
-                  accept='image/*'
-                  multiple
-                  onChange={handleImageUpload}
-                  disabled={isSubmitting || isUploading}
-                  className='hidden'
-                />
-                <label 
-                  htmlFor='images'
-                  className='cursor-pointer flex flex-col items-center gap-3'
-                >
-                  {isUploading ? (
-                    <>
-                      <div className='w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center'>
-                        <Loader2 className='h-8 w-8 text-primary animate-spin' />
-                      </div>
-                      <span className='text-sm font-medium text-muted-foreground'>
-                        Uploading...
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <div className='w-16 h-16 rounded-full bg-muted group-hover:bg-primary/10 transition-colors flex items-center justify-center'>
-                        <Upload className='h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors' />
-                      </div>
-                      <div>
-                        <span className='text-sm font-medium text-foreground'>
-                          Click to upload or drag and drop
-                        </span>
-                        <p className='text-xs text-muted-foreground mt-1'>
-                          PNG, JPG, WEBP up to 5MB each
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </label>
-              </div>
-
-              {imageUrls.length > 0 && (
-                <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
-                  {imageUrls.map((url, index) => (
-                    <div key={index} className='relative group'>
-                      <div className='relative h-28 w-full overflow-hidden rounded-xl border border-border/50'>
-                        <Image
-                          src={url}
-                          alt={`Preview ${index + 1}`}
-                          fill
-                          className='object-cover'
-                          unoptimized
-                        />
-                      </div>
-                      <Button
-                        type='button'
-                        variant='destructive'
-                        size='icon'
-                        className='absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg'
-                        onClick={() => removeImage(index)}
-                        disabled={isSubmitting || isUploading}
-                      >
-                        <X className='h-4 w-4' />
-                      </Button>
-                      {index === 0 && (
-                        <span className='absolute bottom-2 left-2 text-xs font-medium bg-primary text-primary-foreground px-2 py-0.5 rounded-md'>
-                          Main
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </motion.div>
-
-        {/* Submit Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className='flex justify-end gap-4 pt-4'
-        >
-          <Button
-            type='submit'
-            disabled={isSubmitting || isUploading}
-            size='lg'
-            className='min-w-[160px] rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40'
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                Saving...
-              </>
-            ) : product ? (
-              <>
-                <Package className='h-4 w-4 mr-2' />
-                Save Changes
-              </>
-            ) : (
-              <>
-                <Package className='h-4 w-4 mr-2' />
-                Create Product
-              </>
-            )}
-          </Button>
-        </motion.div>
+        </div>
       </form>
     </Form>
   );

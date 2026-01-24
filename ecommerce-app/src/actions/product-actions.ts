@@ -2,13 +2,13 @@
 
 import { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
-import { ProductOption, ProductWithRelations, SortKey } from '@/lib/types';
+import { ProductWithRelations, SortKey } from '@/lib/types';
 
 /**
  * Sort options
  */
-const sortOptions: Record<SortKey, Prisma.ProductOrderByWithRelationInput> = {
-  featured: { rating: 'desc' },
+const sortOptions: Record<SortKey, Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]> = {
+  featured: [{ isFeatured: 'desc' }, { rating: 'desc' }],
   'price-asc': { price: 'asc' },
   'price-desc': { price: 'desc' },
   rating: { rating: 'desc' },
@@ -19,11 +19,14 @@ const sortOptions: Record<SortKey, Prisma.ProductOrderByWithRelationInput> = {
 export interface GetProductsOptions {
   query?: string;
   categories?: string;
+  subCategories?: string;
   brands?: string;
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
   inStock?: boolean;
+  featured?: boolean;
+  archived?: boolean; // Admin use
   sort?: SortKey;
   page?: number;
   limit?: number;
@@ -46,18 +49,24 @@ export async function getProductsAction(
   const {
     query,
     categories,
+    subCategories,
     brands,
     minPrice,
     maxPrice,
     minRating,
     inStock,
+    featured,
+    archived = false, // Default to not showing archived
     sort = 'featured',
     page = 1,
     limit = 12,
   } = options;
 
   const where: Prisma.ProductWhereInput = {
-    AND: [],
+    AND: [
+        // Default filter: hide archived products unless explicitly requested (e.g. by admin)
+        { isArchived: archived }
+    ],
   };
 
   const andArray = where.AND as Prisma.ProductWhereInput[];
@@ -70,30 +79,32 @@ export async function getProductsAction(
         { description: { contains: query, mode: 'insensitive' } },
         { brand: { contains: query, mode: 'insensitive' } },
         { category: { contains: query, mode: 'insensitive' } },
+        { subCategory: { contains: query, mode: 'insensitive' } },
       ],
     });
   }
 
   // Categories filter
   if (categories) {
-    const categoryList = categories
-      .split(',')
-      .map((c) => c.trim())
-      .filter(Boolean);
-    if (categoryList.length > 0) {
-      andArray.push({ category: { in: categoryList } });
-    }
+    const list = categories.split(',').map((c) => c.trim()).filter(Boolean);
+    if (list.length > 0) andArray.push({ category: { in: list } });
+  }
+
+  // SubCategories filter
+  if (subCategories) {
+    const list = subCategories.split(',').map((c) => c.trim()).filter(Boolean);
+    if (list.length > 0) andArray.push({ subCategory: { in: list } });
   }
 
   // Brands filter
   if (brands) {
-    const brandList = brands
-      .split(',')
-      .map((b) => b.trim())
-      .filter(Boolean);
-    if (brandList.length > 0) {
-      andArray.push({ brand: { in: brandList } });
-    }
+    const list = brands.split(',').map((b) => b.trim()).filter(Boolean);
+    if (list.length > 0) andArray.push({ brand: { in: list } });
+  }
+
+  // Featured filter
+  if (featured) {
+      andArray.push({ isFeatured: true });
   }
 
   // Price range
@@ -121,6 +132,7 @@ export async function getProductsAction(
           select: {
             id: true,
             url: true,
+            // createdAt: true, // Optional if needed
           },
         },
         reviews: {
@@ -283,34 +295,37 @@ async function requireAdmin() {
 /**
  * Create product (admin only)
  */
-export async function createProductAction(data: {
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  brand: string;
-  category: string;
-  images?: string[];
-  discount?: number;
-  tags?: string[];
-  features?: string[];
-  options?: ProductOption[];
-  specifications?: Record<string, string>;
-}) {
+export async function createProductAction(data: ProductFormValues) {
   try {
     await requireAdmin();
 
-    const { images, ...productData } = data;
-
+    const validatedData = productFormSchema.parse(data);
+    const { images, ...productData } = validatedData;
+    
+    // Explicitly handle fields potentially undefined in validatedData but needed for Prisma
     const product = await prisma.product.create({
       data: {
-        ...productData,
+        title: productData.title,
+        description: productData.description,
+        price: productData.price,
+        stock: productData.stock,
+        brand: productData.brand,
+        category: productData.category,
+        subCategory: productData.subCategory,
+        sku: productData.sku,
+        barcode: productData.barcode,
+        weight: productData.weight,
+        isFeatured: productData.isFeatured || false,
+        isArchived: productData.isArchived || false,
         discount: productData.discount || 0,
         thumbnail: images?.[0] || null,
         tags: productData.tags || [],
-        features: productData.features || [],
-        options: (productData.options || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
+        
+        // JSON conversions
+        dimensions: (productData.dimensions || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
         specifications: (productData.specifications || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
+        options: (productData.options || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
+        
         images: {
           create: images?.map((url) => ({ url })) || [],
         },
@@ -351,21 +366,35 @@ export async function updateProductAction(
     const validatedData = productFormSchema.partial().parse(data);
     const { images, ...productData } = validatedData;
 
-    // Separate Prisma-compatible fields from form fields
-    const { title, description, price, stock, brand, category, discount } =
-      productData;
-
-    // Update product with only valid Prisma fields
     await prisma.product.update({
       where: { id },
       data: {
-        ...(title !== undefined && { title }),
-        ...(description !== undefined && { description }),
-        ...(price !== undefined && { price }),
-        ...(stock !== undefined && { stock }),
-        ...(brand !== undefined && { brand }),
-        ...(category !== undefined && { category }),
-        ...(discount !== undefined && { discount }),
+        title: productData.title,
+        description: productData.description,
+        price: productData.price,
+        stock: productData.stock,
+        brand: productData.brand,
+        category: productData.category,
+        subCategory: productData.subCategory,
+        sku: productData.sku,
+        barcode: productData.barcode,
+        weight: productData.weight,
+        isFeatured: productData.isFeatured,
+        isArchived: productData.isArchived,
+        discount: productData.discount,
+        tags: productData.tags,
+        
+        // JSON conversions
+        ...(productData.dimensions !== undefined && { 
+            dimensions: productData.dimensions as unknown as Prisma.InputJsonValue 
+        }),
+        ...(productData.specifications !== undefined && { 
+            specifications: productData.specifications as unknown as Prisma.InputJsonValue 
+        }),
+        ...(productData.options !== undefined && { 
+            options: productData.options as unknown as Prisma.InputJsonValue 
+        }),
+
         ...(images && images.length > 0 && { thumbnail: images[0] }),
       },
     });

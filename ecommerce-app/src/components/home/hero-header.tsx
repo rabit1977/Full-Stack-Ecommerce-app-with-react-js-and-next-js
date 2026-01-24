@@ -37,7 +37,7 @@ const floatVariants: Variants = {
 
 export const HeroHeader = () => {
   return (
-    <div className='relative container-wide py-20 sm:py-28 lg:py-36 text-center overflow-hidden'>
+    <div className='relative container-wide py-20 sm:py-28 lg:py-36 text-center overflow-hidden gradient-hero'>
       {/* Background Decorations */}
       <div className='absolute inset-0 -z-10 overflow-hidden'>
         {/* Primary Gradient Orb */}

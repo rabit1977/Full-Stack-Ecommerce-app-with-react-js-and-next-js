@@ -26,9 +26,10 @@ export interface ProductOption {
  * Base Product type with all fields
  * Overrides Prisma's JsonValue types with proper TypeScript types
  */
-export type Product = Omit<PrismaProduct, 'options' | 'specifications'> & {
+export type Product = Omit<PrismaProduct, 'options' | 'specifications' | 'dimensions'> & {
   options: ProductOption[] | null;
-  specifications: Record<string, string> | null;
+  specifications: { key: string; value: string }[] | Record<string, string> | null;
+  dimensions: { length?: number; width?: number; height?: number } | null;
 };
 
 /**

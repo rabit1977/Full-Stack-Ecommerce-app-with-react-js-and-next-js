@@ -34,10 +34,10 @@ const ProductGridControls = ({
   return (
     <div className='flex flex-col lg:flex-row justify-between mb-8'>
       <div className='flex lg:block gap-3 items-center mb-4'>
-        <h2 className='text-lg md:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white'>
+        <h2 className='text-lg md:text-2xl lg:text-3xl font-bold tracking-tight text-foreground'>
           {title}
         </h2>
-        <p className='mt-2 text-sm md:text-base lg:text-lg text-slate-600 dark:text-slate-300'>
+        <p className='mt-2 text-sm md:text-base lg:text-lg text-muted-foreground'>
           {subtitle}
         </p>
       </div>
@@ -57,7 +57,7 @@ const ProductGridControls = ({
           <select
             value={currentSort}
             onChange={(e) => onSortChange(e.target.value)}
-            className='h-10 cursor-pointer appearance-none rounded-md border border-slate-300 bg-white py-2 pl-3 pr-10 focus:border-slate-500 focus:outline-none focus:ring-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
+            className='h-10 cursor-pointer appearance-none rounded-md border border-input bg-background text-foreground py-2 pl-3 pr-10 focus:border-primary focus:outline-none focus:ring-primary'
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>

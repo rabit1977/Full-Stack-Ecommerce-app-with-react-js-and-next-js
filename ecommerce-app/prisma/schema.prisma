@@ -112,6 +112,13 @@ model Product {
   stock          Int             @default(0)
   brand          String
   category       String
+  subCategory    String?
+  sku            String?         @unique
+  barcode        String?
+  weight         Float?
+  dimensions     Json?           // { length, width, height }
+  isFeatured     Boolean         @default(false)
+  isArchived     Boolean         @default(false)
   rating         Float           @default(0)
   reviewCount    Int             @default(0)
   thumbnail      String?
@@ -137,8 +144,10 @@ model Product {
   updatedAt      DateTime        @updatedAt
 
   @@index([category])
+  @@index([subCategory])
   @@index([brand])
   @@index([rating])
+  @@index([isFeatured])
 }
 
 model ProductImage {
