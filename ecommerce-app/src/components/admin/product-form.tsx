@@ -73,20 +73,21 @@ export const ProductForm = ({
   const [isUploading, setIsUploading] = useState(false);
 
   // Initialize form
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
+    resolver: zodResolver(productFormSchema) as any,
     defaultValues: {
       title: product?.title || '',
       description: product?.description || '',
-      price: product?.price || 0,
-      stock: product?.stock || 0,
+      price: product?.price ? Number(product.price) : 0,
+      stock: product?.stock ? Number(product.stock) : 0,
       brand: product?.brand || '',
       category: product?.category || '',
       subCategory: product?.subCategory || '',
-      discount: product?.discount || undefined,
+      discount: product?.discount ? Number(product.discount) : undefined,
       sku: product?.sku || '',
       barcode: product?.barcode || '',
-      weight: product?.weight || undefined,
+      weight: product?.weight ? Number(product.weight) : undefined,
       isFeatured: product?.isFeatured || false,
       isArchived: product?.isArchived || false,
       tags: product?.tags || [],
