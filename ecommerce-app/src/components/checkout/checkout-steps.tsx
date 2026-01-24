@@ -35,30 +35,26 @@ const CheckoutSteps = memo(
     };
 
     return (
-      <nav aria-label='Checkout progress' className='mt-8 mb-8'>
-        <ol className='flex items-center justify-between w-full'>
+      <nav aria-label='Checkout progress' className='mt-8 mb-12'>
+        <ol className='flex items-center justify-between w-full relative z-10'>
           {steps.map((step, index) => {
             const isCompleted = currentStep > step.number;
             const isCurrent = currentStep === step.number;
             const isClickable = onStepClick && step.number < currentStep;
 
             return (
-              <li key={step.number} className='flex-1 relative'>
+              <li key={step.number} className='flex-1 relative last:flex-none'>
                 <div className='flex items-center'>
                   {/* Connector Line */}
-                  {index > 0 && (
-                    <div
-                      className={cn(
-                        'absolute left-0 top-5 -ml-2 w-full h-0.5 -z-10',
-                        isCompleted || isCurrent
-                          ? 'bg-blue-600 dark:bg-blue-500'
-                          : 'bg-slate-200 dark:bg-slate-700',
-                      )}
-                      style={{
-                        width: 'calc(100% - 2.5rem)',
-                        transform: 'translateX(-100%)',
-                      }}
-                    />
+                  {index < steps.length - 1 && (
+                     <div className="absolute left-10 top-5 w-[calc(100%-2.5rem)] h-0.5 bg-secondary -z-10">
+                        <div 
+                           className={cn(
+                              "h-full bg-primary transition-all duration-500",
+                              isCompleted ? "w-full" : "w-0"
+                           )}
+                        />
+                     </div>
                   )}
 
                   {/* Step Content */}
@@ -66,67 +62,46 @@ const CheckoutSteps = memo(
                     onClick={() => handleStepClick(step.number)}
                     disabled={!isClickable}
                     className={cn(
-                      'flex flex-col items-start w-full group',
-                      isClickable && 'cursor-pointer hover:opacity-80',
+                      'flex items-center gap-4 group bg-transparent border-0 p-0',
+                      isClickable && 'cursor-pointer',
                     )}
                   >
-                    <div className='flex items-center gap-3 mb-2'>
-                      {/* Step Circle */}
-                      <div
+                     {/* Step Circle */}
+                     <div
                         className={cn(
-                          'flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all',
-                          isCompleted
-                            ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                            : isCurrent
-                              ? 'bg-white border-blue-600 dark:bg-slate-900 dark:border-blue-500'
-                              : 'bg-white border-slate-300 dark:bg-slate-900 dark:border-slate-700',
+                           'flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 relative',
+                           isCompleted
+                           ? 'bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20'
+                           : isCurrent
+                              ? 'bg-background border-primary text-primary ring-4 ring-primary/10'
+                              : 'bg-secondary border-transparent text-muted-foreground',
                         )}
-                      >
+                     >
                         {isCompleted ? (
-                          <Check className='w-5 h-5 text-white' />
+                           <Check className='w-5 h-5' />
                         ) : (
-                          <span
-                            className={cn(
-                              'text-sm font-semibold',
-                              isCurrent
-                                ? 'text-blue-600 dark:text-blue-500'
-                                : 'text-slate-400 dark:text-slate-600',
-                            )}
-                          >
-                            {step.number}
-                          </span>
+                           <span className='text-sm font-bold'>
+                           {step.number}
+                           </span>
                         )}
-                      </div>
+                     </div>
 
-                      {/* Step Label - Desktop */}
-                      <div className='hidden sm:block text-left'>
+                     {/* Step Label - Desktop */}
+                     <div className='hidden sm:block text-left'>
                         <p
-                          className={cn(
-                            'text-sm font-semibold',
-                            isCompleted || isCurrent
-                              ? 'text-slate-900 dark:text-white'
-                              : 'text-slate-500 dark:text-slate-400',
-                          )}
+                           className={cn(
+                           'text-sm font-bold transition-colors',
+                           isCompleted || isCurrent
+                              ? 'text-foreground'
+                              : 'text-muted-foreground',
+                           )}
                         >
-                          {step.label}
+                           {step.label}
                         </p>
-                        <p className='text-xs text-slate-500 dark:text-slate-400'>
-                          {step.description}
+                        <p className='text-xs text-muted-foreground font-medium'>
+                           {step.description}
                         </p>
-                      </div>
-                    </div>
-
-                    {/* Step Label - Mobile */}
-                    <p
-                      className={cn(
-                        'sm:hidden text-xs font-medium text-center w-full',
-                        isCompleted || isCurrent
-                          ? 'text-slate-900 dark:text-white'
-                          : 'text-slate-500 dark:text-slate-400',
-                      )}
-                    >
-                      {step.label}
-                    </p>
+                     </div>
                   </button>
                 </div>
               </li>

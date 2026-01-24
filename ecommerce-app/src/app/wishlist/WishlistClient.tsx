@@ -16,6 +16,28 @@ import { useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
 
+
+function EmptyWishlist() {
+  const router = useRouter();
+  
+  return (
+    <div className='container-wide min-h-[50vh] flex items-center justify-center p-4'>
+       <div className='max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-700'>
+          <div className="w-24 h-24 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-6">
+             <Heart className='h-10 w-10 text-muted-foreground' />
+          </div>
+          <h2 className='text-3xl font-black text-foreground'>Your wishlist is empty</h2>
+          <p className="text-muted-foreground text-lg">Start saving items you love to find them easily later.</p>
+          <Button onClick={() => router.push('/products')} size="lg" className="btn-premium rounded-full px-8 shadow-lg shadow-primary/20">
+             Explore Products
+          </Button>
+       </div>
+    </div>
+  );
+}
+
+import { Heart } from 'lucide-react';
+
 export function WishlistClient({
   products,
 }: {
@@ -36,7 +58,6 @@ export function WishlistClient({
       const result = await toggleWishlistAction(productId);
       if (result.success) {
         toast.success('Removed from wishlist');
-        // Router refresh is implied by server action usually, but good to keep if needed
         router.refresh(); 
       } else {
         toast.error(result.error || 'Failed to remove from wishlist');
@@ -46,8 +67,6 @@ export function WishlistClient({
 
   const handleClearWishlist = () => {
     startTransition(async () => {
-      // For clear all, we could eagerly clear the list, but let's just wait for server
-      // or implement another optimistic action if critical.
       const result = await clearWishlistAction();
       if (result.success) {
         toast.success('Wishlist cleared');
@@ -63,29 +82,41 @@ export function WishlistClient({
       const result = await addItemToCartAction(productId, 1);
       if (result.success) {
         toast.success('Added to cart');
-        router.refresh(); // Refresh to update cart icon
+        router.refresh(); 
       } else {
         toast.error(result.message || 'Failed to add to cart');
       }
     });
   };
 
+  if (optimisticProducts.length === 0) {
+      return (
+         <div className='min-h-screen bg-slate-50 dark:bg-slate-950/50 pb-20 pt-10'>
+            <div className='container-wide py-12'>
+               <h1 className='text-3xl font-black tracking-tight text-foreground mb-8'>Your Wishlist</h1>
+               <EmptyWishlist />
+            </div>
+         </div>
+      );
+  }
+
   return (
-    <div className='bg-slate-50 min-h-[70vh] dark:bg-slate-900'>
-      <div className='container mx-auto px-4 py-12'>
-        <div className='flex items-center justify-between mb-8'>
-          <div className='flex items-baseline gap-4'>
-            <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
+    <div className='min-h-screen bg-slate-50 dark:bg-slate-950/50 pb-20'>
+      <div className='container-wide py-10 sm:py-16'>
+        <div className='flex items-center justify-between mb-10'>
+          <div className='space-y-1'>
+            <h1 className='text-3xl sm:text-5xl font-black tracking-tight text-foreground'>
               Your Wishlist
             </h1>
-            <span className='text-slate-600 dark:text-slate-300'>
-              {optimisticProducts.length} item{optimisticProducts.length !== 1 ? 's' : ''}
-            </span>
+            <p className='text-muted-foreground font-medium text-lg'>
+              {optimisticProducts.length} item{optimisticProducts.length !== 1 ? 's' : ''} saved for later
+            </p>
           </div>
           <Button
             variant='outline'
             onClick={handleClearWishlist}
             disabled={isPending || optimisticProducts.length === 0}
+            className="rounded-full border-border/60 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all font-medium"
           >
             <Trash2 className='mr-2 h-4 w-4' />
             Clear Wishlist
@@ -96,51 +127,50 @@ export function WishlistClient({
           {optimisticProducts.map((product) => (
             <div
               key={product.id}
-              className='border rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col dark:bg-muted dark:border-slate-800'
+              className='glass-card group relative flex flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1'
             >
-              <div className='h-64 w-full overflow-hidden relative bg-slate-100 dark:bg-muted'>
+              <div className='aspect-square overflow-hidden relative bg-secondary'>
                 <Image
                   src={getProductImage(product)}
                   alt={product.title}
                   fill
-                  className='object-cover hover:scale-110 transition-transform duration-300'
+                  className='object-cover transition-transform duration-700 group-hover:scale-110'
                   sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
-                  priority={false}
                 />
+                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Button 
+                     size="sm" 
+                     className="w-full rounded-full font-bold bg-white text-black hover:bg-white/90"
+                     onClick={() => handleAddToCart(product.id)}
+                     disabled={isPending}
+                    >
+                       <ShoppingCart className="h-4 w-4 mr-2" />
+                       Add to Cart
+                    </Button>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/20 backdrop-blur-md text-white border border-white/20 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
+                  onClick={() => handleRemoveFromWishlist(product.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-              <div className='p-4 flex flex-col grow'>
-                <h3 className='font-semibold text-slate-800 dark:text-white'>
-                  <Link
-                    href={`/products/${product.id}`}
-                    className='hover:underline hover:underline-offset-3   cursor-pointer'
-                  >
-                    {product.title}
-                  </Link>
-                </h3>
-                <p className='text-slate-500 text-sm dark:text-slate-400'>
-                  {product.brand}
-                </p>
-                <p className='mt-2 text-lg font-bold text-slate-900 dark:text-white'>
-                  {formatPrice(product.price)}
-                </p>
-                <div className='mt-4 pt-4 border-t flex flex-col gap-2  dark:border-slate-800'>
-                  <Button
-                    onClick={() => handleAddToCart(product.id)}
-                    className='w-full'
-                    disabled={isPending}
-                  >
-                    <ShoppingCart className='h-4 w-4 mr-2' />
-                    Add to Cart
-                  </Button>
-                  <Button
-                    variant='outline'
-                    onClick={() => handleRemoveFromWishlist(product.id)}
-                    className='w-full'
-                    disabled={isPending}
-                  >
-                    <Trash2 className='h-4 w-4 mr-2' />
-                    Remove
-                  </Button>
+              
+              <div className='p-6 flex flex-col grow'>
+                <div className="mb-4">
+                   <p className='text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1'>
+                     {product.brand || 'Brand'}
+                   </p>
+                   <h3 className='font-bold text-lg text-foreground leading-tight line-clamp-2 mb-2'>
+                     <Link href={`/products/${product.id}`} className='hover:text-primary transition-colors'>
+                        {product.title}
+                     </Link>
+                   </h3>
+                   <p className='text-xl font-black text-primary'>
+                     {formatPrice(product.price)}
+                   </p>
                 </div>
               </div>
             </div>
