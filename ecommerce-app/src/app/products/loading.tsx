@@ -1,19 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Package } from 'lucide-react';
 
 /**
  * Premium Loading Component for Products Page
  * 
  * Features:
- * - Animated skeleton loaders
- * - Subtle gradient shimmer effect
- * - Responsive grid layout matching actual product grid
+ * - Enhanced skeleton loaders with shimmer effect
+ * - Consistent design with the new theme
+ * - Responsive grid layout
  */
 export default function ProductsLoading() {
   return (
-    <div className='bg-slate-50 dark:bg-slate-900 min-h-screen'>
+    <div className='min-h-screen gradient-hero'>
       <div className='container-wide py-8 sm:py-12 lg:py-16'>
         {/* Header Skeleton */}
         <motion.div
@@ -23,11 +23,14 @@ export default function ProductsLoading() {
           className='mb-8'
         >
           <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-            <div>
-              <div className='h-8 w-48 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 rounded-lg animate-shimmer' />
-              <div className='h-4 w-32 mt-2 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 rounded animate-shimmer' />
+            <div className='space-y-2'>
+              <div className='h-10 w-56 skeleton-enhanced rounded-xl' />
+              <div className='h-5 w-36 skeleton-enhanced rounded-lg' />
             </div>
-            <div className='h-10 w-40 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 rounded-lg animate-shimmer' />
+            <div className='flex gap-3'>
+              <div className='h-11 w-32 skeleton-enhanced rounded-xl' />
+              <div className='h-11 w-40 skeleton-enhanced rounded-xl' />
+            </div>
           </div>
         </motion.div>
 
@@ -37,39 +40,56 @@ export default function ProductsLoading() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className='hidden lg:block lg:col-span-1 sticky top-4 self-start'
+            className='hidden lg:block lg:col-span-1 sticky top-24 self-start'
           >
-            <div className='rounded-xl border bg-card p-5 shadow-sm space-y-6'>
+            <div className='rounded-2xl border border-border/50 bg-card p-6 shadow-sm space-y-6'>
               {/* Categories */}
-              <div className='space-y-3'>
-                <div className='h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
+              <div className='space-y-4'>
+                <div className='h-5 w-24 skeleton-enhanced rounded' />
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className='flex items-center gap-3'>
-                    <div className='h-4 w-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                    <div className='h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                  </div>
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.15 + i * 0.05 }}
+                    className='flex items-center gap-3'
+                  >
+                    <div className='h-5 w-5 skeleton-enhanced rounded' />
+                    <div className='h-4 w-24 skeleton-enhanced rounded' />
+                  </motion.div>
                 ))}
               </div>
 
               {/* Brands */}
-              <div className='space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700'>
-                <div className='h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
+              <div className='space-y-4 pt-6 border-t border-border/50'>
+                <div className='h-5 w-20 skeleton-enhanced rounded' />
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className='flex items-center gap-3'>
-                    <div className='h-4 w-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                    <div className='h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                  </div>
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 + i * 0.05 }}
+                    className='flex items-center gap-3'
+                  >
+                    <div className='h-5 w-5 skeleton-enhanced rounded' />
+                    <div className='h-4 w-20 skeleton-enhanced rounded' />
+                  </motion.div>
                 ))}
               </div>
 
               {/* Price Range */}
-              <div className='space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700'>
-                <div className='h-5 w-28 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                <div className='h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full animate-pulse' />
+              <div className='space-y-4 pt-6 border-t border-border/50'>
+                <div className='h-5 w-28 skeleton-enhanced rounded' />
+                <div className='h-2 w-full skeleton-enhanced rounded-full' />
                 <div className='flex justify-between'>
-                  <div className='h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                  <div className='h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
+                  <div className='h-4 w-14 skeleton-enhanced rounded' />
+                  <div className='h-4 w-14 skeleton-enhanced rounded' />
                 </div>
+              </div>
+
+              {/* Clear Filters Button */}
+              <div className='pt-4'>
+                <div className='h-10 w-full skeleton-enhanced rounded-xl' />
               </div>
             </div>
           </motion.aside>
@@ -82,28 +102,43 @@ export default function ProductsLoading() {
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
-                  className='group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm dark:bg-slate-800 dark:border-slate-700'
+                  transition={{ duration: 0.3, delay: 0.1 + i * 0.04 }}
+                  className='group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm'
                 >
                   {/* Image Skeleton */}
-                  <div className='relative aspect-square h-64 w-full overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800'>
+                  <div className='relative aspect-square h-64 w-full overflow-hidden bg-muted'>
+                    <div className='skeleton-enhanced h-full w-full' />
                     <div className='absolute inset-0 flex items-center justify-center'>
-                      <Loader2 className='h-8 w-8 animate-spin text-slate-300 dark:text-slate-600' />
+                      <Package className='h-10 w-10 text-muted-foreground/20' />
                     </div>
-                    {/* Shimmer */}
-                    <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer' />
                   </div>
 
                   {/* Content Skeleton */}
-                  <div className='flex flex-1 flex-col p-4 space-y-3'>
-                    <div className='h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                    <div className='h-5 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                    <div className='flex items-center justify-between mt-2'>
-                      <div className='h-6 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
-                      <div className='h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse' />
+                  <div className='flex flex-1 flex-col p-5 space-y-4'>
+                    {/* Brand & Rating */}
+                    <div className='flex items-center justify-between'>
+                      <div className='h-3 w-16 skeleton-enhanced rounded' />
+                      <div className='h-3 w-12 skeleton-enhanced rounded' />
                     </div>
+                    
+                    {/* Title */}
+                    <div className='space-y-2'>
+                      <div className='h-5 w-full skeleton-enhanced rounded' />
+                      <div className='h-5 w-3/4 skeleton-enhanced rounded' />
+                    </div>
+                    
+                    {/* Price */}
+                    <div className='flex items-end justify-between pt-1'>
+                      <div className='space-y-1'>
+                        <div className='h-6 w-24 skeleton-enhanced rounded' />
+                        <div className='h-3 w-16 skeleton-enhanced rounded' />
+                      </div>
+                    </div>
+                    
                     <div className='flex-1' />
-                    <div className='h-10 w-full bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse' />
+                    
+                    {/* Button */}
+                    <div className='h-11 w-full skeleton-enhanced rounded-xl' />
                   </div>
                 </motion.div>
               ))}
@@ -114,33 +149,18 @@ export default function ProductsLoading() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className='flex justify-center mt-8 gap-2'
+              className='flex justify-center mt-10 gap-2'
             >
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className='h-10 w-10 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse'
+                  className='h-10 w-10 skeleton-enhanced rounded-xl'
                 />
               ))}
             </motion.div>
           </main>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-        .animate-shimmer {
-          animation: shimmer 2s infinite linear;
-          background-size: 200% 100%;
-        }
-      `}</style>
     </div>
   );
 }

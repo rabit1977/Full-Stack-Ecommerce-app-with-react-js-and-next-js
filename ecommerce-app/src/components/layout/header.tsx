@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NavActions } from './nav-actions';
 import { SearchBar } from './search-bar';
 
@@ -27,7 +27,7 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { href: '/products', label: 'Products', icon: Package },
   { href: '/about', label: 'About', icon: Info },
-  { href: '/contact', label: 'User Care', icon: Headset },
+  { href: '/contact', label: 'Support', icon: Headset },
   { href: '/services', label: 'Services', icon: Briefcase },
 ];
 
@@ -39,14 +39,7 @@ interface HeaderProps {
 }
 
 /**
- * Header component with sticky navigation, search, and responsive mobile menu
- *
- * Features:
- * - Sticky header with backdrop blur
- * - Active link highlighting
- * - Mobile navigation drawer
- * - Accessible markup
- * - Optimized re-renders
+ * Premium Header with scroll effects, glass morphism, and smooth animations
  */
 const Header = ({
   isMenuOpen,
@@ -55,6 +48,16 @@ const Header = ({
   initialCartItemCount,
 }: HeaderProps) => {
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   /**
    * Check if link is active
@@ -69,74 +72,80 @@ const Header = ({
 
   return (
     <header
-      className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 dark:bg-slate-1000/95 dark:supports-[backdrop-filter]:bg-slate-950/80 dark:border-slate-800 transition-all duration-300'
+      className={cn(
+        'sticky top-0 z-50 w-full transition-all duration-300',
+        isScrolled
+          ? 'bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-sm'
+          : 'bg-background/80 backdrop-blur-sm border-b border-transparent'
+      )}
       role='banner'
     >
-      <div className='container-wide flex h-16 sm:h-20 items-center justify-between gap-1 sm:gap-4'>
+      <div className='container-wide flex h-16 sm:h-18 lg:h-20 items-center justify-between gap-2 sm:gap-4'>
         {/* Logo */}
         <Link
           href='/'
-          className='flex shrink-0 items-center gap-1.5 sm:gap-2 group'
+          className='flex shrink-0 items-center gap-2 sm:gap-2.5 group'
           aria-label='Electro home page'
         >
-          <div className='w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300'>
-            <Zap className='h-4 w-4 sm:h-5 sm:w-5 text-primary' />
+          <div className='w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105'>
+            <Zap className='h-5 w-5 sm:h-5 sm:w-5 text-white' />
           </div>
-          <span className='text-lg sm:text-xl font-bold tracking-tight text-foreground'>
-            <span className='hidden xs:inline'>Electro</span>
-          </span>
+          <div className='hidden xs:block'>
+            <span className='text-lg sm:text-xl font-bold tracking-tight text-foreground'>
+              Electro
+            </span>
+            <span className='hidden sm:block text-[10px] text-muted-foreground font-medium -mt-0.5'>
+              Premium Tech
+            </span>
+          </div>
         </Link>
 
         {/* Search Bar - Hidden on very small screens, shown from sm up */}
-        <div className='hidden sm:block flex-1 max-w-sm lg:max-w-md mx-2 sm:mx-4 transition-all duration-300'>
+        <div className='hidden sm:block flex-1 max-w-sm lg:max-w-md xl:max-w-lg mx-4 transition-all duration-300'>
           <SearchBar />
         </div>
 
         {/* Desktop Navigation - Shown from lg up */}
         <nav
-          className='hidden lg:flex items-center gap-1 xl:gap-2'
+          className='hidden lg:flex items-center'
           aria-label='Main navigation'
         >
-          {navLinks.map((link) => {
-            const isActive = isActiveLink(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'px-3 py-2 text-sm font-medium transition-all rounded-md relative group/link',
-                  isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
-                )}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <div className='flex items-center gap-2'>
-                  {link.icon && (
-                    <link.icon
-                      className={cn(
-                        'h-4 w-4 transition-colors',
-                        isActive
-                          ? 'text-primary'
-                          : 'text-muted-foreground group-hover/link:text-foreground',
-                      )}
+          <div className='flex items-center gap-1 bg-muted/50 rounded-full px-1.5 py-1.5'>
+            {navLinks.map((link) => {
+              const isActive = isActiveLink(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'relative px-4 py-2 text-sm font-medium transition-all rounded-full',
+                    isActive
+                      ? 'text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId='activeNavPill'
+                      className='absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25'
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                     />
                   )}
-                  <span>{link.label}</span>
-                </div>
-                {isActive && (
-                  <motion.span
-                    layoutId='activeNav'
-                    className='absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full'
-                  />
-                )}
-              </Link>
-            );
-          })}
+                  <span className='relative z-10 flex items-center gap-2'>
+                    {link.icon && (
+                      <link.icon className='h-4 w-4' />
+                    )}
+                    {link.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
         </nav>
 
         {/* Nav Actions (Cart, Theme, etc.) */}
-        <div className='flex items-center gap-0.5 sm:gap-1'>
+        <div className='flex items-center gap-1 sm:gap-2'>
           <NavActions
             initialWishlistCount={initialWishlistCount}
             initialCartItemCount={initialCartItemCount}
@@ -146,7 +155,10 @@ const Header = ({
           <Button
             variant='ghost'
             size='icon'
-            className='lg:hidden h-9 w-9 sm:h-10 sm:w-10 ml-0.5 sm:ml-1'
+            className={cn(
+              'lg:hidden h-10 w-10 rounded-xl transition-all duration-200',
+              isMenuOpen && 'bg-primary text-primary-foreground'
+            )}
             onClick={toggleMobileMenu}
             aria-label='Open menu'
             aria-expanded={isMenuOpen}
@@ -157,9 +169,14 @@ const Header = ({
       </div>
       
       {/* Mobile Search Bar - Visible only on mobile screens below sm */}
-      <div className='sm:hidden px-4 pb-3 pt-0'>
+      <motion.div 
+        className='sm:hidden px-4 pb-3'
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
         <SearchBar />
-      </div>
+      </motion.div>
     </header>
   );
 };

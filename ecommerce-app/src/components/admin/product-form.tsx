@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -18,7 +19,8 @@ import {
 } from '@/lib/schemas/product-schema';
 import { ProductWithRelations } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { DollarSign, Image as ImageIcon, Layers, Loader2, Package, Percent, Tag, Type, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -108,259 +110,405 @@ export const ProductForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className='space-y-6'>
-        {/* Title */}
-        <FormField
-          control={form.control}
-          name='title'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Product Title</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder='e.g. Quantum QLED 65" TV'
-                  disabled={isSubmitting || isUploading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className='space-y-8'>
+        {/* Basic Information Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='card-premium p-6 space-y-6'
+        >
+          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+            <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
+              <Package className='h-5 w-5 text-primary' />
+            </div>
+            <div>
+              <h3 className='font-semibold text-foreground'>Basic Information</h3>
+              <p className='text-sm text-muted-foreground'>Product details and description</p>
+            </div>
+          </div>
 
-        {/* Description */}
-        <FormField
-          control={form.control}
-          name='description'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder='Describe the product features and benefits...'
-                  rows={4}
-                  disabled={isSubmitting || isUploading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Price and Stock */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          {/* Title */}
           <FormField
             control={form.control}
-            name='price'
+            name='title'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price ($)</FormLabel>
+                <FormLabel className='flex items-center gap-2'>
+                  <Type className='h-4 w-4 text-muted-foreground' />
+                  Product Title
+                </FormLabel>
                 <FormControl>
                   <Input
-                    type='number'
-                    step='0.01'
-                    min='0'
-                    placeholder='e.g. 1299.99'
+                    placeholder='e.g. Quantum QLED 65" Smart TV'
+                    className='input-premium'
                     disabled={isSubmitting || isUploading}
                     {...field}
-                    value={field.value === 0 ? '' : field.value}
-                    onChange={(e) => {
-                      const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                      field.onChange(isNaN(value) ? 0 : value);
-                    }}
                   />
                 </FormControl>
+                <FormDescription>
+                  A clear, compelling title that describes your product
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          {/* Description */}
           <FormField
             control={form.control}
-            name='stock'
+            name='description'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Stock Quantity</FormLabel>
+                <FormLabel className='flex items-center gap-2'>
+                  <Layers className='h-4 w-4 text-muted-foreground' />
+                  Description
+                </FormLabel>
                 <FormControl>
-                  <Input
-                    type='number'
-                    min='0'
-                    placeholder='e.g. 25'
+                  <Textarea
+                    placeholder='Describe the product features, specifications, and benefits...'
+                    rows={5}
+                    className='input-premium resize-none'
                     disabled={isSubmitting || isUploading}
                     {...field}
-                    value={field.value === 0 ? '' : field.value}
-                    onChange={(e) => {
-                      const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-                      field.onChange(isNaN(value) ? 0 : value);
-                    }}
                   />
                 </FormControl>
+                <FormDescription>
+                  Detailed description helps customers make informed decisions
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
+        </motion.div>
 
-        {/* Brand and Category */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <FormField
-            control={form.control}
-            name='brand'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Brand</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='e.g. AuroVision'
-                    disabled={isSubmitting || isUploading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Pricing & Inventory Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className='card-premium p-6 space-y-6'
+        >
+          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+            <div className='w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center'>
+              <DollarSign className='h-5 w-5 text-emerald-600 dark:text-emerald-400' />
+            </div>
+            <div>
+              <h3 className='font-semibold text-foreground'>Pricing & Inventory</h3>
+              <p className='text-sm text-muted-foreground'>Set pricing and stock levels</p>
+            </div>
+          </div>
 
-          <FormField
-            control={form.control}
-            name='category'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder='e.g. TVs'
-                    disabled={isSubmitting || isUploading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+            <FormField
+              control={form.control}
+              name='price'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className='flex items-center gap-2'>
+                    <DollarSign className='h-4 w-4 text-muted-foreground' />
+                    Price
+                  </FormLabel>
+                  <FormControl>
+                    <div className='relative'>
+                      <span className='absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium'>$</span>
+                      <Input
+                        type='number'
+                        step='0.01'
+                        min='0'
+                        placeholder='0.00'
+                        className='input-premium pl-8'
+                        disabled={isSubmitting || isUploading}
+                        {...field}
+                        value={field.value === 0 ? '' : field.value}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                          field.onChange(isNaN(value) ? 0 : value);
+                        }}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='discount'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className='flex items-center gap-2'>
+                    <Percent className='h-4 w-4 text-muted-foreground' />
+                    Discount (%)
+                  </FormLabel>
+                  <FormControl>
+                    <div className='relative'>
+                      <Input
+                        type='number'
+                        min='0'
+                        max='100'
+                        placeholder='0'
+                        className='input-premium pr-8'
+                        disabled={isSubmitting || isUploading}
+                        {...field}
+                        value={field.value === undefined || field.value === 0 ? '' : field.value}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                          field.onChange(value);
+                        }}
+                      />
+                      <span className='absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground'>%</span>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='stock'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className='flex items-center gap-2'>
+                    <Package className='h-4 w-4 text-muted-foreground' />
+                    Stock Quantity
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      min='0'
+                      placeholder='0'
+                      className='input-premium'
+                      disabled={isSubmitting || isUploading}
+                      {...field}
+                      value={field.value === 0 ? '' : field.value}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                        field.onChange(isNaN(value) ? 0 : value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </motion.div>
+
+        {/* Organization Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className='card-premium p-6 space-y-6'
+        >
+          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+            <div className='w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center'>
+              <Tag className='h-5 w-5 text-blue-600 dark:text-blue-400' />
+            </div>
+            <div>
+              <h3 className='font-semibold text-foreground'>Organization</h3>
+              <p className='text-sm text-muted-foreground'>Brand and category classification</p>
+            </div>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <FormField
+              control={form.control}
+              name='brand'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Brand</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='e.g. AuroVision, TechPro, SoundMax'
+                      className='input-premium'
+                      disabled={isSubmitting || isUploading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='category'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='e.g. TVs, Laptops, Audio, Phones'
+                      className='input-premium'
+                      disabled={isSubmitting || isUploading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </motion.div>
 
         {/* Product Images Section */}
-        <div className="border dark:border-slate-800 rounded-lg p-6 space-y-4">
-          <FormLabel>Product Images</FormLabel>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className='card-premium p-6 space-y-6'
+        >
+          <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+            <div className='w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center'>
+              <ImageIcon className='h-5 w-5 text-purple-600 dark:text-purple-400' />
+            </div>
+            <div>
+              <h3 className='font-semibold text-foreground'>Product Images</h3>
+              <p className='text-sm text-muted-foreground'>Add images to showcase your product</p>
+            </div>
+          </div>
           
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <Button
-              type="button"
+              type='button'
               variant={useUrlInput ? 'default' : 'outline'}
-              size="sm"
+              size='sm'
               onClick={() => setUseUrlInput(true)}
               disabled={isUploading}
+              className='rounded-xl'
             >
-              <ImageIcon className="h-4 w-4 mr-2" />
+              <ImageIcon className='h-4 w-4 mr-2' />
               Image URL
             </Button>
             <Button
-              type="button"
+              type='button'
               variant={!useUrlInput ? 'default' : 'outline'}
-              size="sm"
+              size='sm'
               onClick={() => setUseUrlInput(false)}
               disabled={isUploading}
+              className='rounded-xl'
             >
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className='h-4 w-4 mr-2' />
               Upload Files
             </Button>
           </div>
 
           {useUrlInput ? (
-            <div className="space-y-2">
+            <div className='space-y-4'>
               <Input
-                type="url"
-                placeholder="https://example.com/image.jpg"
+                type='url'
+                placeholder='https://example.com/image.jpg'
                 value={imageUrls[0] || ''}
                 onChange={(e) => setImageUrls([e.target.value])}
                 disabled={isSubmitting || isUploading}
+                className='input-premium'
               />
-                <div className="mt-2 relative h-32 w-32 overflow-hidden rounded-lg border dark:border-slate-700">
+              {imageUrls[0] && (
+                <div className='relative h-40 w-40 overflow-hidden rounded-2xl border border-border/50 shadow-sm'>
                   <Image 
                     src={imageUrls[0]} 
-                    alt="Preview" 
+                    alt='Preview' 
                     fill
-                    className="object-cover"
-                    unoptimized // Previews might be blobs or external URLs
+                    className='object-cover'
+                    unoptimized
                   />
                 </div>
+              )}
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="border-2 border-dashed dark:border-slate-700 rounded-lg p-6 text-center hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+            <div className='space-y-4'>
+              <div className='border-2 border-dashed border-border/50 rounded-2xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 cursor-pointer group'>
                 <Input
-                  id="images"
-                  type="file"
-                  accept="image/*"
+                  id='images'
+                  type='file'
+                  accept='image/*'
                   multiple
                   onChange={handleImageUpload}
                   disabled={isSubmitting || isUploading}
-                  className="hidden"
+                  className='hidden'
                 />
                 <label 
-                  htmlFor="images"
-                  className="cursor-pointer flex flex-col items-center gap-2"
+                  htmlFor='images'
+                  className='cursor-pointer flex flex-col items-center gap-3'
                 >
                   {isUploading ? (
                     <>
-                      <Loader2 className='h-10 w-10 text-slate-400 animate-spin' />
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                      <div className='w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center'>
+                        <Loader2 className='h-8 w-8 text-primary animate-spin' />
+                      </div>
+                      <span className='text-sm font-medium text-muted-foreground'>
                         Uploading...
                       </span>
                     </>
                   ) : (
                     <>
-                      <Upload className="h-10 w-10 text-slate-400" />
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
-                        Click to upload or drag and drop
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        PNG, JPG, WEBP up to 5MB each
-                      </span>
+                      <div className='w-16 h-16 rounded-full bg-muted group-hover:bg-primary/10 transition-colors flex items-center justify-center'>
+                        <Upload className='h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors' />
+                      </div>
+                      <div>
+                        <span className='text-sm font-medium text-foreground'>
+                          Click to upload or drag and drop
+                        </span>
+                        <p className='text-xs text-muted-foreground mt-1'>
+                          PNG, JPG, WEBP up to 5MB each
+                        </p>
+                      </div>
                     </>
                   )}
                 </label>
               </div>
 
               {imageUrls.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
                   {imageUrls.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <div className="relative h-24 w-full overflow-hidden rounded-lg border dark:border-slate-700">
+                    <div key={index} className='relative group'>
+                      <div className='relative h-28 w-full overflow-hidden rounded-xl border border-border/50'>
                         <Image
                           src={url}
                           alt={`Preview ${index + 1}`}
                           fill
-                          className="object-cover"
+                          className='object-cover'
                           unoptimized
                         />
                       </div>
                       <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        type='button'
+                        variant='destructive'
+                        size='icon'
+                        className='absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg'
                         onClick={() => removeImage(index)}
                         disabled={isSubmitting || isUploading}
                       >
-                        <X className="h-4 w-4" />
+                        <X className='h-4 w-4' />
                       </Button>
+                      {index === 0 && (
+                        <span className='absolute bottom-2 left-2 text-xs font-medium bg-primary text-primary-foreground px-2 py-0.5 rounded-md'>
+                          Main
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Submit Button */}
-        <div className='flex gap-4 pt-4'>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className='flex justify-end gap-4 pt-4'
+        >
           <Button
             type='submit'
             disabled={isSubmitting || isUploading}
-            className='min-w-30'
+            size='lg'
+            className='min-w-[160px] rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40'
           >
             {isSubmitting ? (
               <>
@@ -368,12 +516,18 @@ export const ProductForm = ({
                 Saving...
               </>
             ) : product ? (
-              'Save Changes'
+              <>
+                <Package className='h-4 w-4 mr-2' />
+                Save Changes
+              </>
             ) : (
-              'Create Product'
+              <>
+                <Package className='h-4 w-4 mr-2' />
+                Create Product
+              </>
             )}
           </Button>
-        </div>
+        </motion.div>
       </form>
     </Form>
   );

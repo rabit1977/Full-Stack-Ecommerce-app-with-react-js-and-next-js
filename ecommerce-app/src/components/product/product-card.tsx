@@ -7,7 +7,7 @@ import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import { motion } from 'framer-motion';
-import { Eye, Heart, ShoppingBag } from 'lucide-react';
+import { Eye, Heart, ShoppingBag, Sparkles, Star, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { memo, useCallback, useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ export const ProductCard = memo(
   ({ product, initialIsWished = false }: ProductCardProps) => {
     const [isPending, startTransition] = useTransition();
     const [isWished, setIsWished] = useState(initialIsWished);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
     const { openModal } = useQuickView();
 
     const currentStock = useMemo(() => product.stock, [product.stock]);
@@ -42,6 +43,12 @@ export const ProductCard = memo(
       }
       return null;
     }, [product.price, product.discount]);
+
+    // Calculate average rating
+    const avgRating = useMemo(() => {
+      if (!product.reviews || product.reviews.length === 0) return 0;
+      return product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length;
+    }, [product.reviews]);
 
     const handleQuickView = useCallback(
       (e: React.MouseEvent) => {
@@ -79,6 +86,7 @@ export const ProductCard = memo(
         e.preventDefault();
         e.stopPropagation();
         if (isOutOfStock) return;
+        setIsAddingToCart(true);
         startTransition(async () => {
           const result = await addItemToCartAction(product.id, 1);
           if (result.success) {
@@ -86,6 +94,7 @@ export const ProductCard = memo(
           } else {
             toast.error(result.message || 'Failed to add to cart.');
           }
+          setIsAddingToCart(false);
         });
       },
       [product.id, isOutOfStock],
@@ -98,44 +107,58 @@ export const ProductCard = memo(
         layoutId={`product-card-${product.id}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className='group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg dark:bg-slate-800 dark:border-slate-800'
+        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+        className='group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 dark:bg-slate-900/50 dark:border-slate-800/50'
       >
         {/* --- Image Section --- */}
-        <div className='relative aspect-square h-64 w-full overflow-hidden bg-slate-100 dark:bg-slate-900'>
+        <div className='relative aspect-square h-64 w-full overflow-hidden bg-gradient-to-br from-muted/50 to-muted'>
           <ProductImageCarousel product={product} />
 
+          {/* Gradient Overlay on Hover */}
+          <div className='absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
+
           {/* Badges (Top Left) */}
-          <div className='absolute left-2 top-2 sm:left-3 sm:top-3 z-10 flex flex-col gap-1.5'>
+          <div className='absolute left-3 top-3 z-10 flex flex-col gap-2'>
             {discount && (
-              <span className='inline-flex items-center rounded-md bg-red-600 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-bold text-white shadow-sm'>
+              <motion.span 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg shadow-red-500/25'
+              >
+                <Sparkles className='h-3 w-3' />
                 -{Math.round(discount.percentage)}%
-              </span>
+              </motion.span>
             )}
             {isLowStock && (
-              <span className='inline-flex items-center rounded-md bg-amber-500 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-bold text-white shadow-sm'>
+              <span className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg shadow-amber-500/25'>
+                <Zap className='h-3 w-3' />
                 Low Stock
+              </span>
+            )}
+            {isOutOfStock && (
+              <span className='inline-flex items-center rounded-lg bg-slate-900/90 px-2.5 py-1 text-xs font-bold text-white'>
+                Out of Stock
               </span>
             )}
           </div>
 
           {/* Floating Actions (Top Right) - Always visible on mobile, hover on desktop */}
-          <div className='absolute right-2 top-2 sm:right-3 sm:top-3 z-10 flex flex-col gap-2 md:translate-x-12 md:opacity-0 transition-all duration-300 md:group-hover:translate-x-0 md:group-hover:opacity-100'>
+          <div className='absolute right-3 top-3 z-10 flex flex-col gap-2 md:translate-x-14 md:opacity-0 transition-all duration-300 md:group-hover:translate-x-0 md:group-hover:opacity-100'>
             <Button
               size='icon'
               variant='secondary'
-              className='h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/95 shadow-md hover:bg-white dark:bg-slate-800/95 dark:hover:bg-slate-800'
+              className='h-9 w-9 rounded-full bg-white/95 shadow-lg hover:bg-white hover:scale-110 dark:bg-slate-800/95 dark:hover:bg-slate-800 transition-all duration-200'
               onClick={handleQuickView}
               title='Quick View'
             >
-              <Eye className='h-4 w-4 text-slate-700 dark:text-slate-200' />
+              <Eye className='h-4 w-4 text-foreground' />
             </Button>
             <Button
               size='icon'
               variant='secondary'
               className={cn(
-                'h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/95 shadow-md transition-colors hover:bg-white dark:bg-slate-800/95 dark:hover:bg-slate-800',
-                isWished && 'text-red-500 hover:text-red-600',
+                'h-9 w-9 rounded-full bg-white/95 shadow-lg transition-all duration-200 hover:bg-white hover:scale-110 dark:bg-slate-800/95 dark:hover:bg-slate-800',
+                isWished && 'bg-red-50 hover:bg-red-100 dark:bg-red-950/50',
               )}
               onClick={handleToggleWishlist}
               disabled={isPending}
@@ -144,7 +167,7 @@ export const ProductCard = memo(
               <Heart
                 className={cn(
                   'h-4 w-4 transition-all',
-                  isWished && 'fill-current',
+                  isWished ? 'fill-red-500 text-red-500' : 'text-foreground'
                 )}
               />
             </Button>
@@ -152,57 +175,79 @@ export const ProductCard = memo(
         </div>
 
         {/* --- Content Section --- */}
-        <div className='flex flex-1 flex-col p-3 sm:p-5'>
-          {/* Brand & Title */}
-          <Link href={`/products/${product.id}`} className='block group/title'>
-            <p className='text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+        <div className='flex flex-1 flex-col p-4 sm:p-5'>
+          {/* Brand & Rating */}
+          <div className='flex items-center justify-between gap-2'>
+            <p className='text-[11px] font-semibold uppercase tracking-wider text-primary/80'>
               {product.brand}
             </p>
-            <h3 className='mt-0.5 sm:mt-1 line-clamp-1 text-sm sm:text-base font-semibold text-foreground transition-colors group-hover/title:text-primary'>
+            {avgRating > 0 && (
+              <div className='flex items-center gap-1'>
+                <Star className='h-3.5 w-3.5 fill-amber-400 text-amber-400' />
+                <span className='text-xs font-medium text-muted-foreground'>
+                  {avgRating.toFixed(1)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Title */}
+          <Link href={`/products/${product.id}`} className='block group/title mt-1.5'>
+            <h3 className='line-clamp-2 text-sm sm:text-base font-semibold text-foreground transition-colors group-hover/title:text-primary leading-snug'>
               {product.title}
             </h3>
           </Link>
 
+          {/* Spacer */}
+          <div className='flex-1 min-h-2' />
+
           {/* Price Area */}
-          <div className='mt-2 sm:mt-3 flex items-center justify-between gap-2'>
-            <div className='flex items-center gap-2'>
-            <span className='text-base sm:text-lg font-bold text-foreground'>
-              {formatPrice(effectivePrice)}
-            </span>
-            {discount && (
-              <span className='text-[10px] sm:text-sm text-muted-foreground line-through decoration-slate-400/60'>
-                {formatPrice(discount.originalPrice)}
-              </span>
-            )}
+          <div className='mt-3 flex items-end justify-between gap-2'>
+            <div className='space-y-0.5'>
+              <div className='flex items-baseline gap-2'>
+                <span className='text-lg sm:text-xl font-bold text-foreground'>
+                  {formatPrice(effectivePrice)}
+                </span>
+                {discount && (
+                  <span className='text-xs text-muted-foreground line-through'>
+                    {formatPrice(discount.originalPrice)}
+                  </span>
+                )}
+              </div>
+              {!isOutOfStock && (
+                <p className='text-[11px] text-muted-foreground'>
+                  <span className='text-emerald-600 dark:text-emerald-400 font-medium'>
+                    {product.stock}
+                  </span>{' '}
+                  in stock
+                </p>
+              )}
             </div>
-            {product.stock === 0 ? (
-              <span className='text-[10px] sm:text-sm text-muted-foreground'>
-                Out of Stock
-              </span>
-            ) : (
-              <span className='text-[10px] sm:text-sm text-muted-foreground'>
-                In stock <span  className='text-primary font-semibold'>{product.stock}</span>
-              </span>
-            )}
           </div>
 
-          {/* Spacer to push button to bottom */}
-          <div className='flex-1' />
-
           {/* --- Footer Action --- */}
-          <div className='mt-3 sm:mt-5'>
+          <div className='mt-4'>
             <Button
               className={cn(
-                'h-11 sm:h-10 w-full rounded-lg font-medium shadow-none transition-all',
+                'h-11 w-full rounded-xl font-semibold shadow-none transition-all duration-300',
                 isOutOfStock
                   ? 'cursor-not-allowed bg-muted text-muted-foreground hover:bg-muted'
-                  : 'bg-primary hover:bg-primary/90 hover:shadow-md active:scale-95 sm:active:scale-100',
+                  : 'bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98]',
               )}
               onClick={handleAddToCart}
               disabled={isOutOfStock || isPending}
             >
               {isOutOfStock ? (
                 'Out of Stock'
+              ) : isAddingToCart ? (
+                <span className='flex items-center gap-2'>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    className='h-4 w-4 border-2 border-white/30 border-t-white rounded-full'
+                  />
+                  Adding...
+                </span>
               ) : (
                 <>
                   <ShoppingBag className='mr-2 h-4 w-4' />
@@ -212,7 +257,6 @@ export const ProductCard = memo(
             </Button>
           </div>
         </div>
-
       </motion.div>
     );
   },
