@@ -81,46 +81,62 @@ export function ProductPurchasePanel({
   }).format(product.price);
 
   return (
-    <div className='flex flex-col gap-6 sm:gap-8'>
+    <div className='glass-card p-6 sm:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700'>
       <div className='space-y-4'>
-        <h1 className='leading-tight'>{product.title}</h1>
+        <h1 className='text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight'>
+          {product.title}
+        </h1>
 
-        <div className='flex items-center gap-4'>
-          <p className='text-2xl sm:text-3xl font-bold text-primary'>
+        <div className='flex items-baseline gap-4 flex-wrap'>
+          <p className='text-4xl sm:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600'>
             {formattedPrice}
           </p>
           {product.discount && product.discount > 0 && (
-            <span className='px-2 py-1 rounded-md bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400 text-sm font-bold'>
-              -{product.discount}% OFF
-            </span>
+            <div className='flex items-center gap-2'>
+              <span className='text-xl text-muted-foreground line-through font-medium'>
+                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price / (1 - product.discount/100))}
+              </span>
+              <span className='px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-bold border border-red-500/20 shadow-sm'>
+                {product.discount}% OFF
+              </span>
+            </div>
           )}
         </div>
 
-        <p className='text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl'>
+        <p className='text-lg text-muted-foreground leading-relaxed'>
           {product.description}
         </p>
       </div>
 
-      <Separator />
+      <Separator className='bg-border/60' />
 
       {/* Options */}
       <div className='space-y-6'>
         {Array.isArray(product.options) &&
           product.options.map((option) => (
-            <div key={option.name} className='flex flex-col gap-3'>
-              <Label className='text-sm font-semibold uppercase tracking-wider text-muted-foreground'>
-                {option.name}
-              </Label>
+            <div key={option.name} className='space-y-3'>
+              <div className='flex justify-between items-center'>
+                <Label className='text-sm font-semibold uppercase tracking-wider text-muted-foreground'>
+                  {option.name}
+                </Label>
+                <span className='text-sm font-medium text-foreground'>
+                  {selectedOptions[option.name]}
+                </span>
+              </div>
               <Select
                 value={selectedOptions[option.name]}
                 onValueChange={(value) => onOptionChange(option.name, value)}
               >
-                <SelectTrigger className='h-12 w-full sm:max-w-xs'>
+                <SelectTrigger className='h-12 w-full rounded-xl border-border/60 bg-secondary/30 hover:bg-secondary/50 transition-colors focus:ring-2 focus:ring-primary/20 font-medium'>
                   <SelectValue placeholder={`Select ${option.name}`} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className='rounded-xl border-border/60 backdrop-blur-xl'>
                   {option.variants.map((variant) => (
-                    <SelectItem key={variant.value} value={variant.value}>
+                    <SelectItem 
+                      key={variant.value} 
+                      value={variant.value}
+                      className='focus:bg-primary/10 py-3 cursor-pointer'
+                    >
                       {variant.value}
                     </SelectItem>
                   ))}
@@ -128,91 +144,92 @@ export function ProductPurchasePanel({
               </Select>
             </div>
           ))}
-
       </div>
 
       {/* Actions */}
-      <div className='flex flex-col sm:flex-row gap-3 pt-4'>
-        {/* Quantity Stepper */}
-        <div className='flex items-center border-2 border-input rounded-full h-14 w-fit px-1'>
-            <Button
-              variant='ghost'
-              size='icon'
-              className='h-10 w-10 rounded-full'
-              disabled={quantity <= 1 || isPending}
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            >
-              <Minus className='h-4 w-4' />
-              <span className='sr-only'>Decrease quantity</span>
-            </Button>
-            <span className='w-12 text-center text-lg font-semibold tabular-nums'>
-              {quantity}
-            </span>
-            <Button
-              variant='ghost'
-              size='icon'
-              className='h-10 w-10 rounded-full'
-              disabled={quantity >= product.stock || isPending}
-              onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-            >
-              <Plus className='h-4 w-4' />
-              <span className='sr-only'>Increase quantity</span>
-            </Button>
+      <div className='space-y-4 pt-2'>
+        <div className='flex flex-col sm:flex-row gap-4'>
+           {/* Quantity Stepper */}
+           <div className='flex items-center justify-between border border-border/60 bg-secondary/30 rounded-full h-14 px-1 shrink-0 min-w-[140px]'>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-11 w-11 rounded-full hover:bg-background shadow-sm transition-all'
+                disabled={quantity <= 1 || isPending}
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              >
+                <Minus className='h-4 w-4' />
+              </Button>
+              <span className='text-lg font-bold tabular-nums w-8 text-center'>
+                {quantity}
+              </span>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-11 w-11 rounded-full hover:bg-background shadow-sm transition-all'
+                disabled={quantity >= product.stock || isPending}
+                onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+              >
+                <Plus className='h-4 w-4' />
+              </Button>
+           </div>
+           
+           <Button
+             size='icon'
+             variant='outline'
+             onClick={handleToggleWishlist}
+             disabled={isPending}
+             className='h-14 w-14 rounded-full border border-border/60 hover:bg-secondary/50 hover:border-primary/30 transition-all shrink-0'
+             title={isWished ? 'Remove from Wishlist' : 'Add to Wishlist'}
+           >
+             <Heart
+               className={cn('h-6 w-6 transition-all duration-300', {
+                 'fill-red-500 text-red-500 scale-110': isWished,
+                 'text-muted-foreground': !isWished
+               })}
+             />
+           </Button>
         </div>
 
         <Button
           size='lg'
           onClick={handleAddToCart}
           disabled={isPending || product.stock === 0}
-          className='flex-1 h-14 text-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all rounded-full'
+          className='w-full h-16 text-lg font-bold rounded-2xl btn-premium btn-glow shadow-xl shadow-primary/25 hover:shadow-primary/40'
         >
           {isPending ? (
-            <div className='h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent mr-2' />
+            <div className='h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white mr-3' />
           ) : (
-            <ShoppingCart className='mr-2 h-5 w-5' />
+            <ShoppingCart className='mr-3 h-5 w-5' />
           )}
-          {isPending ? 'Adding...' : 'Add to Cart'}
-        </Button>
-
-        <Button
-          size='icon'
-          variant='outline'
-          onClick={handleToggleWishlist}
-          disabled={isPending}
-          className='h-14 w-14 rounded-full border-2 active:scale-95 transition-all shrink-0'
-          title={isWished ? 'Remove from Wishlist' : 'Add to Wishlist'}
-        >
-          <Heart
-            className={cn('h-6 w-6 transition-all', {
-              'fill-red-500 text-red-500 scale-110': isWished,
-              'text-muted-foreground': !isWished
-            })}
-          />
-          <span className='sr-only'>{isWished ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
+          {isPending ? 'Adding to Cart...' : 'Add to Cart — ' + new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price * quantity)}
         </Button>
       </div>
 
       {/* Stock Status */}
-       <div className='flex items-center gap-2 text-sm'>
-          {product.stock > 10 && (
-             <span className='flex items-center text-green-600 font-medium'>
-               <div className='h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse'/>
-               In Stock ({product.stock} available)
-             </span>
-          )}
-          {product.stock > 0 && product.stock <= 10 && (
-            <span className='flex items-center text-amber-600 font-medium'>
-               <div className='h-2 w-2 rounded-full bg-amber-500 mr-2'/>
-               Low Stock - Only {product.stock} left!
-            </span>
-          )}
-          {product.stock === 0 && (
-            <span className='flex items-center text-red-600 font-medium'>
+      <div className='flex items-center gap-3 text-sm pt-2'>
+          {product.stock > 10 ? (
+             <div className='flex items-center text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 px-3 py-1.5 rounded-full'>
+               <div className='h-2 w-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse'/>
+               In Stock & Ready to Ship
+             </div>
+          ) : product.stock > 0 ? (
+            <div className='flex items-center text-amber-600 dark:text-amber-400 font-medium bg-amber-500/10 px-3 py-1.5 rounded-full'>
+               <div className='h-2 w-2 rounded-full bg-amber-500 mr-2 shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse'/>
+               Low Stock - Only {product.stock} left
+            </div>
+          ) : (
+            <div className='flex items-center text-red-600 dark:text-red-400 font-medium bg-red-500/10 px-3 py-1.5 rounded-full'>
                <div className='h-2 w-2 rounded-full bg-red-500 mr-2'/>
                Out of Stock
+            </div>
+          )}
+          {product.stock > 0 && (
+            <span className='text-xs text-muted-foreground'>
+              Free shipping on all orders
             </span>
           )}
-       </div>
+      </div>
     </div>
 
   );

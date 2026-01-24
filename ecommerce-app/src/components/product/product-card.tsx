@@ -31,11 +31,15 @@ export const ProductCard = memo(
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const { openModal } = useQuickView();
 
-    const currentStock = useMemo(() => product.stock, [product.stock]);
-    const isOutOfStock = useMemo(() => currentStock === 0, [currentStock]);
+    const [optimisticStock, addOptimisticStock] = useOptimistic(
+      product.stock,
+      (state: number, amount: number) => Math.max(0, state + amount)
+    );
+
+    const isOutOfStock = useMemo(() => optimisticStock === 0, [optimisticStock]);
     const isLowStock = useMemo(
-      () => !isOutOfStock && currentStock < 10,
-      [isOutOfStock, currentStock],
+      () => !isOutOfStock && optimisticStock < 10,
+      [isOutOfStock, optimisticStock],
     );
 
     const discount = useMemo(() => {
@@ -93,6 +97,7 @@ export const ProductCard = memo(
         if (isOutOfStock) return;
         setIsAddingToCart(true);
         startTransition(async () => {
+          addOptimisticStock(-1);
           const result = await addItemToCartAction(product.id, 1);
           if (result.success) {
             toast.success('Added to cart!');
@@ -224,7 +229,7 @@ export const ProductCard = memo(
               {!isOutOfStock && (
                 <p className='text-[11px] text-muted-foreground'>
                   <span className='text-primary font-medium'>
-                    {product.stock}
+                    {optimisticStock}
                   </span>{' '}
                   in stock
                 </p>

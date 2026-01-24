@@ -142,18 +142,28 @@ export const NavActions = ({
         aria-label={`View wishlist (${wishlistCount} items)`}
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-accent',
+          'relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors',
         )}
       >
         <Heart className='h-5 w-5' />
-        {wishlistCount > 0 && (
-          <Badge
-            variant='default'
-            className='absolute right-0 top-0 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[10px] pointer-events-none bg-primary text-primary-foreground border-2 border-background'
-          >
-            {wishlistCount > 99 ? '99+' : wishlistCount}
-          </Badge>
-        )}
+        <AnimatePresence>
+          {wishlistCount > 0 && (
+            <motion.div
+              key='wishlist-badge'
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              className='absolute -right-1 -top-1'
+            >
+              <Badge
+                variant='default'
+                className='h-5 w-5 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[10px] font-bold bg-red-500 text-white border-2 border-background shadow-sm'
+              >
+                {wishlistCount > 99 ? '99+' : wishlistCount}
+              </Badge>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Link>
 
       {/* Shopping Cart */}
@@ -162,18 +172,28 @@ export const NavActions = ({
         aria-label={`View shopping cart (${cartItemCount} items)`}
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-accent',
+          'relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors',
         )}
       >
         <ShoppingCart className='h-5 w-5' />
-        {cartItemCount > 0 && (
-          <Badge
-            variant='default'
-            className='absolute right-0 top-0 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[10px] pointer-events-none bg-primary text-primary-foreground border-2 border-background'
-          >
-            {cartItemCount > 99 ? '99+' : cartItemCount}
-          </Badge>
-        )}
+        <AnimatePresence>
+          {cartItemCount > 0 && (
+            <motion.div
+              key='cart-badge'
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              className='absolute -right-1 -top-1'
+            >
+              <Badge
+                variant='default'
+                className='h-5 w-5 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[10px] font-bold bg-primary text-primary-foreground border-2 border-background shadow-sm'
+              >
+                {cartItemCount > 99 ? '99+' : cartItemCount}
+              </Badge>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Link>
 
       {/* User Menu */}

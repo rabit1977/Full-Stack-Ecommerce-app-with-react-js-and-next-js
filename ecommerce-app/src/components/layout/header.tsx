@@ -110,7 +110,7 @@ const Header = ({
           className='hidden lg:flex items-center'
           aria-label='Main navigation'
         >
-          <div className='flex items-center gap-1 bg-muted/50 rounded-full px-1.5 py-1.5'>
+          <div className='flex items-center p-1 bg-muted/50 dark:bg-muted/20 border border-white/10 backdrop-blur-md rounded-full'>
             {navLinks.map((link) => {
               const isActive = isActiveLink(link.href);
               return (
@@ -118,23 +118,24 @@ const Header = ({
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'relative px-4 py-2 text-sm font-medium transition-all rounded-full',
+                    'relative px-5 py-2 text-sm font-medium transition-all rounded-full duration-300',
                     isActive
                       ? 'text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground',
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-white/5',
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {isActive && (
                     <motion.span
                       layoutId='activeNavPill'
-                      className='absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25'
+                      className='absolute inset-0 bg-primary/90 rounded-full shadow-lg shadow-primary/25 ring-1 ring-white/10'
                       transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      style={{ borderRadius: 9999 }}
                     />
                   )}
                   <span className='relative z-10 flex items-center gap-2'>
                     {link.icon && (
-                      <link.icon className='h-4 w-4' />
+                      <link.icon className={cn('h-4 w-4', isActive ? 'text-white' : 'text-current')} />
                     )}
                     {link.label}
                   </span>

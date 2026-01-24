@@ -156,13 +156,13 @@ const ReviewsSection = ({
                        <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
                      </svg>
                   </div>
-                  <div className='flex-1 h-2.5 bg-secondary/50 rounded-full overflow-hidden'>
+                  <div className='flex-1 h-2.5 bg-secondary rounded-full overflow-hidden'>
                     <div 
-                      className='h-full bg-amber-500 rounded-full' 
+                      className='h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full' 
                       style={{ width: `${percent}%` }} 
                     />
                   </div>
-                  <span className='w-8 text-right text-muted-foreground tabular-nums'>
+                  <span className='w-8 text-right text-muted-foreground tabular-nums font-medium'>
                     {Math.round(percent)}%
                   </span>
                 </div>
@@ -172,7 +172,7 @@ const ReviewsSection = ({
 
           {/* Call to Action - Only show if user can review */}
           {canShowAddForm && (
-             <div className='p-6 bg-muted/30 rounded-2xl border border-border/50 text-center'>
+             <div className='p-6 bg-gradient-to-br from-muted/50 to-muted/10 rounded-2xl border border-border/50 text-center'>
                <h3 className='font-semibold'>Share your thoughts</h3>
                <p className='text-sm text-muted-foreground mt-2 mb-4'>
                  If you’ve used this product, share your thoughts with other customers.
@@ -182,7 +182,8 @@ const ReviewsSection = ({
                     const formElement = document.getElementById('review-form-anchor');
                     if (formElement) formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                  }}
-                 className='w-full rounded-full'
+                 className='w-full rounded-xl font-semibold'
+                 variant='outline'
                >
                  Write a Review
                </Button>
@@ -195,7 +196,7 @@ const ReviewsSection = ({
           
           <div id="review-form-anchor" className="scroll-mt-24">
             {canShowAddForm && (
-              <div className="mb-10 p-6 sm:p-8 bg-card rounded-2xl border shadow-sm">
+              <div className="mb-10 p-6 sm:p-8 card-premium">
                  <h3 className='text-xl font-bold mb-6'>Write a Review</h3>
                  <AddReviewForm
                   productId={productId}
@@ -206,7 +207,7 @@ const ReviewsSection = ({
             )}
 
             {editingReview && (
-              <div className="mb-10 p-6 sm:p-8 bg-card rounded-2xl border shadow-sm ring-2 ring-primary/10">
+              <div className="mb-10 p-6 sm:p-8 card-premium ring-2 ring-primary/20">
                 <div className="flex items-center justify-between mb-6">
                    <h3 className='text-xl font-bold'>Edit your Review</h3>
                    <Button variant='ghost' size='sm' onClick={handleCancelEdit}>Cancel</Button>
@@ -240,10 +241,10 @@ const ReviewsSection = ({
                   <div 
                     key={review.id} 
                     className={cn(
-                      'group relative p-6 sm:p-8 rounded-3xl border bg-card transition-all duration-300 hover:shadow-md',
+                      'group relative p-6 sm:p-8 card-premium transition-all duration-300',
                       isUserReview 
                         ? 'border-primary/20 bg-primary/5' 
-                        : 'border-border/60 hover:border-border'
+                        : ''
                     )}
                   >
                     <div className='flex flex-col sm:flex-row gap-6'>
