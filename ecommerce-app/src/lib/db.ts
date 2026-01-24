@@ -12,7 +12,7 @@ const pool =
   globalForPrisma.pool ??
   new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 2, // Increased slightly to handle concurrent Server Component fetches
+    max: 10, // Increased to handle concurrent Server Component fetches
     connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
   })

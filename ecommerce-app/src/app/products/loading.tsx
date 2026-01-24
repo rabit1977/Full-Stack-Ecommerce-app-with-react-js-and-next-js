@@ -4,16 +4,12 @@ import { motion } from 'framer-motion';
 import { Package } from 'lucide-react';
 
 /**
- * Premium Loading Component for Products Page
- * 
- * Features:
- * - Enhanced skeleton loaders with shimmer effect
- * - Consistent design with the new theme
- * - Responsive grid layout
+ * Products Page Loading Skeleton
+ * Consistent with other loading pages
  */
 export default function ProductsLoading() {
   return (
-    <div className='min-h-screen gradient-hero'>
+    <div className='page-wrapper'>
       <div className='container-wide py-8 sm:py-12 lg:py-16'>
         {/* Header Skeleton */}
         <motion.div
@@ -42,7 +38,7 @@ export default function ProductsLoading() {
             transition={{ duration: 0.3, delay: 0.1 }}
             className='hidden lg:block lg:col-span-1 sticky top-24 self-start'
           >
-            <div className='rounded-2xl border border-border/50 bg-card p-6 shadow-sm space-y-6'>
+            <div className='rounded-2xl border border-border bg-card p-6 space-y-6'>
               {/* Categories */}
               <div className='space-y-4'>
                 <div className='h-5 w-24 skeleton-enhanced rounded' />
@@ -61,7 +57,7 @@ export default function ProductsLoading() {
               </div>
 
               {/* Brands */}
-              <div className='space-y-4 pt-6 border-t border-border/50'>
+              <div className='space-y-4 pt-6 border-t border-border'>
                 <div className='h-5 w-20 skeleton-enhanced rounded' />
                 {[1, 2, 3, 4].map((i) => (
                   <motion.div
@@ -78,7 +74,7 @@ export default function ProductsLoading() {
               </div>
 
               {/* Price Range */}
-              <div className='space-y-4 pt-6 border-t border-border/50'>
+              <div className='space-y-4 pt-6 border-t border-border'>
                 <div className='h-5 w-28 skeleton-enhanced rounded' />
                 <div className='h-2 w-full skeleton-enhanced rounded-full' />
                 <div className='flex justify-between'>
@@ -103,10 +99,10 @@ export default function ProductsLoading() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 + i * 0.04 }}
-                  className='group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm'
+                  className='flex flex-col rounded-2xl border border-border bg-card overflow-hidden'
                 >
                   {/* Image Skeleton */}
-                  <div className='relative aspect-square h-64 w-full overflow-hidden bg-muted'>
+                  <div className='relative aspect-square w-full overflow-hidden'>
                     <div className='skeleton-enhanced h-full w-full' />
                     <div className='absolute inset-0 flex items-center justify-center'>
                       <Package className='h-10 w-10 text-muted-foreground/20' />
@@ -115,19 +111,16 @@ export default function ProductsLoading() {
 
                   {/* Content Skeleton */}
                   <div className='flex flex-1 flex-col p-5 space-y-4'>
-                    {/* Brand & Rating */}
                     <div className='flex items-center justify-between'>
                       <div className='h-3 w-16 skeleton-enhanced rounded' />
                       <div className='h-3 w-12 skeleton-enhanced rounded' />
                     </div>
                     
-                    {/* Title */}
                     <div className='space-y-2'>
                       <div className='h-5 w-full skeleton-enhanced rounded' />
                       <div className='h-5 w-3/4 skeleton-enhanced rounded' />
                     </div>
                     
-                    {/* Price */}
                     <div className='flex items-end justify-between pt-1'>
                       <div className='space-y-1'>
                         <div className='h-6 w-24 skeleton-enhanced rounded' />
@@ -137,7 +130,6 @@ export default function ProductsLoading() {
                     
                     <div className='flex-1' />
                     
-                    {/* Button */}
                     <div className='h-11 w-full skeleton-enhanced rounded-xl' />
                   </div>
                 </motion.div>

@@ -37,6 +37,10 @@ model User {
   role            UserRole        @default(USER)
   bio             String?
   
+  // Password Reset
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  
   // Coupon
   couponId        String?
   coupon          Coupon?     @relation(fields: [couponId], references: [id])
@@ -50,6 +54,7 @@ model User {
   helpfulReviews  String[]        @default([])
   cartItems       CartItem[]
   savedForLater   SavedForLater[]
+  activityLogs    ActivityLog[]   @relation("UserActivityLogs")
   
   // Timestamps
   createdAt       DateTime        @default(now())
@@ -279,4 +284,33 @@ model Coupon {
 
   @@index([code])
   @@index([isActive])
+}
+
+// Activity Log for Admin Dashboard
+enum ActivityType {
+  PRODUCT_CREATED
+  PRODUCT_UPDATED
+  PRODUCT_DELETED
+  ORDER_UPDATED
+  ORDER_CANCELLED
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  COUPON_CREATED
+  COUPON_UPDATED
+  SETTINGS_CHANGED
+}
+
+model ActivityLog {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation("UserActivityLogs", fields: [userId], references: [id], onDelete: Cascade)
+  action      ActivityType
+  description String
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }

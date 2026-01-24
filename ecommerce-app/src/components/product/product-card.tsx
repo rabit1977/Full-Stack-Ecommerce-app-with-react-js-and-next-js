@@ -108,14 +108,14 @@ export const ProductCard = memo(
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-        className='group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 dark:bg-slate-900/50 dark:border-slate-800/50'
+        className='group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1'
       >
         {/* --- Image Section --- */}
-        <div className='relative aspect-square h-64 w-full overflow-hidden bg-gradient-to-br from-muted/50 to-muted'>
+        <div className='relative aspect-square w-full overflow-hidden bg-muted'>
           <ProductImageCarousel product={product} />
 
           {/* Gradient Overlay on Hover */}
-          <div className='absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
+          <div className='absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 
           {/* Badges (Top Left) */}
           <div className='absolute left-3 top-3 z-10 flex flex-col gap-2'>
@@ -123,42 +123,44 @@ export const ProductCard = memo(
               <motion.span 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg shadow-red-500/25'
+                className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg'
               >
                 <Sparkles className='h-3 w-3' />
                 -{Math.round(discount.percentage)}%
               </motion.span>
             )}
             {isLowStock && (
-              <span className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg shadow-amber-500/25'>
+              <span className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg'>
                 <Zap className='h-3 w-3' />
                 Low Stock
               </span>
             )}
             {isOutOfStock && (
-              <span className='inline-flex items-center rounded-lg bg-slate-900/90 px-2.5 py-1 text-xs font-bold text-white'>
+              <span className='inline-flex items-center rounded-lg bg-gray-900 px-2.5 py-1 text-xs font-bold text-white'>
                 Out of Stock
               </span>
             )}
           </div>
 
-          {/* Floating Actions (Top Right) - Always visible on mobile, hover on desktop */}
+          {/* Floating Actions (Top Right) */}
           <div className='absolute right-3 top-3 z-10 flex flex-col gap-2 md:translate-x-14 md:opacity-0 transition-all duration-300 md:group-hover:translate-x-0 md:group-hover:opacity-100'>
             <Button
               size='icon'
               variant='secondary'
-              className='h-9 w-9 rounded-full bg-white/95 shadow-lg hover:bg-white hover:scale-110 dark:bg-slate-800/95 dark:hover:bg-slate-800 transition-all duration-200'
+              className='h-9 w-9 rounded-full bg-white shadow-md hover:bg-primary/10 hover:text-primary dark:bg-card dark:hover:bg-primary/20 transition-all duration-200'
               onClick={handleQuickView}
               title='Quick View'
             >
-              <Eye className='h-4 w-4 text-foreground' />
+              <Eye className='h-4 w-4' />
             </Button>
             <Button
               size='icon'
               variant='secondary'
               className={cn(
-                'h-9 w-9 rounded-full bg-white/95 shadow-lg transition-all duration-200 hover:bg-white hover:scale-110 dark:bg-slate-800/95 dark:hover:bg-slate-800',
-                isWished && 'bg-red-50 hover:bg-red-100 dark:bg-red-950/50',
+                'h-9 w-9 rounded-full bg-white shadow-md transition-all duration-200 dark:bg-card',
+                isWished 
+                  ? 'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900'
+                  : 'hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20',
               )}
               onClick={handleToggleWishlist}
               disabled={isPending}
@@ -167,7 +169,7 @@ export const ProductCard = memo(
               <Heart
                 className={cn(
                   'h-4 w-4 transition-all',
-                  isWished ? 'fill-red-500 text-red-500' : 'text-foreground'
+                  isWished && 'fill-current'
                 )}
               />
             </Button>
@@ -178,7 +180,7 @@ export const ProductCard = memo(
         <div className='flex flex-1 flex-col p-4 sm:p-5'>
           {/* Brand & Rating */}
           <div className='flex items-center justify-between gap-2'>
-            <p className='text-[11px] font-semibold uppercase tracking-wider text-primary/80'>
+            <p className='text-[11px] font-semibold uppercase tracking-wider text-primary'>
               {product.brand}
             </p>
             {avgRating > 0 && (
@@ -216,7 +218,7 @@ export const ProductCard = memo(
               </div>
               {!isOutOfStock && (
                 <p className='text-[11px] text-muted-foreground'>
-                  <span className='text-emerald-600 dark:text-emerald-400 font-medium'>
+                  <span className='text-primary font-medium'>
                     {product.stock}
                   </span>{' '}
                   in stock
@@ -229,10 +231,10 @@ export const ProductCard = memo(
           <div className='mt-4'>
             <Button
               className={cn(
-                'h-11 w-full rounded-xl font-semibold shadow-none transition-all duration-300',
+                'h-11 w-full rounded-xl font-semibold transition-all duration-300',
                 isOutOfStock
                   ? 'cursor-not-allowed bg-muted text-muted-foreground hover:bg-muted'
-                  : 'bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98]',
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]',
               )}
               onClick={handleAddToCart}
               disabled={isOutOfStock || isPending}

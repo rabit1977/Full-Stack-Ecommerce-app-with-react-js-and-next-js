@@ -43,12 +43,12 @@ export default async function RootLayout({
       <body className={inter.className}>
         <Providers>
           <CommandPalette />
-          <div className='min-h-screen bg-white font-sans text-slate-800 dark:bg-slate-900 dark:text-slate-200'>
+          <div className='min-h-screen bg-background text-foreground'>
             <MobileSidebarWrapper
               initialWishlistCount={initialWishlistCount}
               initialCartItemCount={initialCartItemCount}
             />
-            <main className='min-h-auto'>{children}</main>
+            <main className='min-h-auto pb-20 lg:pb-0'>{children}</main>
             <Footer />
             <QuickViewModal/>
             <Toast />

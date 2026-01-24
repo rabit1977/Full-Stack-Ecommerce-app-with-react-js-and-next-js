@@ -47,19 +47,16 @@ export const HeroHeader = () => {
           className='hero-orb hero-orb-primary w-[500px] h-[500px] top-[-10%] left-[-10%]'
         />
         
-        {/* Accent Gradient Orb */}
+        {/* Secondary Gradient Orb */}
         <motion.div
           variants={floatVariants}
           animate='animate'
           style={{ animationDelay: '2s' }}
-          className='hero-orb hero-orb-accent w-[600px] h-[600px] bottom-[-20%] right-[-15%]'
+          className='hero-orb hero-orb-secondary w-[600px] h-[600px] bottom-[-20%] right-[-15%]'
         />
         
-        {/* Center Glow */}
-        <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/5 via-transparent to-transparent blur-3xl' />
-        
         {/* Grid Pattern */}
-        <div className='absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:60px_60px]' />
+        <div className='absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.02)_1px,transparent_1px)] bg-[size:60px_60px]' />
       </div>
 
       <motion.div
@@ -115,21 +112,21 @@ export const HeroHeader = () => {
           <Button
             asChild
             size='lg'
-            className='group relative overflow-hidden text-base px-8 h-14 rounded-2xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/95 hover:to-primary shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:shadow-2xl transition-all duration-300 font-semibold'
+            className='group relative overflow-hidden text-base px-8 h-14 rounded-2xl bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:shadow-xl transition-all duration-300 font-semibold'
           >
             <Link href='/products'>
               <Zap className='h-5 w-5 mr-2' />
               Shop Now
               <ArrowRight className='h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform' />
               {/* Shine effect */}
-              <span className='absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700' />
+              <span className='absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700' />
             </Link>
           </Button>
           <Button
             asChild
             size='lg'
             variant='outline'
-            className='text-base px-8 h-14 rounded-2xl border-2 border-border hover:bg-accent/50 hover:border-primary/30 transition-all duration-300 font-semibold group backdrop-blur-sm'
+            className='text-base px-8 h-14 rounded-2xl border-2 border-border hover:bg-accent hover:border-primary/20 transition-all duration-300 font-semibold group backdrop-blur-sm'
           >
             <Link href='/about'>
               <Play className='h-4 w-4 mr-2 group-hover:scale-110 transition-transform' />
@@ -155,7 +152,7 @@ export const HeroHeader = () => {
               transition={{ delay: 0.8 + index * 0.1 }}
               className='flex items-center gap-3 group'
             >
-              <div className='w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center group-hover:bg-primary/20 dark:group-hover:bg-primary/30 transition-colors'>
+              <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors'>
                 <item.icon className='h-5 w-5 text-primary' />
               </div>
               <div className='text-left'>
@@ -180,7 +177,7 @@ export const HeroHeader = () => {
           repeat: Infinity,
         }}
       >
-        <div className='w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center'>
+        <div className='w-16 h-16 rounded-2xl bg-primary/10 backdrop-blur-sm border border-primary/10 shadow-lg flex items-center justify-center'>
           <Sparkles className='h-7 w-7 text-primary' />
         </div>
       </motion.div>
@@ -198,8 +195,8 @@ export const HeroHeader = () => {
           delay: 1,
         }}
       >
-        <div className='w-14 h-14 rounded-xl bg-gradient-to-br from-accent/20 to-primary/20 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center'>
-          <Zap className='h-6 w-6 text-accent' />
+        <div className='w-14 h-14 rounded-xl bg-purple-500/10 backdrop-blur-sm border border-purple-500/10 shadow-lg flex items-center justify-center'>
+          <Zap className='h-6 w-6 text-purple-500' />
         </div>
       </motion.div>
     </div>

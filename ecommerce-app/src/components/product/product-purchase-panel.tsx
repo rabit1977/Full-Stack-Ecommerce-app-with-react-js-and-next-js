@@ -16,7 +16,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ProductWithImages } from '@/lib/types/product';
 import { cn } from '@/lib/utils';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Label } from '../ui/label';
@@ -129,67 +129,90 @@ export function ProductPurchasePanel({
             </div>
           ))}
 
-        {/* Quantity */}
-        <div className='flex flex-col gap-3'>
-          <Label className='text-sm font-semibold uppercase tracking-wider text-muted-foreground'>
-            Quantity
-          </Label>
-          <div className='flex items-center gap-4'>
-            <Select
-              value={String(quantity)}
-              onValueChange={(val) => setQuantity(Number(val))}
-            >
-              <SelectTrigger className='h-12 w-24'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((i) => (
-                  <SelectItem key={i} value={String(i)}>
-                    {i}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <p className='text-sm text-muted-foreground italic'>
-              {product.stock > 0 ? `${product.stock} items available` : 'Currently out of stock'}
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Actions */}
       <div className='flex flex-col sm:flex-row gap-3 pt-4'>
+        {/* Quantity Stepper */}
+        <div className='flex items-center border-2 border-input rounded-full h-14 w-fit px-1'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-10 w-10 rounded-full'
+              disabled={quantity <= 1 || isPending}
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            >
+              <Minus className='h-4 w-4' />
+              <span className='sr-only'>Decrease quantity</span>
+            </Button>
+            <span className='w-12 text-center text-lg font-semibold tabular-nums'>
+              {quantity}
+            </span>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-10 w-10 rounded-full'
+              disabled={quantity >= product.stock || isPending}
+              onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+            >
+              <Plus className='h-4 w-4' />
+              <span className='sr-only'>Increase quantity</span>
+            </Button>
+        </div>
+
         <Button
           size='lg'
           onClick={handleAddToCart}
           disabled={isPending || product.stock === 0}
-          className='flex-1 h-14 text-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all'
+          className='flex-1 h-14 text-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all rounded-full'
         >
           {isPending ? (
             <div className='h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent mr-2' />
           ) : (
             <ShoppingCart className='mr-2 h-5 w-5' />
           )}
-          {isPending ? 'Adding to Cart...' : 'Add to Cart'}
+          {isPending ? 'Adding...' : 'Add to Cart'}
         </Button>
 
         <Button
-          size='lg'
+          size='icon'
           variant='outline'
           onClick={handleToggleWishlist}
           disabled={isPending}
-          className='h-14 px-8 text-lg font-semibold border-2 active:scale-95 transition-all'
+          className='h-14 w-14 rounded-full border-2 active:scale-95 transition-all shrink-0'
+          title={isWished ? 'Remove from Wishlist' : 'Add to Wishlist'}
         >
           <Heart
-            className={cn('mr-2 h-5 w-5 transition-all', {
-              'fill-red-500 text-red-500': isWished,
+            className={cn('h-6 w-6 transition-all', {
+              'fill-red-500 text-red-500 scale-110': isWished,
+              'text-muted-foreground': !isWished
             })}
           />
           <span className='sr-only'>{isWished ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
-          {isWished ? 'In Wishlist' : 'Wishlist'}
         </Button>
       </div>
+
+      {/* Stock Status */}
+       <div className='flex items-center gap-2 text-sm'>
+          {product.stock > 10 && (
+             <span className='flex items-center text-green-600 font-medium'>
+               <div className='h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse'/>
+               In Stock ({product.stock} available)
+             </span>
+          )}
+          {product.stock > 0 && product.stock <= 10 && (
+            <span className='flex items-center text-amber-600 font-medium'>
+               <div className='h-2 w-2 rounded-full bg-amber-500 mr-2'/>
+               Low Stock - Only {product.stock} left!
+            </span>
+          )}
+          {product.stock === 0 && (
+            <span className='flex items-center text-red-600 font-medium'>
+               <div className='h-2 w-2 rounded-full bg-red-500 mr-2'/>
+               Out of Stock
+            </span>
+          )}
+       </div>
     </div>
 
   );

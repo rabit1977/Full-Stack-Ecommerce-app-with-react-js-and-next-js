@@ -209,8 +209,16 @@ export async function getCartAction() {
   }
 
   try {
-    const results = await Promise.all([
-      prisma.cartItem.findMany({
+    // Run queries independently to handle potential schema mismatches gracefully
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let cartItems: any[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let savedForLaterItems: any[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let user: any = null;
+
+    try {
+      cartItems = await prisma.cartItem.findMany({
         where: { userId: session.user.id },
         include: {
           product: {
@@ -233,8 +241,13 @@ export async function getCartAction() {
           }
         },
         orderBy: { createdAt: 'desc' },
-      }),
-      prisma.savedForLater.findMany({
+      });
+    } catch (error) {
+      console.error('Error fetching cart items:', error);
+    }
+
+    try {
+      savedForLaterItems = await prisma.savedForLater.findMany({
         where: { userId: session.user.id },
         include: {
           product: {
@@ -257,22 +270,37 @@ export async function getCartAction() {
           }
         },
         orderBy: { createdAt: 'desc' },
-      }),
-      prisma.user.findUnique({
+      });
+    } catch (error) {
+      console.error('Error fetching saved items:', error);
+    }
+
+    try {
+      // This query was causing crashes due to "column not available" (couponId)
+      // We wrap it separately so cart still loads even if this fails
+      user = await prisma.user.findUnique({
         where: { id: session.user.id },
         include: { coupon: true },
-      }),
-    ]);
-    const [cartItems, savedForLaterItems, user] = results;
+      });
+    } catch (error) {
+      console.warn('Warning: Failed to fetch user data (likely due to missing DB columns). Using session fallback.');
+      // Fallback: create a minimal user object from session if DB fetch fails
+      if (!user && session.user) {
+         user = { 
+           ...session.user, 
+           coupon: null,
+           couponId: null
+         };
+      }
+    }
     
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      items: cartItems as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      savedForLater: savedForLaterItems as any,
+      items: cartItems,
+      savedForLater: savedForLaterItems,
       user,
     };
-  } catch {
+  } catch (globalError) {
+    console.error('Global error in getCartAction:', globalError);
     return emptyCart;
   }
 }

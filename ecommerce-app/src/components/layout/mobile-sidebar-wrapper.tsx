@@ -10,10 +10,8 @@ interface MobileSidebarWrapperProps {
 }
 
 /**
- * Mobile Sidebar Wrapper Component - Optimized
- *
- * Uses custom hook for state management
- * React 19 patterns for optimal performance
+ * Mobile Sidebar Wrapper Component
+ * Includes header, mobile sidebar, and mobile bottom navigation
  */
 export function MobileSidebarWrapper({
   initialWishlistCount,
@@ -30,6 +28,7 @@ export function MobileSidebarWrapper({
         initialCartItemCount={initialCartItemCount}
       />
       <MobileSidebar isOpen={sidebar.isOpen} onClose={sidebar.close} />
+
     </>
   );
 }

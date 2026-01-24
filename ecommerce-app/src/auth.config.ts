@@ -6,14 +6,58 @@ export const authConfig = {
     signIn: '/auth/sign-in',
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
-      // 1. Initial sign-in
+    async jwt({ token, user, trigger, session, account }) {
+      // 1. Initial sign-in - for credentials, user.id is the DB id
+      //    For OAuth, user.id is the provider's id, so we need to look up by email
       if (user) {
-        token.id = user.id;
-        token.role = user.role as UserRole;
-        token.bio = user.bio;
-        token.image = user.image;
-        token.createdAt = user.createdAt;
+        // For OAuth providers, look up the database user by email
+        if (account?.provider === 'google' || account?.provider === 'github') {
+          try {
+            const { prisma } = await import('@/lib/db');
+            
+            // Find or create user in database
+            let dbUser = await prisma.user.findUnique({ 
+              where: { email: user.email! },
+              select: { id: true, role: true, name: true, image: true, bio: true, createdAt: true },
+            });
+            
+            if (!dbUser) {
+              // Create user if they don't exist (first OAuth sign-in)
+              dbUser = await prisma.user.create({
+                data: {
+                  email: user.email!,
+                  name: user.name,
+                  image: user.image,
+                  role: 'USER',
+                },
+                select: { id: true, role: true, name: true, image: true, bio: true, createdAt: true },
+              });
+            } else {
+              // Update image on subsequent OAuth sign-ins
+              await prisma.user.update({
+                where: { email: user.email! },
+                data: { image: user.image || dbUser.image },
+              });
+            }
+            
+            // Set token with database user info
+            token.id = dbUser.id;
+            token.role = dbUser.role as UserRole;
+            token.name = dbUser.name;
+            token.image = dbUser.image;
+            token.bio = dbUser.bio;
+            token.createdAt = dbUser.createdAt;
+          } catch (error) {
+            console.error('[JWT Callback] OAuth user lookup/creation error:', error);
+          }
+        } else {
+          // Credentials provider - user.id is already the database ID
+          token.id = user.id;
+          token.role = user.role as UserRole;
+          token.bio = user.bio;
+          token.image = user.image;
+          token.createdAt = user.createdAt;
+        }
       }
 
       // 2. Handle session updates (e.g. from updateProfileAction)
@@ -21,13 +65,13 @@ export const authConfig = {
         return { ...token, ...session.user };
       }
 
-      // 3. Fresh role fetch from DB on every call
-      if (token.id) {
+      // 3. Fresh data fetch from DB on subsequent requests (not initial sign-in)
+      // Only fetch if token.id exists and is a valid CUID-like string
+      if (!user && token.id && typeof token.id === 'string' && token.id.length > 10) {
         try {
-          // We use a dynamic import for prisma to avoid environment issues in middleware
           const { prisma } = await import('@/lib/db');
           const dbUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
+            where: { id: token.id },
             select: { role: true, name: true, image: true, bio: true },
           });
 

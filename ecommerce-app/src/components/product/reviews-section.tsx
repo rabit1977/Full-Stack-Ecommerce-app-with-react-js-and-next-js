@@ -2,19 +2,19 @@
 
 import { deleteReviewAction, toggleReviewHelpfulAction } from '@/actions/review-actions';
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
 } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Stars } from '@/components/ui/stars';
 import { ProductWithRelations, Review } from '@/lib/types';
@@ -121,153 +121,231 @@ const ReviewsSection = ({
   const canShowAddForm = user && !userReview && !editingReview;
 
   return (
-    <div className='mt-12 py-12 border-t dark:border-slate-800' id="reviews">
-      <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10'>
-        <div>
-          <h2 className='text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white'>
-            Customer Reviews
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
-            {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'} for this product
-          </p>
-        </div>
-      </div>
-
-      <div id="review-form-anchor" className="scroll-mt-24">
-        {canShowAddForm && (
-          <AddReviewForm
-            productId={productId}
-            reviewToEdit={null}
-            onCancelEdit={handleCancelEdit}
-          />
-        )}
-
-        {editingReview && (
-          <AddReviewForm
-            productId={productId}
-            reviewToEdit={editingReview}
-            onCancelEdit={handleCancelEdit}
-          />
-        )}
-      </div>
-
-      <div className='mt-10 space-y-8'>
-        {reviews.length === 0 ? (
-          <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800">
-            <p className='text-lg text-slate-500 dark:text-slate-400'>
-              No reviews yet. Be the first to share your thoughts!
-            </p>
+      <div className='mt-16 sm:mt-24 py-16 border-t border-border/40' id="reviews">
+      <div className='grid lg:grid-cols-12 gap-12 lg:gap-16 items-start'>
+        
+        {/* Left Column: Rating Snapshot */}
+        <div className='lg:col-span-4 space-y-8 lg:sticky lg:top-24'>
+          <div>
+            <h2 className='text-3xl font-bold tracking-tight text-foreground'>
+              Customer Reviews
+            </h2>
+             <div className='mt-6 flex items-baseline gap-4'>
+                <span className='text-6xl font-extrabold tracking-tighter text-foreground'>
+                   {reviews.length > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : '0.0'}
+                </span>
+                <div className='flex flex-col'>
+                  <Stars value={reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 0} className='h-5 w-5' />
+                  <span className='text-sm text-muted-foreground mt-1'>
+                    Based on {reviews.length} reviews
+                  </span>
+                </div>
+             </div>
           </div>
-        ) : (
-          reviews.map((review) => {
-            const isHelpful = helpfulReviews.includes(review.id);
-            const isUserReview = user && user.id === review.userId;
-            
-            return (
-              <div 
-                key={review.id} 
-                className={cn(
-                  'relative group p-6 rounded-2xl border transition-all duration-300',
-                  isUserReview 
-                    ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30' 
-                    : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-sm'
-                )}
-              >
-                {isUserReview && (
-                  <div className="absolute top-6 right-6 flex items-center justify-center">
-                    <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 border-none px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold">
-                      Your Review
-                    </Badge>
+
+          {/* Rating Distribution */}
+          <div className='space-y-3'>
+            {[5, 4, 3, 2, 1].map((star) => {
+              const count = reviews.filter(r => r.rating === star).length;
+              const percent = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+              return (
+                <div key={star} className='flex items-center gap-3 text-sm'>
+                  <span className='w-3 font-medium text-muted-foreground'>{star}</span>
+                  <div className='h-4 w-4 text-amber-500 fill-amber-500'>
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                       <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                     </svg>
                   </div>
-                )}
-
-                <div className='flex flex-col sm:flex-row gap-6'>
-                  <div className='shrink-0'>
-                    <Avatar className='w-14 h-14 rounded-2xl shadow-sm'>
-                      <AvatarImage 
-                        src={
-                          (isUserReview && user?.image) 
-                            ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`)
-                            : (review.user.image 
-                                ? (review.user.image.startsWith('http') || review.user.image.startsWith('/') ? review.user.image : `/${review.user.image}`)
-                                : undefined
-                              )
-                        } 
-                        alt={review.user.name || 'User'} 
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-xl font-bold text-slate-600 dark:text-slate-300 rounded-2xl">
-                        {(review.user.name || '?').charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                  <div className='flex-1 h-2.5 bg-secondary/50 rounded-full overflow-hidden'>
+                    <div 
+                      className='h-full bg-amber-500 rounded-full' 
+                      style={{ width: `${percent}%` }} 
+                    />
                   </div>
+                  <span className='w-8 text-right text-muted-foreground tabular-nums'>
+                    {Math.round(percent)}%
+                  </span>
+                </div>
+              );
+            })}
+          </div>
 
-                  <div className='flex-1 min-w-0'>
-                    <div className='flex items-center gap-3 mb-2'>
-                      <h4 className='font-bold text-slate-900 dark:text-white truncate'>
-                        {review.user.name || 'Verified Buyer'}
-                      </h4>
-                      <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-800 hidden sm:block" />
-                      <Stars value={review.rating} />
-                    </div>
+          {/* Call to Action - Only show if user can review */}
+          {canShowAddForm && (
+             <div className='p-6 bg-muted/30 rounded-2xl border border-border/50 text-center'>
+               <h3 className='font-semibold'>Share your thoughts</h3>
+               <p className='text-sm text-muted-foreground mt-2 mb-4'>
+                 If you’ve used this product, share your thoughts with other customers.
+               </p>
+               <Button 
+                 onClick={() => {
+                    const formElement = document.getElementById('review-form-anchor');
+                    if (formElement) formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                 }}
+                 className='w-full rounded-full'
+               >
+                 Write a Review
+               </Button>
+             </div>
+          )}
+        </div>
 
-                    <h5 className='font-semibold text-lg text-slate-900 dark:text-slate-100 mb-2 leading-tight'>
-                      {review.title}
-                    </h5>
-                    
-                    <p className='text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl'>
-                      {review.comment}
-                    </p>
+        {/* Right Column: Review List & Form */}
+        <div className='lg:col-span-8 space-y-10'>
+          
+          <div id="review-form-anchor" className="scroll-mt-24">
+            {canShowAddForm && (
+              <div className="mb-10 p-6 sm:p-8 bg-card rounded-2xl border shadow-sm">
+                 <h3 className='text-xl font-bold mb-6'>Write a Review</h3>
+                 <AddReviewForm
+                  productId={productId}
+                  reviewToEdit={null}
+                  onCancelEdit={handleCancelEdit}
+                />
+              </div>
+            )}
 
-                    <div className='mt-6 flex flex-wrap items-center justify-between gap-4'>
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={() => handleToggleHelpful(review.id)}
-                          disabled={isUserReview as boolean | undefined}
-                          className={cn(
-                            'flex items-center gap-2 text-sm font-medium transition-all px-3 py-1.5 rounded-lg',
-                            isHelpful 
-                              ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
-                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800',
-                            isUserReview && 'cursor-not-allowed opacity-50 grayscale'
-                          )}
-                        >
-                          <ThumbsUp
-                            className={cn('h-4 w-4', isHelpful && 'fill-current')}
+            {editingReview && (
+              <div className="mb-10 p-6 sm:p-8 bg-card rounded-2xl border shadow-sm ring-2 ring-primary/10">
+                <div className="flex items-center justify-between mb-6">
+                   <h3 className='text-xl font-bold'>Edit your Review</h3>
+                   <Button variant='ghost' size='sm' onClick={handleCancelEdit}>Cancel</Button>
+                </div>
+                <AddReviewForm
+                  productId={productId}
+                  reviewToEdit={editingReview}
+                  onCancelEdit={handleCancelEdit}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className='space-y-6'>
+            {reviews.length === 0 ? (
+              <div className="bg-muted/30 rounded-3xl p-16 text-center border-2 border-dashed border-muted">
+                <div className='mx-auto h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4'>
+                   <Pencil className='h-6 w-6 text-muted-foreground' />
+                </div>
+                <h3 className='text-xl font-semibold mb-2'>No reviews yet</h3>
+                <p className='text-muted-foreground max-w-sm mx-auto'>
+                  Be the first to share your experience with this product. Your feedback helps others make better choices!
+                </p>
+              </div>
+            ) : (
+              reviews.map((review) => {
+                const isHelpful = helpfulReviews.includes(review.id);
+                const isUserReview = user && user.id === review.userId;
+                
+                return (
+                  <div 
+                    key={review.id} 
+                    className={cn(
+                      'group relative p-6 sm:p-8 rounded-3xl border bg-card transition-all duration-300 hover:shadow-md',
+                      isUserReview 
+                        ? 'border-primary/20 bg-primary/5' 
+                        : 'border-border/60 hover:border-border'
+                    )}
+                  >
+                    <div className='flex flex-col sm:flex-row gap-6'>
+                      <div className='shrink-0'>
+                        <Avatar className='w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-background shadow-sm'>
+                          <AvatarImage 
+                            src={
+                              (isUserReview && user?.image) 
+                                ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`)
+                                : (review.user.image 
+                                    ? (review.user.image.startsWith('http') || review.user.image.startsWith('/') ? review.user.image : `/${review.user.image}`)
+                                    : undefined
+                                  )
+                            } 
+                            alt={review.user.name || 'User'} 
+                            className="object-cover"
                           />
-                          <span>Helpful ({review.helpful || 0})</span>
-                        </button>
+                          <AvatarFallback className="bg-gradient-to-br from-muted to-muted/80 text-lg font-bold text-muted-foreground rounded-2xl">
+                            {(review.user.name || '?').charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
 
-                      {isUserReview && !editingReview && (
-                        <div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() => handleEditClick(review)}
-                            className='h-9 gap-2 text-slate-600 dark:text-slate-400 hover:text-primary hover:bg-primary/5'
-                          >
-                            <Pencil className='h-4 w-4' />
-                            Edit
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() => handleDeleteReviewClick(review.id)}
-                            className='h-9 gap-2 text-slate-600 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30'
-                          >
-                            <Trash2 className='h-4 w-4' />
-                            Delete
-                          </Button>
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex flex-wrap items-center justify-between gap-4 mb-3'>
+                          <div>
+                            <h4 className='font-bold text-foreground text-lg truncate'>
+                              {review.user.name || 'Verified Buyer'}
+                            </h4>
+                            <div className='flex items-center gap-2 mt-1 text-xs text-muted-foreground'>
+                               {/* Date could go here if available in Review object */}
+                               <span>Verified Purchase</span>
+                            </div>
+                          </div>
+                          {isUserReview && (
+                             <Badge variant='secondary' className="bg-primary/10 text-primary hover:bg-primary/20 border-none transition-colors">
+                               You
+                             </Badge>
+                          )}
                         </div>
-                      )}
+
+                        <div className='mb-4'>
+                          <Stars value={review.rating} className="w-[18px] h-[18px]" />
+                        </div>
+
+                        <h5 className='font-bold text-xl text-foreground mb-3 leading-tight'>
+                          {review.title}
+                        </h5>
+                        
+                        <p className='text-muted-foreground leading-relaxed max-w-3xl'>
+                          {review.comment}
+                        </p>
+
+                        <div className='mt-8 pt-6 border-t border-border/50 flex flex-wrap items-center justify-between gap-4'>
+                          <button
+                            onClick={() => handleToggleHelpful(review.id)}
+                            disabled={isUserReview as boolean | undefined}
+                            className={cn(
+                              'flex items-center gap-2.5 text-sm font-medium transition-all px-4 py-2 rounded-full',
+                              isHelpful 
+                                ? 'text-primary bg-primary/10 font-semibold' 
+                                : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+                              isUserReview && 'cursor-not-allowed opacity-50'
+                            )}
+                          >
+                            <ThumbsUp
+                              className={cn('h-4 w-4', isHelpful && 'fill-current')}
+                            />
+                            <span>Helpful {review.helpful > 0 && `(${review.helpful})`}</span>
+                          </button>
+
+                          {isUserReview && !editingReview && (
+                            <div className='flex items-center gap-2'>
+                              <Button
+                                variant='ghost'
+                                size='sm'
+                                onClick={() => handleEditClick(review)}
+                                className='h-8 px-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary'
+                              >
+                                <Pencil className='h-3.5 w-3.5 mr-2' />
+                                Edit
+                              </Button>
+                              <Button
+                                variant='ghost'
+                                size='sm'
+                                onClick={() => handleDeleteReviewClick(review.id)}
+                                className='h-8 px-3 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10'
+                              >
+                                <Trash2 className='h-3.5 w-3.5 mr-2' />
+                                Delete
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            );
-          })
-        )}
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
 
       <Dialog
