@@ -114,253 +114,165 @@ export const ContactContent = () => {
   );
 
   return (
-    <motion.div
-      initial='hidden'
-      animate='visible'
-      className='container mx-auto px-4 py-12 sm:py-16 lg:py-20 space-y-6 lg:space-y-8 max-w-6xl'
-    >
-      {/* Page Header */}
-      <motion.div className='text-center mb-12 sm:mb-16'>
-        <h1 className='text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white'>
-          Get in Touch
-        </h1>
-        <p className='mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto'>
-          We&apos;re here to help you. Fill out the form below or find us at our
-          office.
-        </p>
-      </motion.div>
+      <motion.div
+        initial='hidden'
+        animate='visible'
+        className='container mx-auto px-4 py-12 sm:py-20 lg:py-28 max-w-7xl'
+      >
+        {/* Page Header */}
+        <motion.div 
+          className='text-center mb-16 sm:mb-24 space-y-4'
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className='text-4xl sm:text-6xl font-black tracking-tighter text-foreground'>
+            Get in Touch
+          </h1>
+          <p className='text-xl text-muted-foreground max-w-2xl mx-auto'>
+            We&apos;re here to help. Reach out to us for any questions or support.
+          </p>
+        </motion.div>
 
-      <motion.div className='grid md:grid-cols-2 gap-8 lg:gap-12'>
-        {/* Contact Form */}
-        <div className='rounded-xl border bg-white p-6 sm:p-8 shadow-lg dark:bg-slate-900 space-y-6 dark:border-slate-800'>
-          <h2 className='text-2xl font-semibold dark:text-white mb-6'>
-            Send us a message
-          </h2>
+        <div className='grid lg:grid-cols-12 gap-8 lg:gap-16 items-start'>
+          {/* Contact Form */}
+          <motion.div 
+            className='lg:col-span-7 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-xl p-8 sm:p-12 shadow-2xl relative overflow-hidden'
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {/* Glossy overlay effect */}
+            <div className='absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none' />
 
-          <form onSubmit={handleSubmit} className='space-y-8' noValidate>
-            {/* Name Field */}
-            <div className='space-y-2'>
-              <Label htmlFor='name'>
-                Name <span className='text-red-500'>*</span>
-              </Label>
-              <Input
-                id='name'
-                name='name'
-                placeholder='John Doe'
-                value={formData.name}
-                onChange={handleChange}
-                disabled={isPending}
-                aria-invalid={!!errors.name}
-                aria-describedby={errors.name ? 'name-error' : undefined}
-                className={
-                  errors.name ? 'border-red-500 focus-visible:ring-red-500' : ''
-                }
-              />
-              {errors.name && (
-                <p id='name-error' className='text-sm text-red-500'>
-                  {errors.name}
-                </p>
-              )}
-            </div>
-
-            {/* Email Field */}
-            <div className='space-y-2'>
-              <Label htmlFor='email'>
-                Email <span className='text-red-500'>*</span>
-              </Label>
-              <Input
-                id='email'
-                name='email'
-                type='email'
-                placeholder='john@example.com'
-                value={formData.email}
-                onChange={handleChange}
-                disabled={isPending}
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? 'email-error' : undefined}
-                className={
-                  errors.email
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : ''
-                }
-              />
-              {errors.email && (
-                <p id='email-error' className='text-sm text-red-500'>
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Subject Field */}
-            <div className='space-y-2'>
-              <Label htmlFor='subject'>
-                Subject <span className='text-red-500'>*</span>
-              </Label>
-              <Input
-                id='subject'
-                name='subject'
-                placeholder='How can we help?'
-                value={formData.subject}
-                onChange={handleChange}
-                disabled={isPending}
-                aria-invalid={!!errors.subject}
-                aria-describedby={errors.subject ? 'subject-error' : undefined}
-                className={
-                  errors.subject
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : ''
-                }
-              />
-              {errors.subject && (
-                <p id='subject-error' className='text-sm text-red-500'>
-                  {errors.subject}
-                </p>
-              )}
-            </div>
-
-            {/* Message Field */}
-            <div className='space-y-2'>
-              <Label htmlFor='message'>
-                Message <span className='text-red-500'>*</span>
-              </Label>
-              <Textarea
-                id='message'
-                name='message'
-                placeholder='Tell us more about your inquiry...'
-                value={formData.message}
-                onChange={handleChange}
-                disabled={isPending}
-                rows={5}
-                aria-invalid={!!errors.message}
-                aria-describedby={errors.message ? 'message-error' : undefined}
-                className={
-                  errors.message
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : ''
-                }
-              />
-              {errors.message && (
-                <p id='message-error' className='text-sm text-red-500'>
-                  {errors.message}
-                </p>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type='submit'
-              className='w-full gap-2'
-              size='lg'
-              disabled={isPending}
-            >
-              {isPending ? (
-                <>
-                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent' />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className='h-4 w-4' />
-                  Send Message
-                </>
-              )}
-            </Button>
-          </form>
-        </div>
-
-        {/* Contact Information */}
-        <div className='space-y-6 lg:space-y-8'>
-          {/* Location Card */}
-          <div className='rounded-xl border bg-white p-6 shadow-lg dark:bg-slate-900 dark:border-slate-800'>
-            <h2 className='text-2xl font-semibold dark:text-white mb-6'>
-              Our Location
-            </h2>
-            <div className='space-y-4'>
-              <div className='flex gap-4'>
-                <div className='shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <MapPin className='h-4 w-4 text-primary' />
-                </div>
-                <div>
-                  <p className='font-semibold dark:text-white'>Address</p>
-                  <p className='text-slate-600 text-sm dark:text-slate-400 mt-1'>
-                    123 Tech Avenue, Suite 100
-                    <br />
-                    Innovation City, CA 90210
-                  </p>
-                </div>
-              </div>
-
-              <div className='flex gap-4'>
-                <div className='shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <Phone className='h-4 w-4 text-primary' />
-                </div>
-                <div>
-                  <p className='font-semibold dark:text-white'>Phone</p>
-                  <Link
-                    href='tel:+15551234567'
-                    className='text-slate-600 text-sm dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors mt-1 block'
-                  >
-                    +1 (555) 123-4567
-                  </Link>
-                </div>
-              </div>
-
-              <div className='flex gap-4'>
-                <div className='shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <Mail className='h-4 w-4 text-primary' />
-                </div>
-                <div>
-                  <p className='font-semibold dark:text-white'>Email</p>
-                  <Link
-                    href='mailto:support@electro.com'
-                    className='text-slate-600 text-sm dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors mt-1 block'
-                  >
-                    support@electro.com
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Business Hours Card */}
-          <div className='rounded-xl border bg-white p-6 shadow-lg dark:bg-slate-900 dark:border-slate-800'>
-            <div className='flex items-center gap-3 mb-6'>
-              <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
-                <Clock className='h-5 w-5 text-primary' />
-              </div>
-              <h2 className='text-2xl font-semibold dark:text-white'>
-                Business Hours
+            <div className='relative z-10'>
+              <h2 className='text-3xl font-bold mb-8'>
+                Send us a message
               </h2>
+
+              <form onSubmit={handleSubmit} className='space-y-6' noValidate>
+                <div className='grid sm:grid-cols-2 gap-6'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='name' className='font-semibold'>Name</Label>
+                    <Input
+                      id='name'
+                      name='name'
+                      placeholder='John Doe'
+                      value={formData.name}
+                      onChange={handleChange}
+                      disabled={isPending}
+                      className={`h-12 bg-secondary/20 border-border/50 focus:border-primary/50 transition-all ${errors.name ? 'border-red-500' : ''}`}
+                    />
+                    {errors.name && <p className='text-sm text-red-500'>{errors.name}</p>}
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='email' className='font-semibold'>Email</Label>
+                    <Input
+                      id='email'
+                      name='email'
+                      type='email'
+                      placeholder='john@example.com'
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={isPending}
+                      className={`h-12 bg-secondary/20 border-border/50 focus:border-primary/50 transition-all ${errors.email ? 'border-red-500' : ''}`}
+                    />
+                    {errors.email && <p className='text-sm text-red-500'>{errors.email}</p>}
+                  </div>
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='subject' className='font-semibold'>Subject</Label>
+                  <Input
+                    id='subject'
+                    name='subject'
+                    placeholder='How can we help?'
+                    value={formData.subject}
+                    onChange={handleChange}
+                    disabled={isPending}
+                    className={`h-12 bg-secondary/20 border-border/50 focus:border-primary/50 transition-all ${errors.subject ? 'border-red-500' : ''}`}
+                  />
+                   {errors.subject && <p className='text-sm text-red-500'>{errors.subject}</p>}
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='message' className='font-semibold'>Message</Label>
+                  <Textarea
+                    id='message'
+                    name='message'
+                    placeholder='Tell us more about your inquiry...'
+                    value={formData.message}
+                    onChange={handleChange}
+                    disabled={isPending}
+                    rows={6}
+                    className={`bg-secondary/20 border-border/50 focus:border-primary/50 transition-all resize-none ${errors.message ? 'border-red-500' : ''}`}
+                  />
+                  {errors.message && <p className='text-sm text-red-500'>{errors.message}</p>}
+                </div>
+
+                <Button
+                  type='submit'
+                  className='w-full sm:w-auto h-14 px-10 text-lg font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95'
+                  disabled={isPending}
+                >
+                  {isPending ? (
+                    'Sending...'
+                  ) : (
+                    <>
+                      Send Message <Send className='ml-2 h-5 w-5' />
+                    </>
+                  )}
+                </Button>
+              </form>
             </div>
-            <div className='space-y-2 text-slate-600 dark:text-slate-400'>
-              <div className='flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700'>
-                <span className='font-medium text-sm'>Monday - Friday</span>
-                <span className='text-sm'>9:00 AM - 6:00 PM</span>
-              </div>
-              <div className='flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700'>
-                <span className='font-medium text-sm'>Saturday</span>
-                <span className='text-sm'>10:00 AM - 4:00 PM</span>
-              </div>
-              <div className='flex justify-between items-center py-2'>
-                <span className='font-medium text-sm'>Sunday</span>
-                <span className='font-medium text-sm'>Closed</span>
-              </div>
+          </motion.div>
+
+          {/* Contact Info & Map */}
+          <motion.div 
+            className='lg:col-span-5 space-y-8'
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            {/* Info Cards */}
+            <div className='grid gap-6'>
+              {[
+                { icon: MapPin, title: 'Visit Us', content: '123 Tech Avenue, Suite 100\nInnovation City, CA 90210' },
+                { icon: Phone, title: 'Call Us', content: '+1 (555) 123-4567', link: 'tel:+15551234567' },
+                { icon: Mail, title: 'Email Us', content: 'support@electro.com', link: 'mailto:support@electro.com' },
+                { icon: Clock, title: 'Business Hours', content: 'Mon-Fri: 9AM - 6PM\nSat: 10AM - 4PM' }
+              ].map((item, idx) => (
+                <div key={idx} className='flex items-start gap-4 p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-colors shadow-sm'>
+                  <div className='h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary'>
+                    <item.icon className='h-6 w-6' />
+                  </div>
+                  <div>
+                    <h3 className='font-bold text-lg mb-1'>{item.title}</h3>
+                    {item.link ? (
+                      <Link href={item.link} className='text-muted-foreground hover:text-primary transition-colors whitespace-pre-line'>
+                        {item.content}
+                      </Link>
+                    ) : (
+                      <p className='text-muted-foreground whitespace-pre-line'>{item.content}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* Map */}
+            <div className='rounded-3xl overflow-hidden shadow-xl border border-border/50 h-64 sm:h-80'>
+              <iframe
+                src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.004258724266!3d40.74076987932881!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259bf5c8eef01%3A0x7a2ff2c2e2b3c3b!2sTech%20Avenue!5e0!3m2!1sen!2sus!4v1690835000000!5m2!1sen!2sus'
+                allowFullScreen
+                loading='lazy'
+                referrerPolicy='no-referrer-when-downgrade'
+                title='Office location map'
+                className='w-full h-full border-0 filter grayscale hover:grayscale-0 transition-all duration-700'
+              />
+            </div>
+          </motion.div>
         </div>
       </motion.div>
-
-      {/* Map */}
-      <motion.div className='rounded-xl block w-full overflow-hidden shadow-lg h-64 sm:h-80'>
-        <iframe
-          src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.004258724266!3d40.74076987932881!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259bf5c8eef01%3A0x7a2ff2c2e2b3c3b!2sTech%20Avenue!5e0!3m2!1sen!2sus!4v1690835000000!5m2!1sen!2sus'
-          allowFullScreen
-          loading='lazy'
-          referrerPolicy='no-referrer-when-downgrade'
-          title='Office location map'
-          className='w-full h-full border-0'
-        />
-      </motion.div>
-    </motion.div>
   );
 };

@@ -217,21 +217,19 @@ export const ProductCard = memo(
           <div className='mt-3 flex items-end justify-between gap-2'>
             <div className='space-y-0.5'>
               <div className='flex items-baseline gap-2'>
-                <span className='text-lg sm:text-xl font-bold text-foreground'>
+                <span className='text-xl sm:text-2xl font-black text-foreground tracking-tight'>
                   {formatPrice(effectivePrice)}
                 </span>
                 {discount && (
-                  <span className='text-xs text-muted-foreground line-through'>
+                  <span className='text-sm text-muted-foreground line-through font-medium'>
                     {formatPrice(discount.originalPrice)}
                   </span>
                 )}
               </div>
               {!isOutOfStock && (
-                <p className='text-[11px] text-muted-foreground'>
-                  <span className='text-primary font-medium'>
-                    {optimisticStock}
-                  </span>{' '}
-                  in stock
+                <p className='text-[11px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1'>
+                  <span className='block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse' />
+                  {optimisticStock > 10 ? 'In stock' : `${optimisticStock} left in stock`}
                 </p>
               )}
             </div>
@@ -241,10 +239,10 @@ export const ProductCard = memo(
           <div className='mt-4'>
             <Button
               className={cn(
-                'h-11 w-full rounded-xl font-semibold transition-all duration-300',
+                'h-11 w-full rounded-xl font-bold transition-all duration-300 relative overflow-hidden',
                 isOutOfStock
                   ? 'cursor-not-allowed bg-muted text-muted-foreground hover:bg-muted'
-                  : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]',
+                  : 'btn-premium hover:shadow-primary/40'
               )}
               onClick={handleAddToCart}
               disabled={isOutOfStock || isPending}

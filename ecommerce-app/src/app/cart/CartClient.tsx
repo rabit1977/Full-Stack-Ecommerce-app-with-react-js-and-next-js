@@ -49,25 +49,42 @@ function EmptyCart() {
   const router = useRouter();
 
   return (
-    <div className='container-wide'>
-      <div className='flex flex-col items-center justify-center py-20 sm:py-30 min-h-[calc(100lvh-200px)] text-center space-y-6 sm:space-y-8'>
-        <div className='relative'>
-          <div className='absolute inset-0 bg-primary/10 rounded-full blur-3xl opacity-50' />
-          <ShoppingCart className='relative h-20 w-20 sm:h-24 sm:w-24 text-primary/40' />
+    <div className='container-wide min-h-[calc(100vh-200px)] flex items-center justify-center p-4'>
+      <div className='max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-500'>
+        <div className='relative mx-auto w-32 h-32 flex items-center justify-center'>
+          <div className='absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-20' />
+          <div className='relative z-10 w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center ring-1 ring-primary/20 backdrop-blur-sm shadow-xl'>
+            <ShoppingCart className='h-10 w-10 text-primary' />
+          </div>
+          {/* Decorative floating elements */}
+          <div className='absolute top-0 right-0 h-4 w-4 bg-blue-400 rounded-full animate-bounce delay-100 opacity-60' />
+          <div className='absolute bottom-2 left-2 h-3 w-3 bg-purple-400 rounded-full animate-bounce delay-300 opacity-60' />
         </div>
+        
         <div className='space-y-3'>
-          <h1 className='text-3xl sm:text-4xl font-extrabold tracking-tight'>Your cart is empty</h1>
-          <p className='text-lg text-muted-foreground max-w-md mx-auto'>
-            Looks like you haven&apos;t added anything to your cart yet. Start
-            exploring our products!
+          <h1 className='text-3xl font-bold tracking-tight text-foreground'>Your cart is empty</h1>
+          <p className='text-muted-foreground text-lg leading-relaxed'>
+            Looks like you haven&apos;t added any items yet. 
+            <br />
+            Our latest collection is waiting for you!
           </p>
         </div>
-        <div className='flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4'>
-          <Button size='lg' onClick={() => router.push('/products')} className='w-full sm:w-auto h-12 px-8'>
-            <Package className='h-5 w-5 mr-2' />
-            Browse Products
+
+        <div className='flex flex-col sm:flex-row gap-4 justify-center pt-2'>
+          <Button 
+            size='lg' 
+            onClick={() => router.push('/products')} 
+            className='h-12 px-8 rounded-full text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95'
+          >
+            <Package className='h-4 w-4 mr-2' />
+            Start Shopping
           </Button>
-          <Button variant='outline' size='lg' onClick={() => router.push('/')} className='w-full sm:w-auto h-12 px-8'>
+          <Button 
+            variant='outline' 
+            size='lg' 
+            onClick={() => router.push('/')} 
+            className='h-12 px-8 rounded-full text-base border-2 hover:bg-secondary/50'
+          >
             Back to Home
           </Button>
         </div>
@@ -264,20 +281,20 @@ export function CartClient({
   }
 
   return (
-    <div className='bg-slate-50 min-h-[70vh] dark:bg-slate-900'>
-      <div className='container-wide py-8 sm:py-12'>
-        <div className='flex items-center justify-between mb-8'>
-          <div className='space-y-1'>
+    <div className='min-h-[80vh] bg-slate-50/50 dark:bg-slate-950/50 pb-20'>
+      <div className='container-wide py-10 sm:py-16'>
+        <div className='flex items-center justify-between mb-10'>
+          <div className='space-y-1.5'>
             <div className='flex items-center gap-3'>
               <Button
                 variant='ghost'
                 size='icon'
                 onClick={() => router.push('/products')}
-                className='hover:bg-slate-100 dark:hover:bg-slate-800'
+                className='rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800'
               >
                 <ArrowLeft className='h-5 w-5' />
               </Button>
-              <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
+              <h1 className='text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground'>
                 Shopping Cart
               </h1>
             </div>

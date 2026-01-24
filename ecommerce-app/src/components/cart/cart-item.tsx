@@ -1,13 +1,13 @@
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CartItemWithProduct } from '@/lib/types/cart';
@@ -53,88 +53,107 @@ export const CartItem = React.memo(
     const options = item.selectedOptions || {};
 
     return (
-      <li className='flex flex-col py-6 sm:flex-row px-4'>
-        <div className='h-48 w-full shrink-0 overflow-hidden rounded-md border dark:border-slate-800 sm:h-24 sm:w-24'>
+      <li className='group flex flex-col py-6 sm:flex-row px-4 sm:px-6 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/50'>
+        <div className='relative h-32 w-full sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-xl border border-border bg-muted'>
           <Image
             src={getProductImage(item.product)}
             alt={item.product.title}
-            width={96}
-            height={96}
-            className='h-full w-full object-cover'
+            fill
+            className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
           />
         </div>
-        <div className='mt-4 flex flex-1 flex-col sm:ml-4 sm:mt-0'>
-          <div>
-            <div className='flex flex-col justify-between text-base font-medium text-slate-900 dark:text-white sm:flex-row'>
-              <h3>
-                <Link
-                  href={`/products/${item.productId}`}
-                  className='hover:underline'
-                >
-                  {item.product.title}
-                </Link>
-              </h3>
-              <p className='mt-1 shrink-0 sm:ml-4 sm:mt-0'>
+        <div className='mt-4 flex flex-1 flex-col justify-between sm:ml-6 sm:mt-0'>
+          <div className='relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0'>
+            <div>
+              <div className='flex justify-between'>
+                <h3 className='text-base font-semibold text-foreground'>
+                  <Link
+                    href={`/products/${item.productId}`}
+                    className='hover:text-primary transition-colors'
+                  >
+                    {item.product.title}
+                  </Link>
+                </h3>
+              </div>
+              <div className='mt-1 flex text-sm'>
+                <p className='text-muted-foreground font-medium'>
+                   {item.product.brand && <span className='uppercase tracking-wider text-xs mr-2 border border-border px-1.5 py-0.5 rounded'>{item.product.brand}</span>}
+                </p>
+              </div>
+              {Object.keys(options).length > 0 && (
+                <div className='mt-2 flex flex-wrap gap-2'>
+                  {Object.entries(options).map(([name, value]) => (
+                    <span 
+                      key={name} 
+                      className='inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-gray-500/10'
+                    >
+                      {name}: {value as string}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className='mt-4 sm:mt-0 sm:pr-9 text-right'>
+              <p className='text-lg font-bold text-foreground tabular-nums'>
                 {formatPrice(item.product.price * item.quantity)}
               </p>
+              {item.quantity > 1 && (
+                <p className='text-xs text-muted-foreground mt-0.5'>
+                  {formatPrice(item.product.price)} each
+                </p>
+              )}
             </div>
-            {Object.keys(options).length > 0 && (
-              <div className='mt-1 flex flex-wrap gap-x-3 text-sm text-slate-500 dark:text-slate-400'>
-                {Object.entries(options).map(([name, value]) => (
-                  <span key={name}>
-                    {name}: {value as string}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
-          <div className='flex flex-1 flex-col items-start gap-4 pt-4 text-sm sm:flex-row sm:items-end sm:justify-between sm:pt-0'>
-            <div className='flex items-center rounded-md border dark:border-slate-700'>
+
+          <div className='mt-4 flex items-center justify-between'>
+             {/* Quantity Control */}
+            <div className='flex items-center rounded-full border border-border bg-background shadow-sm'>
               <Button
                 variant='ghost'
                 size='icon'
-                className='h-8 w-8'
+                className='h-8 w-8 rounded-l-full hover:bg-secondary'
                 onClick={handleQuantityDecrease}
                 aria-label='Decrease quantity'
                 disabled={isPending || item.quantity <= 1}
               >
-                <Minus className='h-4 w-4' />
+                <Minus className='h-3.5 w-3.5' />
               </Button>
-              <span
-                className='w-8 text-center dark:text-white'
-                aria-live='polite'
-              >
-                {item.quantity}
-              </span>
+              <div className='w-10 text-center text-sm font-semibold tabular-nums border-x border-border/50 h-full flex items-center justify-center bg-secondary/30'>
+                 {item.quantity}
+              </div>
               <Button
                 variant='ghost'
                 size='icon'
-                className='h-8 w-8'
+                className='h-8 w-8 rounded-r-full hover:bg-secondary'
                 onClick={handleQuantityIncrease}
                 aria-label='Increase quantity'
                 disabled={isPending || item.quantity >= item.product.stock}
               >
-                <Plus className='h-4 w-4' />
+                <Plus className='h-3.5 w-3.5' />
               </Button>
             </div>
-            <div className='flex gap-2'>
+
+            <div className='flex items-center gap-4'>
               <Button
-                variant='link'
+                variant='ghost'
                 size='sm'
                 onClick={handleSaveForLater}
                 disabled={isPending}
+                className='text-muted-foreground hover:text-primary text-xs sm:text-sm font-medium'
               >
-                Save for Later
+                Save for later
               </Button>
+              <span className="text-border h-4 w-px bg-border/50" />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
-                    variant='link'
+                    variant='ghost'
                     size='sm'
-                    className='font-medium text-red-600 hover:text-red-500 -mx-2.5'
+                    className='text-muted-foreground hover:text-destructive hover:bg-destructive/5 text-xs sm:text-sm font-medium'
                     disabled={isPending}
                   >
-                    <Trash2 className='h-4 w-4' />
+                    <Trash2 className='h-3.5 w-3.5 mr-1.5' />
                     Remove
                   </Button>
                 </AlertDialogTrigger>
@@ -147,7 +166,7 @@ export const CartItem = React.memo(
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleRemove}>
+                    <AlertDialogAction onClick={handleRemove} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
                       Remove
                     </AlertDialogAction>
                   </AlertDialogFooter>

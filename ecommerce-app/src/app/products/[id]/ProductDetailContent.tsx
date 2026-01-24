@@ -2,7 +2,7 @@ import { getMeAction } from '@/actions/auth-actions';
 import { getCartAction } from '@/actions/cart-actions';
 import { getProductByIdAction } from '@/actions/product-actions';
 import { getWishlistAction } from '@/actions/wishlist-actions';
-import { ProductImageCarousel } from '@/components/product/product-image-carousel';
+import { ProductDetailGallery } from '@/components/product/product-detail-gallery';
 import { RelatedProducts } from '@/components/product/related-products';
 import { ReviewsSection } from '@/components/product/reviews-section';
 import { notFound } from 'next/navigation';
@@ -31,7 +31,7 @@ export async function ProductDetailContent({
     <div className='container-wide py-8 sm:py-12 lg:py-16'>
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16 items-start'>
         <div className='w-full'>
-          <ProductImageCarousel product={product} />
+          <ProductDetailGallery product={product} />
         </div>
         <div className='w-full lg:sticky lg:top-24'>
           <ProductPurchaseManager
