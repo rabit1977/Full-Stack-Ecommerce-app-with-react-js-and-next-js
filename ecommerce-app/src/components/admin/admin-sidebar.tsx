@@ -1,25 +1,30 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   BarChart,
   ChevronRight,
   Home,
   LayoutDashboard,
   LogOut,
+  Moon,
   Package,
   Settings,
   ShoppingCart,
+  Sun,
   Ticket,
   Users,
   Zap
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+
 
 const navLinks = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Overview & stats' },
@@ -33,6 +38,56 @@ const quickLinks = [
   { href: '/', label: 'View Store', icon: Home },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart },
 ];
+
+/**
+ * Premium Theme Toggle for Admin
+ */
+const AdminThemeToggle = () => {
+    const { setTheme, resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => setMounted(true), []);
+
+    if (!mounted) {
+        return <div className="w-8 h-8 rounded-lg bg-muted/20 animate-pulse" />;
+    }
+
+    const isDark = resolvedTheme === 'dark';
+
+    return (
+        <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            className="w-8 h-8 rounded-lg bg-background/50 hover:bg-background border border-border/50 shadow-sm"
+        >
+            <AnimatePresence mode="wait" initial={false}>
+                {isDark ? (
+                    <motion.div
+                        key="moon"
+                        initial={{ scale: 0.5, opacity: 0, rotate: 90 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        exit={{ scale: 0.5, opacity: 0, rotate: -90 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Moon className="h-4 w-4 text-indigo-400" />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="sun"
+                        initial={{ scale: 0.5, opacity: 0, rotate: -90 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Sun className="h-4 w-4 text-amber-500" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <span className="sr-only">Toggle theme</span>
+        </Button>
+    );
+};
 
 /**
  * Premium Desktop Sidebar - visible on large screens
@@ -142,16 +197,19 @@ export const AdminSidebar = () => {
 
         {/* Footer */}
         <div className='p-4 m-4 mt-0 bg-secondary/30 rounded-2xl border border-border/50 backdrop-blur-sm'>
-          <div className="flex items-center gap-3 mb-3">
-             <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center ring-2 ring-white dark:ring-slate-900 border border-white/20">
-                <span className="text-xs font-bold text-white">
-                  {user?.name?.slice(0, 2).toUpperCase() || 'AD'}
-                </span>
+          <div className="flex items-center justify-between mb-3">
+             <div className="flex items-center gap-3">
+                 <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center ring-2 ring-white dark:ring-slate-900 border border-white/20">
+                    <span className="text-xs font-bold text-white">
+                      {user?.name?.slice(0, 2).toUpperCase() || 'AD'}
+                    </span>
+                 </div>
+                 <div className="min-w-0">
+                    <p className="text-sm font-bold truncate max-w-[90px]">{user?.name || 'Admin User'}</p>
+                    <p className="text-[10px] text-muted-foreground truncate font-medium uppercase tracking-wide">Administrator</p>
+                 </div>
              </div>
-             <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate">{user?.name || 'Admin User'}</p>
-                <p className="text-[10px] text-muted-foreground truncate font-medium uppercase tracking-wide">Administrator</p>
-             </div>
+             <AdminThemeToggle />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Link
@@ -192,8 +250,10 @@ export const AdminMobileHeader = () => {
                 <span className='font-bold text-lg tracking-tight'>Electro<span className="text-primary">Admin</span></span>
             </Link>
 
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-3">
+                <AdminThemeToggle />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 border border-border/50 bg-secondary/20">
                          <div className="h-full w-full rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center ring-1 ring-white/20">
                             <span className="text-[10px] font-bold text-white">
@@ -217,7 +277,8 @@ export const AdminMobileHeader = () => {
                         Log out
                     </DropdownMenuItem>
                 </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenu>
+            </div>
         </header>
     )
 }
