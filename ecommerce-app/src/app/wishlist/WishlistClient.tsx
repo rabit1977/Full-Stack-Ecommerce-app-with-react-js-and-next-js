@@ -2,8 +2,8 @@
 
 import { addItemToCartAction } from '@/actions/cart-actions';
 import {
-  clearWishlistAction,
-  toggleWishlistAction,
+    clearWishlistAction,
+    toggleWishlistAction,
 } from '@/actions/wishlist-actions';
 import { Button } from '@/components/ui/button';
 import { ProductWithRelations } from '@/lib/types';
@@ -13,7 +13,7 @@ import { ShoppingCart, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
+import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
 
 export function WishlistClient({
@@ -24,12 +24,20 @@ export function WishlistClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  const [optimisticProducts, removeOptimisticProduct] = useOptimistic(
+    products,
+    (currentProducts, productId: string) =>
+      currentProducts.filter((p) => p.id !== productId)
+  );
+
   const handleRemoveFromWishlist = (productId: string) => {
     startTransition(async () => {
+      removeOptimisticProduct(productId);
       const result = await toggleWishlistAction(productId);
       if (result.success) {
         toast.success('Removed from wishlist');
-        router.refresh();
+        // Router refresh is implied by server action usually, but good to keep if needed
+        router.refresh(); 
       } else {
         toast.error(result.error || 'Failed to remove from wishlist');
       }
@@ -38,6 +46,8 @@ export function WishlistClient({
 
   const handleClearWishlist = () => {
     startTransition(async () => {
+      // For clear all, we could eagerly clear the list, but let's just wait for server
+      // or implement another optimistic action if critical.
       const result = await clearWishlistAction();
       if (result.success) {
         toast.success('Wishlist cleared');
@@ -69,13 +79,13 @@ export function WishlistClient({
               Your Wishlist
             </h1>
             <span className='text-slate-600 dark:text-slate-300'>
-              {products.length} item{products.length !== 1 ? 's' : ''}
+              {optimisticProducts.length} item{optimisticProducts.length !== 1 ? 's' : ''}
             </span>
           </div>
           <Button
             variant='outline'
             onClick={handleClearWishlist}
-            disabled={isPending}
+            disabled={isPending || optimisticProducts.length === 0}
           >
             <Trash2 className='mr-2 h-4 w-4' />
             Clear Wishlist
@@ -83,7 +93,7 @@ export function WishlistClient({
         </div>
 
         <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-          {products.map((product) => (
+          {optimisticProducts.map((product) => (
             <div
               key={product.id}
               className='border rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col dark:bg-muted dark:border-slate-800'

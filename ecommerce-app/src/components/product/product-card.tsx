@@ -9,7 +9,7 @@ import { formatPrice } from '@/lib/utils/formatters';
 import { motion } from 'framer-motion';
 import { Eye, Heart, ShoppingBag, Sparkles, Star, Zap } from 'lucide-react';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useState, useTransition } from 'react';
+import { memo, useCallback, useMemo, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '../ui/button';
 import { ProductImageCarousel } from './product-image-carousel';
@@ -23,6 +23,11 @@ export const ProductCard = memo(
   ({ product, initialIsWished = false }: ProductCardProps) => {
     const [isPending, startTransition] = useTransition();
     const [isWished, setIsWished] = useState(initialIsWished);
+    const [optimisticIsWished, toggleOptimisticIsWished] = useOptimistic(
+      isWished,
+      (state: boolean, _: unknown) => !state
+    );
+
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const { openModal } = useQuickView();
 
@@ -64,12 +69,12 @@ export const ProductCard = memo(
         e.preventDefault();
         e.stopPropagation();
         startTransition(async () => {
+          toggleOptimisticIsWished(null);
           const result = await toggleWishlistAction(product.id);
           if (result.success) {
-            const newWishState = !isWished;
-            setIsWished(newWishState);
+            setIsWished((prev) => !prev);
             toast.success(
-              newWishState ? 'Added to wishlist' : 'Removed from wishlist',
+              !isWished ? 'Added to wishlist' : 'Removed from wishlist',
             );
           } else {
             toast.error(
@@ -78,7 +83,7 @@ export const ProductCard = memo(
           }
         });
       },
-      [product.id, isWished],
+      [product.id, isWished, toggleOptimisticIsWished],
     );
 
     const handleAddToCart = useCallback(
@@ -158,18 +163,18 @@ export const ProductCard = memo(
               variant='secondary'
               className={cn(
                 'h-9 w-9 rounded-full bg-white shadow-md transition-all duration-200 dark:bg-card',
-                isWished 
+                optimisticIsWished 
                   ? 'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900'
                   : 'hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20',
               )}
               onClick={handleToggleWishlist}
               disabled={isPending}
-              title={isWished ? 'Remove from wishlist' : 'Add to wishlist'}
+              title={optimisticIsWished ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <Heart
                 className={cn(
                   'h-4 w-4 transition-all',
-                  isWished && 'fill-current'
+                  optimisticIsWished && 'fill-current'
                 )}
               />
             </Button>

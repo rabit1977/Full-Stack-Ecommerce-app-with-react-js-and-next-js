@@ -15,6 +15,51 @@ async function requireAdmin() {
   return session;
 }
 
+export async function signupAction(
+  prevState: { success: boolean; message: string; errors?: Record<string, string[]> } | null,
+  formData: FormData
+) {
+  try {
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    if (!name || !email || !password) {
+      return { success: false, message: 'Missing required fields' };
+    }
+
+    if (password.length < 6) {
+      return { success: false, message: 'Password must be at least 6 characters' };
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (existingUser) {
+      return { success: false, message: 'An account with this email already exists' };
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    await prisma.user.create({
+      data: {
+        name,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: 'USER',
+      },
+    });
+
+    return { success: true, message: 'Account created successfully' };
+  } catch (error) {
+    console.error('Signup error:', error);
+    return { success: false, message: 'An error occurred during signup' };
+  }
+}
 
 export async function createUserAction(
   name: string,
