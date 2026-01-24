@@ -90,13 +90,15 @@ export const ProductForm = ({
       isFeatured: product?.isFeatured || false,
       isArchived: product?.isArchived || false,
       tags: product?.tags || [],
-      dimensions: {
-        length: product?.dimensions && typeof product.dimensions === 'object' && 'length' in product.dimensions ? Number((product.dimensions as any).length) : undefined,
-        width: product?.dimensions && typeof product.dimensions === 'object' && 'width' in product.dimensions ? Number((product.dimensions as any).width) : undefined,
-        height: product?.dimensions && typeof product.dimensions === 'object' && 'height' in product.dimensions ? Number((product.dimensions as any).height) : undefined,
-      },
-      specifications: product?.specifications && Array.isArray(product.specifications) 
-        ? product.specifications 
+      dimensions: product?.dimensions && typeof product.dimensions === 'object' 
+        ? {
+            length: 'length' in product.dimensions ? Number((product.dimensions as any).length) : undefined,
+            width: 'width' in product.dimensions ? Number((product.dimensions as any).width) : undefined,
+            height: 'height' in product.dimensions ? Number((product.dimensions as any).height) : undefined,
+          }
+        : undefined,
+      specifications: product?.specifications && Array.isArray(product.specifications)
+        ? (product.specifications as { key: string; value: string }[])
         : [],
     },
   });
