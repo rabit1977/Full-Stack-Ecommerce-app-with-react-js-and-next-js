@@ -1,12 +1,11 @@
 'use client';
 
 import { OrdersDataTable } from '@/components/admin/orders-data-table';
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatPrice } from '@/lib/utils/formatters';
 import { Order } from '@/generated/prisma/client';
-import { Clock, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
+import { formatPrice } from '@/lib/utils/formatters';
+import { CheckCircle, Clock, DollarSign, ShoppingBag, TrendingUp, Truck, XCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 /**
@@ -14,21 +13,17 @@ import { useMemo, useState } from 'react';
  */
 export function OrdersListSkeleton() {
   return (
-    <div className='space-y-8'>
+    <div className='space-y-8 pb-20'>
       <div className='space-y-2'>
         <Skeleton className='h-8 w-48' />
         <Skeleton className='h-4 w-64' />
       </div>
       <div className='grid grid-cols-1 sm:grid-cols-4 gap-4'>
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i}>
-            <CardContent className='pt-6'>
-              <Skeleton className='h-16 w-full' />
-            </CardContent>
-          </Card>
+          <Skeleton key={i} className='h-32 w-full rounded-2xl skeleton-enhanced' />
         ))}
       </div>
-      <Skeleton className='h-96 w-full' />
+      <Skeleton className='h-96 w-full rounded-3xl skeleton-enhanced' />
     </div>
   );
 }
@@ -62,82 +57,57 @@ function OrderStats({ orders }: { orders: Order[] }) {
   }, [orders]);
 
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-      <Card>
-        <CardContent className='pt-6'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Total Orders
-              </p>
-              <p className='text-3xl font-bold dark:text-white mt-2'>
-                {stats.total}
-              </p>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100'>
+      {[
+        { 
+          label: 'Total Orders', 
+          value: stats.total, 
+          icon: ShoppingBag, 
+          color: 'text-blue-500', 
+          bg: 'bg-blue-500/10', 
+          border: 'border-blue-500/20' 
+        },
+        { 
+          label: 'Pending', 
+          value: stats.pending + stats.processing, 
+          subValue: `${stats.pending} new`, 
+          icon: Clock, 
+          color: 'text-amber-500', 
+          bg: 'bg-amber-500/10', 
+          border: 'border-amber-500/20' 
+        },
+        { 
+          label: 'Total Revenue', 
+          value: formatPrice(stats.revenue), 
+          icon: DollarSign, 
+          color: 'text-emerald-500', 
+          bg: 'bg-emerald-500/10', 
+          border: 'border-emerald-500/20' 
+        },
+        { 
+          label: 'Avg Order Value', 
+          value: formatPrice(stats.avgOrderValue), 
+          icon: TrendingUp, 
+          color: 'text-violet-500', 
+          bg: 'bg-violet-500/10', 
+          border: 'border-violet-500/20' 
+        },
+      ].map((stat, i) => (
+        <div key={i} className={`glass-card p-6 rounded-3xl flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group border ${stat.border}`}>
+            <div className={`flex justify-between items-start mb-2`}>
+                <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} ring-1 ring-inset ring-white/10 group-hover:scale-110 transition-transform`}>
+                    <stat.icon className='h-6 w-6' />
+                </div>
             </div>
-            <ShoppingBag className='h-10 w-10 text-slate-400' />
-          </div>
-          <p className='text-xs text-slate-500 dark:text-slate-400 mt-2'>
-            All time orders
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className='pt-6'>
-          <div className='flex items-center justify-between'>
             <div>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Pending
-              </p>
-              <p className='text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2'>
-                {stats.pending + stats.processing}
-              </p>
+                <h3 className='text-3xl font-black mt-2 tracking-tight text-foreground'>{stat.value}</h3>
+                <div className="flex items-center justify-between mt-1">
+                  <p className='text-sm font-bold text-muted-foreground uppercase tracking-wider'>{stat.label}</p>
+                  {stat.subValue && <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{stat.subValue}</span>}
+                </div>
             </div>
-            <Clock className='h-10 w-10 text-yellow-400' />
-          </div>
-          <p className='text-xs text-slate-500 dark:text-slate-400 mt-2'>
-            Needs attention
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className='pt-6'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Revenue
-              </p>
-              <p className='text-2xl font-bold dark:text-white mt-2'>
-                {formatPrice(stats.revenue)}
-              </p>
-            </div>
-            <DollarSign className='h-10 w-10 text-green-400' />
-          </div>
-          <p className='text-xs text-slate-500 dark:text-slate-400 mt-2'>
-            Total revenue
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className='pt-6'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Avg Order Value
-              </p>
-              <p className='text-2xl font-bold dark:text-white mt-2'>
-                {formatPrice(stats.avgOrderValue)}
-              </p>
-            </div>
-            <TrendingUp className='h-10 w-10 text-blue-400' />
-          </div>
-          <p className='text-xs text-slate-500 dark:text-slate-400 mt-2'>
-            Per order
-          </p>
-        </CardContent>
-      </Card>
+        </div>
+      ))}
     </div>
   );
 }
@@ -179,51 +149,57 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   );
 
   return (
-    <div className='space-y-8'>
+    <div className='space-y-8 pb-20'>
       {/* Header */}
-      <div className='space-y-1'>
-        <div className='flex items-center gap-2'>
-          <ShoppingBag className='h-6 w-6 text-slate-600 dark:text-slate-400' />
-          <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
+      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500'>
+        <div className='space-y-1'>
+          <h1 className='text-3xl sm:text-4xl font-black tracking-tight text-foreground flex items-center gap-3'>
             Orders
+            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold ring-1 ring-inset ring-primary/20">
+               {orders.length}
+            </span>
           </h1>
+          <p className='text-lg text-muted-foreground font-medium'>
+             Manage and track customer orders
+          </p>
         </div>
-        <p className='text-slate-600 dark:text-slate-400'>
-          Manage and track User orders ({orders.length} total)
-        </p>
       </div>
 
       {/* Statistics */}
       <OrderStats orders={orders} />
 
       {/* Orders Table with Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className='grid w-full grid-cols-5'>
-          <TabsTrigger value='all'>
-            All <span className='ml-2 text-xs'>({orders.length})</span>
-          </TabsTrigger>
-          <TabsTrigger value='pending'>
-            Pending{' '}
-            <span className='ml-2 text-xs'>({statusCounts.pending})</span>
-          </TabsTrigger>
-          <TabsTrigger value='shipped'>
-            Shipped{' '}
-            <span className='ml-2 text-xs'>({statusCounts.shipped})</span>
-          </TabsTrigger>
-          <TabsTrigger value='delivered'>
-            Delivered{' '}
-            <span className='ml-2 text-xs'>({statusCounts.delivered})</span>
-          </TabsTrigger>
-          <TabsTrigger value='cancelled'>
-            Cancelled{' '}
-            <span className='ml-2 text-xs'>({statusCounts.cancelled})</span>
-          </TabsTrigger>
-        </TabsList>
+      <div className='glass-card rounded-[2.5rem] overflow-hidden shadow-xl shadow-black/5 border border-border/60 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200'>
+        <div className="p-8">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className='w-full justify-start p-1 h-auto bg-muted/50 rounded-2xl overflow-x-auto flex-nowrap'>
+                {[
+                    { id: 'all', label: 'All Orders', count: orders.length, icon: ShoppingBag },
+                    { id: 'pending', label: 'Pending', count: statusCounts.pending, icon: Clock },
+                    { id: 'shipped', label: 'Shipped', count: statusCounts.shipped, icon: Truck },
+                    { id: 'delivered', label: 'Delivered', count: statusCounts.delivered, icon: CheckCircle },
+                    { id: 'cancelled', label: 'Cancelled', count: statusCounts.cancelled, icon: XCircle },
+                ].map((tab) => (
+                    <TabsTrigger 
+                        key={tab.id} 
+                        value={tab.id}
+                        className='rounded-xl px-4 py-2.5 data-[state=active]:bg-white dark:data-[state=active]:bg-secondary data-[state=active]:shadow-sm transition-all duration-200 flex items-center gap-2 min-w-max'
+                    >
+                        <tab.icon className="h-4 w-4" />
+                        <span className="font-semibold">{tab.label}</span>
+                        <span className='ml-1.5 px-1.5 py-0.5 rounded-full bg-secondary text-[10px] font-bold'>
+                            {tab.count}
+                        </span>
+                    </TabsTrigger>
+                ))}
+                </TabsList>
 
-        <TabsContent value={activeTab} className='mt-6'>
-          <OrdersDataTable orders={filteredOrders} />
-        </TabsContent>
-      </Tabs>
+                <TabsContent value={activeTab} className='mt-8 focus-visible:outline-none'>
+                    <OrdersDataTable orders={filteredOrders} />
+                </TabsContent>
+            </Tabs>
+        </div>
+      </div>
     </div>
   );
 }

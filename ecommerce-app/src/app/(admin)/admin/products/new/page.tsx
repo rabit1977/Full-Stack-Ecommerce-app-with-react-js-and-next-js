@@ -49,27 +49,34 @@ export default function NewProductPage() {
   };
 
   return (
-    <div className='space-y-6'>
-      <div className='space-y-4'>
+    <div className='max-w-4xl mx-auto pb-20'>
+      <div className='mb-8 animate-in fade-in slide-in-from-top-4 duration-500'>
         <Button
           variant='ghost'
           onClick={() => router.push('/admin/products')}
-          className='hover:bg-slate-100 dark:hover:bg-slate-800'
+          className='hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full mb-6 -ml-3'
         >
           <ArrowLeft className='h-4 w-4 mr-2' />
           Back to Products
         </Button>
-        <div>
-          <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
-            Add New Product
-          </h1>
-          <p className='text-slate-600 dark:text-slate-400 mt-2'>
-            Create a new product in your catalog
-          </p>
+        <div className='flex items-center gap-4'>
+           <div className='h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/25'>
+             <ArrowLeft className='h-6 w-6 text-white rotate-180' /> {/* Just using an icon */}
+           </div>
+           <div>
+              <h1 className='text-3xl sm:text-4xl font-black tracking-tight text-foreground'>
+                Add New Product
+              </h1>
+              <p className='text-lg text-muted-foreground font-medium mt-1'>
+                Create a new product in your catalog
+              </p>
+           </div>
         </div>
       </div>
 
-      <ProductForm onSubmit={handleSubmit} isSubmitting={isPending} />
+      <div className='glass-card rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-black/5 border border-border/60 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100'>
+        <ProductForm onSubmit={handleSubmit} isSubmitting={isPending} />
+      </div>
     </div>
   );
 }

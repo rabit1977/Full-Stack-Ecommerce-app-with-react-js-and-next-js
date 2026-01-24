@@ -4,14 +4,7 @@
 import { createUserAction } from '@/actions/user-actions';
 import { UserForm } from '@/components/admin/user-form';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { ArrowLeft, UserPlus } from 'lucide-react';
+import { ArrowLeft, Info, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
@@ -69,59 +62,50 @@ export default function CreateUserPage() {
   };
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <div className='max-w-3xl mx-auto space-y-6'>
-        {/* Header */}
-        <div className='space-y-4'>
-          <Button variant='ghost' asChild>
-            <Link href='/admin/users'>
-              <ArrowLeft className='h-4 w-4 mr-2' />
-              Back to Users
-            </Link>
-          </Button>
-          
-          <div className='flex items-center gap-3'>
-            <div className='h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center'>
-              <UserPlus className='h-6 w-6 text-primary' />
-            </div>
-            <div>
-              <h1 className='text-3xl font-bold tracking-tight'>Create New User</h1>
-              <p className='text-muted-foreground mt-1'>
+    <div className='max-w-4xl mx-auto pb-20'>
+      <div className='mb-8 animate-in fade-in slide-in-from-top-4 duration-500'>
+        <Button variant='ghost' asChild className='hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full mb-6 -ml-3'>
+           <Link href='/admin/users'>
+             <ArrowLeft className='h-4 w-4 mr-2' />
+             Back to Users
+           </Link>
+        </Button>
+        <div className='flex items-center gap-4'>
+           <div className='h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/25'>
+             <UserPlus className='h-6 w-6 text-white' />
+           </div>
+           <div>
+              <h1 className='text-3xl sm:text-4xl font-black tracking-tight text-foreground'>
+                Create New User
+              </h1>
+              <p className='text-lg text-muted-foreground font-medium mt-1'>
                 Add a new user account to the system
               </p>
-            </div>
-          </div>
+           </div>
         </div>
+      </div>
 
+      <div className="grid gap-6">
         {/* Form Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>User Information</CardTitle>
-            <CardDescription>
-              Fill in the details below to create a new user account
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className='glass-card rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-black/5 border border-border/60 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100'>
             <UserForm 
               onSubmit={handleSubmit} 
               isSubmitting={isPending}
             />
-          </CardContent>
-        </Card>
+        </div>
 
         {/* Info Card */}
-        <Card className='border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20'>
-          <CardHeader>
-            <CardTitle className='text-base'>Password Requirements</CardTitle>
-          </CardHeader>
-          <CardContent className='text-sm text-muted-foreground space-y-1'>
-            <ul className='list-disc list-inside space-y-1'>
-              <li>Minimum 6 characters long</li>
-              <li>Users will be able to change their password after first login</li>
-              <li>Admin accounts have elevated privileges</li>
-            </ul>
-          </CardContent>
-        </Card>
+        <div className='p-6 rounded-3xl border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20 max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200'>
+          <h3 className='text-base font-bold flex items-center gap-2 mb-3 text-blue-800 dark:text-blue-300'>
+             <Info className="h-4 w-4" />
+             Password Requirements
+          </h3>
+          <ul className='list-disc list-inside space-y-1 text-sm text-blue-700/80 dark:text-blue-300/80'>
+             <li>Minimum 6 characters long</li>
+             <li>Users will be able to change their password after first login</li>
+             <li>Admin accounts have elevated privileges</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

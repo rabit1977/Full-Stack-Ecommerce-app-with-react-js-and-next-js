@@ -1,4 +1,4 @@
-import { AdminBottomNav, AdminSidebar } from '@/components/admin/admin-sidebar';
+import { AdminBottomNav, AdminMobileHeader, AdminSidebar } from '@/components/admin/admin-sidebar';
 import AdminAuthGuard from '@/components/auth/admin-auth-guard';
 
 export default function AdminLayout({
@@ -15,13 +15,19 @@ export default function AdminLayout({
         
         {/* Admin Sidebar */}
         <AdminSidebar />
-
-        {/* Main Content with bottom padding on mobile */}
-        <main className='flex-1 overflow-x-hidden pb-20 lg:pb-0'>
-          <div className='container-wide py-6 lg:py-8'>
-            <div className='page-enter'>{children}</div>
-          </div>
-        </main>
+        
+        {/* Content Wrapper */}
+        <div className="flex-1 flex flex-col min-w-0 pt-16 lg:pt-0">
+          {/* Mobile Header */}
+          <AdminMobileHeader />
+          
+          {/* Main Content with bottom padding on mobile */}
+          <main className='flex-1 overflow-x-hidden pb-20 lg:pb-0'>
+            <div className='container-wide py-6 lg:py-8'>
+              <div className='page-enter'>{children}</div>
+            </div>
+          </main>
+        </div>
 
         {/* Bottom Navigation for Mobile/Tablet */}
         <AdminBottomNav />

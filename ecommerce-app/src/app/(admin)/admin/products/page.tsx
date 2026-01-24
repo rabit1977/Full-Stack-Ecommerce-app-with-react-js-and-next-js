@@ -2,10 +2,9 @@ import { auth } from '@/auth';
 import { BulkDiscountModal } from '@/components/admin/bulk-discount-modal';
 import { ProductsClient } from '@/components/admin/products-client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { PaginationControls } from '@/components/ui/pagination';
-import { prisma } from '@/lib/db';
 import { Prisma } from '@/generated/prisma/client';
+import { prisma } from '@/lib/db';
 import { Package, PlusCircle } from 'lucide-react';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
@@ -54,12 +53,10 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
   ]);
 
   // 3. Convert Dates to Strings for Client Component
-  // Client components often expect JSON-serializable data (strings), not Date objects
   const products = rawProducts.map((product) => ({
     ...product,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
-    // Ensure JSON fields are typed correctly if needed
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options: product.options as any,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,29 +127,29 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
   }
 
   return (
-    <div className='space-y-8'>
+    <div className='space-y-8 pb-20'>
       {/* Header */}
-      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500'>
         <div className='space-y-1'>
-          <div className='flex items-center gap-2'>
-            <Package className='h-6 w-6 text-slate-600 dark:text-slate-400' />
-            <h1 className='text-3xl font-bold tracking-tight dark:text-white'>
-              Products
-            </h1>
-          </div>
-          <p className='text-slate-600 dark:text-slate-400'>
-            Manage your product catalog and inventory
+          <h1 className='text-3xl sm:text-4xl font-black tracking-tight text-foreground flex items-center gap-3'>
+            Products
+            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold ring-1 ring-inset ring-primary/20">
+               {stats.total}
+            </span>
+          </h1>
+          <p className='text-lg text-muted-foreground font-medium'>
+            Manage your product inventory and catalog
           </p>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex gap-3'>
           <BulkDiscountModal
             categories={categories.map((c) => c.category)}
             brands={brands.map((b) => b.brand)}
             applyBulkDiscountAction={applyBulkDiscountAction}
           />
-          <Button asChild>
+          <Button asChild size="lg" className="rounded-full font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all btn-premium">
             <Link href='/admin/products/new'>
-              <PlusCircle className='h-4 w-4 mr-2' />
+              <PlusCircle className='h-5 w-5 mr-2' />
               Add Product
             </Link>
           </Button>
@@ -160,73 +157,47 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
       </div>
 
       {/* Stats */}
-      <div className='grid grid-cols-1 sm:grid-cols-4 gap-4'>
-        <Card>
-          <CardContent className='pt-6'>
-            <div className='text-center'>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Total Products
-              </p>
-              <p className='text-3xl font-bold dark:text-white mt-2'>
-                {stats.total}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className='pt-6'>
-            <div className='text-center'>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Categories
-              </p>
-              <p className='text-3xl font-bold dark:text-white mt-2'>
-                {stats.categories}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className='pt-6'>
-            <div className='text-center'>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Brands
-              </p>
-              <p className='text-3xl font-bold dark:text-white mt-2'>
-                {stats.brands}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className='pt-6'>
-            <div className='text-center'>
-              <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
-                Low Stock
-              </p>
-              <p className='text-3xl font-bold text-orange-600 dark:text-orange-400 mt-2'>
-                {stats.lowStock}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100'>
+        {[
+            { label: 'Total Products', value: stats.total, icon: Package, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+            { label: 'Active Categories', value: stats.categories, icon: Package, color: 'text-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20' },
+            { label: 'Brands', value: stats.brands, icon: Package, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
+            { label: 'Low Stock', value: stats.lowStock, icon: Package, color: stats.lowStock > 0 ? 'text-orange-500' : 'text-emerald-500', bg: stats.lowStock > 0 ? 'bg-orange-500/10' : 'bg-emerald-500/10', border: stats.lowStock > 0 ? 'border-orange-500/20' : 'border-emerald-500/20' },
+        ].map((stat, i) => (
+             <div key={i} className={`glass-card p-6 rounded-3xl flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group border ${stat.border}`}>
+                <div className='flex justify-between items-start mb-2'>
+                    <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} ring-1 ring-inset ring-white/10 group-hover:scale-110 transition-transform`}>
+                       <stat.icon className='h-6 w-6' />
+                    </div>
+                </div>
+                <div>
+                   <h3 className='text-3xl font-black mt-2 tracking-tight text-foreground'>{stat.value}</h3>
+                   <p className='text-sm font-bold text-muted-foreground uppercase tracking-wider mt-1'>{stat.label}</p>
+                </div>
+             </div>
+        ))}
       </div>
 
       {/* Products List */}
-      <Card>
-        <CardContent className='pt-6'>
-          {products.length === 0 ? (
-            <div className='text-center py-12'>
-              <Package className='h-12 w-12 mx-auto text-slate-400 mb-4' />
-              <h3 className='text-lg font-semibold dark:text-white mb-2'>
-                No products yet
-              </h3>
-              <p className='text-slate-600 dark:text-slate-400 mb-4'>
-                Get started by creating your first product
-              </p>
-              <Button asChild>
+      <div className='glass-card rounded-[2.5rem] overflow-hidden shadow-xl shadow-black/5 border border-border/60 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200'>
+        <div className='p-8'> 
+           {products.length === 0 ? (
+            <div className='flex flex-col items-center justify-center py-20 text-center space-y-6'>
+              <div className='w-24 h-24 rounded-full bg-secondary/50 flex items-center justify-center animate-bounce duration-[3s]'>
+                  <Package className='h-12 w-12 text-muted-foreground/50' />
+              </div>
+              <div className="space-y-2">
+                 <h3 className='text-2xl font-black text-foreground'>
+                    No products found
+                 </h3>
+                 <p className='text-muted-foreground max-w-sm mx-auto'>
+                    Get started by adding your first product to the catalog.
+                 </p>
+              </div>
+              <Button asChild size="lg" className="rounded-full px-8 shadow-lg shadow-primary/20">
                 <Link href='/admin/products/new'>
-                  <PlusCircle className='h-4 w-4 mr-2' />
-                  Add Product
+                  <PlusCircle className='h-5 w-5 mr-2' />
+                  Create First Product
                 </Link>
               </Button>
             </div>
@@ -237,14 +208,19 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
               deleteMultipleProductsAction={deleteMultipleProductsAction}
             />
           )}
-        </CardContent>
-      </Card>
-      <PaginationControls
-        currentPage={page}
-        totalPages={totalPages}
-        hasNextPage={page < totalPages}
-        hasPreviousPage={page > 1}
-      />
+
+           {products.length > 0 && (
+             <div className="mt-8">
+                <PaginationControls
+                  currentPage={page}
+                  totalPages={totalPages}
+                  hasNextPage={page < totalPages}
+                  hasPreviousPage={page > 1}
+                />
+             </div>
+           )}
+        </div>
+      </div>
     </div>
   );
 }

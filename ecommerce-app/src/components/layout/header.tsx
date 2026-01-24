@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import {
-    Briefcase,
-    Headset,
-    Info,
-    LucideIcon,
-    Menu,
-    Package,
-    Zap,
+  Briefcase,
+  Headset,
+  Info,
+  LucideIcon,
+  Menu,
+  Package,
+  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -53,7 +53,7 @@ const Header = ({
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -73,44 +73,50 @@ const Header = ({
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300',
+        'sticky top-0 z-50 w-full transition-all duration-500 ease-in-out',
         isScrolled
-          ? 'bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-sm'
-          : 'bg-background/80 backdrop-blur-sm border-b border-transparent'
+          ? 'bg-background/80 backdrop-blur-xl border-b border-border/40 shadow-sm py-2 sm:py-3'
+          : 'bg-transparent border-b border-transparent py-4 sm:py-5'
       )}
       role='banner'
     >
-      <div className='container-wide flex h-16 sm:h-18 lg:h-20 items-center justify-between gap-2 sm:gap-4'>
+      <div className='container-wide flex items-center justify-between gap-2 sm:gap-4'>
         {/* Logo */}
         <Link
           href='/'
-          className='flex shrink-0 items-center gap-2 sm:gap-2.5 group'
+          className='flex shrink-0 items-center gap-3 group'
           aria-label='Electro home page'
         >
-          <div className='w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105'>
-            <Zap className='h-5 w-5 sm:h-5 sm:w-5 text-white' />
+          <div className='relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 group-hover:scale-105 transition-all duration-300'>
+            <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Zap className='h-6 w-6 text-white' fill="currentColor" />
           </div>
           <div className='hidden xs:block'>
-            <span className='text-lg sm:text-xl font-bold tracking-tight text-foreground'>
-              Electro
+            <span className='text-xl font-black tracking-tight text-foreground leading-none block'>
+              Electro<span className="text-primary">.</span>
             </span>
-            <span className='hidden sm:block text-[10px] text-muted-foreground font-medium -mt-0.5'>
-              Premium Tech
+            <span className='text-[11px] text-muted-foreground font-bold tracking-widest uppercase'>
+              Premium Store
             </span>
           </div>
         </Link>
 
         {/* Search Bar - Hidden on very small screens, shown from sm up */}
-        <div className='hidden sm:block flex-1 max-w-sm lg:max-w-md xl:max-w-lg mx-4 transition-all duration-300'>
-          <SearchBar />
+        <div className='hidden md:block flex-1 max-w-sm lg:max-w-md xl:max-w-xl mx-8 transition-all duration-300'>
+           <div className={cn(
+               "transition-all duration-300",
+               isScrolled ? "scale-100 opacity-100" : "scale-105"
+           )}>
+             <SearchBar />
+           </div>
         </div>
 
         {/* Desktop Navigation - Shown from lg up */}
         <nav
-          className='hidden lg:flex items-center'
+          className='hidden lg:flex items-center mx-4'
           aria-label='Main navigation'
         >
-          <div className='flex items-center p-1 bg-muted/50 dark:bg-muted/20 border border-white/10 backdrop-blur-md rounded-full'>
+          <div className='flex items-center gap-1 p-1.5 bg-secondary/50 dark:bg-secondary/20 border border-white/10 backdrop-blur-md rounded-full shadow-inner'>
             {navLinks.map((link) => {
               const isActive = isActiveLink(link.href);
               return (
@@ -118,25 +124,22 @@ const Header = ({
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'relative px-5 py-2 text-sm font-medium transition-all rounded-full duration-300',
+                    'relative px-4 py-2 text-sm font-bold transition-all rounded-full duration-300',
                     isActive
                       ? 'text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-white/5',
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/80',
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {isActive && (
                     <motion.span
                       layoutId='activeNavPill'
-                      className='absolute inset-0 bg-primary/90 rounded-full shadow-lg shadow-primary/25 ring-1 ring-white/10'
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      className='absolute inset-0 bg-gradient-to-r from-primary to-violet-600 rounded-full shadow-md shadow-primary/20'
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
                       style={{ borderRadius: 9999 }}
                     />
                   )}
                   <span className='relative z-10 flex items-center gap-2'>
-                    {link.icon && (
-                      <link.icon className={cn('h-4 w-4', isActive ? 'text-white' : 'text-current')} />
-                    )}
                     {link.label}
                   </span>
                 </Link>

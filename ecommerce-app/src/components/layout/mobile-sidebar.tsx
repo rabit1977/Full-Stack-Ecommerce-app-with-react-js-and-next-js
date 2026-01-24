@@ -7,15 +7,15 @@ import { useOnClickOutside } from '@/lib/hooks/useOnClickOutside';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    Home,
-    Info,
-    LogOut,
-    Mail,
-    Package,
-    ShoppingBag,
-    User,
-    UserCircle,
-    X,
+  Home,
+  Info,
+  LogOut,
+  Mail,
+  Package,
+  ShoppingBag,
+  User,
+  UserCircle,
+  X,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -309,7 +309,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
               {/* Footer (Logout) */}
               {user && (
-                <div className='border-t p-6 shrink-0 bg-muted/30'>
+                <div className='border-t p-6 shrink-0 bg-muted/30 mb-20'>
                   <Button
                     variant='outline'
                     className='w-full gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors'

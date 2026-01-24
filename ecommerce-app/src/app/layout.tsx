@@ -1,6 +1,6 @@
 import { getCartAction } from '@/actions/cart-actions';
 import { getWishlistAction } from '@/actions/wishlist-actions';
-import { Footer } from '@/components/layout/footer';
+import { FooterWrapper } from '@/components/layout/footer-wrapper';
 import { MobileSidebarWrapper } from '@/components/layout/mobile-sidebar-wrapper';
 import { QuickViewModal } from '@/components/product/quick-view-modal';
 import { Toast } from '@/components/toast';
@@ -49,7 +49,7 @@ export default async function RootLayout({
               initialCartItemCount={initialCartItemCount}
             />
             <main className='min-h-auto pb-20 lg:pb-0'>{children}</main>
-            <Footer />
+            <FooterWrapper />
             <QuickViewModal/>
             <Toast />
           </div>

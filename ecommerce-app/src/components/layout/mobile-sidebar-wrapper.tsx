@@ -1,6 +1,7 @@
 'use client';
 
 import { useMobileSidebar } from '@/lib/hooks/useMobileSidebar';
+import { usePathname } from 'next/navigation';
 import { Header } from './header';
 import { MobileSidebar } from './mobile-sidebar';
 
@@ -18,6 +19,12 @@ export function MobileSidebarWrapper({
   initialCartItemCount,
 }: MobileSidebarWrapperProps) {
   const sidebar = useMobileSidebar();
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith('/admin');
+
+  if (isAdminRoute) {
+    return null;
+  }
 
   return (
     <>

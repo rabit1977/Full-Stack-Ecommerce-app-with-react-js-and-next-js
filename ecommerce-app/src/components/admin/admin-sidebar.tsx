@@ -3,18 +3,23 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import {
-    ChevronRight,
-    Home,
-    LayoutDashboard,
-    Package,
-    Settings,
-    ShoppingCart,
-    Ticket,
-    Users,
-    Zap
+  BarChart,
+  ChevronRight,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Settings,
+  ShoppingCart,
+  Ticket,
+  Users,
+  Zap
 } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Button } from '../ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 const navLinks = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Overview & stats' },
@@ -26,6 +31,7 @@ const navLinks = [
 
 const quickLinks = [
   { href: '/', label: 'View Store', icon: Home },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart },
 ];
 
 /**
@@ -33,26 +39,32 @@ const quickLinks = [
  */
 export const AdminSidebar = () => {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   return (
-    <aside className='hidden lg:flex w-72 shrink-0 sticky top-0 h-screen flex-col admin-sidebar border-r'>
+    <aside className='hidden lg:flex w-72 shrink-0 sticky top-0 h-screen flex-col bg-background/60 backdrop-blur-xl border-r border-border/40 z-40'>
       <div className='flex h-full flex-col'>
         {/* Logo Section */}
-        <div className='p-6 border-b border-border/50'>
+        <div className='p-8 pb-6'>
           <Link href='/admin/dashboard' className='flex items-center gap-3 group'>
-            <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow'>
-              <Zap className='h-5 w-5 text-white' />
+            <div className='relative w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 group-hover:scale-105 transition-all duration-300'>
+              <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Zap className='h-6 w-6 text-white' fill="currentColor" />
             </div>
             <div>
-              <h1 className='text-lg font-bold tracking-tight'>Electro Admin</h1>
-              <p className='text-xs text-muted-foreground'>Store Management</p>
+              <h1 className='text-xl font-black tracking-tight text-foreground'>Electro<span className="text-primary">Admin</span></h1>
+              <p className='text-xs font-semibold text-muted-foreground tracking-wide'>STORE MANAGER</p>
             </div>
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className='flex-1 overflow-y-auto py-6 px-4'>
-          <div className='space-y-1.5'>
+        <nav className='flex-1 overflow-y-auto px-4 py-4 space-y-8 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent'>
+          <div className='space-y-2'>
+            <p className='px-4 text-xs font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 ml-1'>
+               Main Menu
+            </p>
             {navLinks.map((link) => {
               const isActive = pathname.startsWith(link.href);
               return (
@@ -60,38 +72,47 @@ export const AdminSidebar = () => {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200',
+                    'group relative flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium transition-all duration-300',
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      ? 'text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]'
+                      : 'text-muted-foreground hover:bg-white/50 dark:hover:bg-white/5 hover:text-foreground hover:translate-x-1'
                   )}
                 >
-                  {/* Active Indicator */}
+                  {/* Active Background with Motion */}
                   {isActive && (
                     <motion.div
-                      layoutId='activeNavIndicator'
-                      className='absolute inset-0 rounded-xl bg-primary'
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      layoutId='activeNavSidebar'
+                      className='absolute inset-0 rounded-xl bg-gradient-to-r from-primary to-violet-600'
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
                     />
                   )}
                   
-                  <span className='relative z-10 flex items-center gap-3 w-full'>
-                    <link.icon className={cn(
-                      'h-5 w-5 transition-transform group-hover:scale-110',
-                      isActive ? 'text-primary-foreground' : ''
-                    )} />
-                    <div className='flex-1'>
-                      <span className='block'>{link.label}</span>
-                      <span className={cn(
-                        'text-xs transition-colors',
-                        isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                      )}>
-                        {link.description}
-                      </span>
+                  <span className='relative z-10 flex items-center gap-3.5 w-full'>
+                    <div className={cn(
+                        "p-1 rounded-lg transition-all duration-300", 
+                        !isActive && "bg-secondary/50 group-hover:bg-white dark:group-hover:bg-white/10"
+                    )}>
+                        <link.icon className={cn(
+                          'h-5 w-5 transition-transform duration-300',
+                          isActive ? 'text-primary-foreground' : 'group-hover:scale-110'
+                        )} />
+                    </div>
+                    
+                    <div className='flex-1 flex flex-col justify-center'>
+                      <span className={cn('block leading-none', isActive ? 'font-bold' : 'font-semibold')}>{link.label}</span>
+                      {isActive && (
+                         <motion.span 
+                           initial={{ opacity: 0, height: 0 }} 
+                           animate={{ opacity: 1, height: 'auto' }}
+                           className='text-[10px] text-white/80 font-medium mt-1'
+                         >
+                           {link.description}
+                         </motion.span>
+                      )}
                     </div>
                     <ChevronRight className={cn(
-                      'h-4 w-4 opacity-0 -translate-x-2 transition-all',
-                      isActive && 'opacity-100 translate-x-0'
+                      'h-4 w-4 transition-all duration-300',
+                      isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-50 group-hover:translate-x-0'
                     )} />
                   </span>
                 </Link>
@@ -99,21 +120,20 @@ export const AdminSidebar = () => {
             })}
           </div>
 
-          {/* Divider */}
-          <div className='my-6 border-t border-border/50' />
-
-          {/* Quick Links */}
-          <div className='space-y-1'>
-            <p className='px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3'>
-              Quick Links
+          {/* Quick Links Group */}
+          <div className='space-y-2'>
+            <p className='px-4 text-xs font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 ml-1'>
+              Shortcuts
             </p>
             {quickLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className='flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors'
+                className='group flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/50 dark:hover:bg-white/5 hover:text-foreground transition-all duration-200'
               >
-                <link.icon className='h-4 w-4' />
+                <div className="p-1.5 rounded-lg bg-secondary/50 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                   <link.icon className='h-4 w-4' />
+                </div>
                 <span>{link.label}</span>
               </Link>
             ))}
@@ -121,19 +141,86 @@ export const AdminSidebar = () => {
         </nav>
 
         {/* Footer */}
-        <div className='p-4 border-t border-border/50 space-y-2'>
-          <Link
-            href='/admin/settings'
-            className='flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors'
-          >
-            <Settings className='h-4 w-4' />
-            <span>Settings</span>
-          </Link>
+        <div className='p-4 m-4 mt-0 bg-secondary/30 rounded-2xl border border-border/50 backdrop-blur-sm'>
+          <div className="flex items-center gap-3 mb-3">
+             <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center ring-2 ring-white dark:ring-slate-900 border border-white/20">
+                <span className="text-xs font-bold text-white">
+                  {user?.name?.slice(0, 2).toUpperCase() || 'AD'}
+                </span>
+             </div>
+             <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold truncate">{user?.name || 'Admin User'}</p>
+                <p className="text-[10px] text-muted-foreground truncate font-medium uppercase tracking-wide">Administrator</p>
+             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+                href='/admin/settings'
+                className='flex items-center justify-center gap-2 w-full rounded-xl bg-background/50 border border-border/50 px-3 py-2 text-[10px] font-bold hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all shadow-sm'
+            >
+                <Settings className='h-3 w-3' />
+                <span>Settings</span>
+            </Link>
+            <button
+                onClick={() => signOut()}
+                className='flex items-center justify-center gap-2 w-full rounded-xl bg-background/50 border border-border/50 px-3 py-2 text-[10px] font-bold hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all shadow-sm'
+            >
+                <LogOut className='h-3 w-3' />
+                <span>Logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </aside>
   );
 };
+
+/**
+ * Mobile Header for Admin - visible on mobile/tablet
+ * Provides a place for logout/settings that isn't hidden by bottom nav
+ */
+export const AdminMobileHeader = () => {
+    const { data: session } = useSession();
+    const user = session?.user;
+
+    return (
+        <header className='lg:hidden fixed top-0 left-0 right-0 z-50 w-full bg-background border-b border-border/50 px-4 h-16 flex items-center justify-between shadow-sm'>
+             <Link href='/admin/dashboard' className='flex items-center gap-2'>
+                <div className='w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-md shadow-primary/20'>
+                    <Zap className='h-4 w-4 text-white' fill="currentColor" />
+                </div>
+                <span className='font-bold text-lg tracking-tight'>Electro<span className="text-primary">Admin</span></span>
+            </Link>
+
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 border border-border/50 bg-secondary/20">
+                         <div className="h-full w-full rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center ring-1 ring-white/20">
+                            <span className="text-[10px] font-bold text-white">
+                                {user?.name?.slice(0, 2).toUpperCase() || 'AD'}
+                            </span>
+                        </div>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 glass-card p-2 rounded-xl">
+                    <DropdownMenuItem asChild className="rounded-lg">
+                        <Link href="/admin/settings" className="w-full flex items-center cursor-pointer">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Settings
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                        className="rounded-lg text-destructive focus:text-destructive cursor-pointer"
+                        onClick={() => signOut()}
+                    >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Log out
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </header>
+    )
+}
 
 /**
  * Premium Bottom Navigation - visible on mobile/tablet
@@ -142,8 +229,8 @@ export const AdminBottomNav = () => {
   const pathname = usePathname();
 
   return (
-    <nav className='lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/50 shadow-lg'>
-      <div className='grid grid-cols-5 h-16 max-w-md mx-auto'>
+    <nav className='lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-2xl border-t border-border/50 shadow-2xl safe-area-pb'>
+      <div className='grid grid-cols-5 h-[4.5rem] items-end pb-2 max-w-md mx-auto'>
         {navLinks.map((link) => {
           const isActive = pathname.startsWith(link.href);
           const Icon = link.icon;
@@ -153,44 +240,41 @@ export const AdminBottomNav = () => {
               key={link.href}
               href={link.href}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-1 text-xs transition-all duration-200',
+                'relative flex flex-col items-center justify-center h-full pb-2 gap-1 text-xs transition-all duration-300',
                 isActive
-                  ? 'text-primary font-semibold'
+                  ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              {/* Active Background */}
-              {isActive && (
-                <motion.div
-                  layoutId='activeBottomNav'
-                  className='absolute inset-x-2 top-1 bottom-1 rounded-xl bg-primary/10 dark:bg-primary/20'
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              
-              <div className='relative z-10 flex flex-col items-center justify-center gap-0.5'>
-                <Icon
-                  className={cn(
-                    'h-5 w-5 transition-all',
-                    isActive && 'scale-110'
-                  )}
-                />
+              <div className='relative z-10 flex flex-col items-center justify-center gap-1 group'>
+                <div className={cn(
+                    "p-1.5 rounded-xl transition-all duration-300",
+                    isActive ? "bg-primary/10 -translate-y-1" : "group-hover:bg-secondary/50"
+                )}>
+                    <Icon
+                    className={cn(
+                        'h-5 w-5 transition-all',
+                        isActive && 'scale-110'
+                    )}
+                    />
+                </div>
                 <span
                   className={cn(
-                    'truncate max-w-[60px] transition-all',
-                    isActive && 'font-medium'
+                    'text-[10px] font-medium transition-all',
+                    isActive ? 'font-bold translate-y-[-2px]' : 'scale-90 opacity-80'
                   )}
                 >
                   {link.label}
                 </span>
               </div>
               
-              {/* Active Dot Indicator */}
+              {/* Active Indicator */}
               {isActive && (
                 <motion.div
+                  layoutId='activeBottomIndicator'
+                  className='absolute bottom-1 w-1 h-1 rounded-full bg-primary'
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className='absolute -top-0.5 w-1.5 h-1.5 rounded-full bg-primary'
                 />
               )}
             </Link>
