@@ -29,6 +29,7 @@ export const ProductGrid = ({
   pageSize = 8,
   allCategories,
   allBrands,
+  searchQuery: propSearchQuery,
 }: ProductGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -65,19 +66,22 @@ export const ProductGrid = ({
 
 
 
+  // Use prop searchQuery if available, otherwise fall back to hook
+  const effectiveSearchQuery = propSearchQuery || searchQuery;
+
   const currentTitle = useMemo(
-    () => (searchQuery ? `Results for "${searchQuery}"` : title),
-    [searchQuery, title]
+    () => (effectiveSearchQuery ? `Results for "${effectiveSearchQuery}"` : title),
+    [effectiveSearchQuery, title]
   );
 
   const currentSubtitle = useMemo(
     () =>
-      searchQuery
+      effectiveSearchQuery
         ? `${totalCount.toLocaleString()} product${
             totalCount !== 1 ? 's' : ''
           } found`
         : subtitle,
-    [searchQuery, totalCount, subtitle]
+    [effectiveSearchQuery, totalCount, subtitle]
   );
 
   const filterSidebar = useMemo(
