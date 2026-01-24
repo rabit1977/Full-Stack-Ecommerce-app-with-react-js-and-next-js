@@ -2,23 +2,23 @@
 
 import { deleteUserFromAdminAction } from '@/actions/user-actions';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { User } from '@/lib/types';
 import { Edit, Eye, MoreHorizontal, Trash2, UserCog } from 'lucide-react';
@@ -117,7 +117,7 @@ export function UsersDataTable({ users }: UsersDataTableProps) {
           {user.image ? (
             <div className='h-8 w-8 relative shrink-0'>
               <Image 
-                src={user.image} 
+                src={user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`} 
                 alt={user.name || 'User'} 
                 fill
                 className='rounded-full object-cover'

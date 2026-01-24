@@ -1,5 +1,4 @@
 import { UserRole } from '@/generated/prisma/client';
-import { prisma } from '@/lib/db';
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
@@ -7,31 +6,42 @@ export const authConfig = {
     signIn: '/auth/sign-in',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // 1. Initial sign-in
       if (user) {
-        // This block runs only on sign-in
         token.id = user.id;
         token.role = user.role as UserRole;
         token.bio = user.bio;
-        token.helpfulReviews = user.helpfulReviews;
-        token.createdAt = user.createdAt; // 🔥 Add createdAt to token
+        token.image = user.image;
+        token.createdAt = user.createdAt;
+      }
 
-        // On sign-in, fetch the wishlist from the DB
+      // 2. Handle session updates (e.g. from updateProfileAction)
+      if (trigger === 'update' && session?.user) {
+        return { ...token, ...session.user };
+      }
+
+      // 3. Fresh role fetch from DB on every call
+      if (token.id) {
         try {
-          const wishlistItems = await prisma.wishlistItem.findMany({
-            where: { userId: user.id },
-            select: { productId: true },
+          // We use a dynamic import for prisma to avoid environment issues in middleware
+          const { prisma } = await import('@/lib/db');
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, name: true, image: true, bio: true },
           });
-          token.wishlist = wishlistItems.map((item) => item.productId);
+
+          if (dbUser) {
+            token.role = dbUser.role as UserRole;
+            token.name = dbUser.name;
+            token.image = dbUser.image;
+            token.bio = dbUser.bio;
+          }
         } catch (error) {
-          console.error(
-            "Database error fetching wishlist. Have you run 'npx prisma migrate dev'?",
-            error,
-          );
-          // Default to empty wishlist if DB query fails
-          token.wishlist = [];
+          console.error('[JWT Callback] Error fetching fresh user data:', error);
         }
       }
+
       return token;
     },
     async session({ session, token }) {
@@ -39,10 +49,8 @@ export const authConfig = {
         session.user.id = token.id as string;
         session.user.role = (token.role as UserRole) || 'USER';
         session.user.bio = (token.bio as string | null) || null;
-        session.user.image = (token.picture as string | null) || (token.image as string | null);
+        session.user.image = (token.image as string | null) || (token.picture as string | null);
         session.user.createdAt = token.createdAt as Date;
-        session.user.helpfulReviews = (token.helpfulReviews as string[]) || [];
-        session.user.wishlist = (token.wishlist as string[]) || [];
       }
       return session;
     },

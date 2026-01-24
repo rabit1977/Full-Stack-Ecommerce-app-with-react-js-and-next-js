@@ -6,24 +6,24 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatDateTime } from '@/lib/utils/formatters';
 import {
-  ArrowLeft,
-  Calendar,
-  CheckCircle2,
-  Edit,
-  Mail,
-  Shield,
-  ShoppingBag,
-  Star,
-  XCircle,
+    ArrowLeft,
+    Calendar,
+    CheckCircle2,
+    Edit,
+    Mail,
+    Shield,
+    ShoppingBag,
+    Star,
+    XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -107,8 +107,9 @@ export default async function UserDetailsPage({
                 <div className='flex items-start gap-4'>
                   <Avatar className='h-20 w-20'>
                     <AvatarImage
-                      src={user.image || undefined}
+                      src={user.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined}
                       alt={user.name || 'User'}
+                      className="object-cover"
                     />
                     <AvatarFallback className='text-2xl'>
                       {user.name?.charAt(0).toUpperCase() || 'U'}

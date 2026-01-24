@@ -7,11 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { ArrowLeft, Shield } from 'lucide-react';
 import Link from 'next/link';
@@ -60,7 +60,11 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
 
           <div className='flex items-start gap-4'>
             <Avatar className='h-16 w-16'>
-              <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
+              <AvatarImage 
+                src={user.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined} 
+                alt={user.name || 'User'} 
+                className="object-cover"
+              />
               <AvatarFallback className='text-xl'>
                 {user.name?.charAt(0).toUpperCase() || 'U'}
               </AvatarFallback>

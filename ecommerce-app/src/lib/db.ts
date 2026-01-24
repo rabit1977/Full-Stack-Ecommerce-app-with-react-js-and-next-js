@@ -12,8 +12,8 @@ const pool =
   globalForPrisma.pool ??
   new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 1, // Matches connection_limit=1 in your Supabase URL
-    connectionTimeoutMillis: 5000, // Handle pooler wait times
+    max: 2, // Increased slightly to handle concurrent Server Component fetches
+    connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
   })
 const adapter = globalForPrisma.adapter ?? new PrismaPg(pool)

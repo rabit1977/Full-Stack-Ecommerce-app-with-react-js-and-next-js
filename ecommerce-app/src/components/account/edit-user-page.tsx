@@ -5,21 +5,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-    ArrowLeft,
-    Calendar,
-    Camera,
-    Mail,
-    Shield,
-    User as UserIcon
+  ArrowLeft,
+  Calendar,
+  Camera,
+  Mail,
+  Shield,
+  User as UserIcon
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -58,24 +58,52 @@ export default function EditProfilePage() {
   const handleUpdateProfile = async (values: EditProfileFormValues) => {
     startTransition(async () => {
       try {
+        let uploadedImageUrl = session?.user?.image || undefined;
+
+        // If there's a new image preview (base64 from FileReader)
+        if (imagePreview && imagePreview.startsWith('data:')) {
+          // Convert base64 back to a blob/file to upload via our API
+          const response = await fetch(imagePreview);
+          const blob = await response.blob();
+          const file = new File([blob], 'profile-picture.jpg', { type: 'image/jpeg' });
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const uploadResult = await uploadRes.json();
+          if (uploadResult.success) {
+            uploadedImageUrl = uploadResult.url;
+          } else {
+            toast.error('Failed to upload image');
+            return;
+          }
+        }
+
         const result = await updateProfileAction({
           ...values,
-          image: imagePreview || undefined,
+          image: uploadedImageUrl,
         });
 
         if (result.success) {
           toast.success('Profile updated successfully');
           
-          // Update session with new data
+          // Update session with new data using the URL (small), NOT base64 (huge)
           await update({
             ...session,
             user: {
               ...session?.user,
               name: result.user?.name,
               bio: result.user?.bio,
-              image: imagePreview || session?.user?.image,
+              image: uploadedImageUrl,
             },
           });
+          
+          setImagePreview(null); // Clear preview after successful save
         } else {
           toast.error(result.message || 'Failed to update profile');
         }
@@ -172,8 +200,9 @@ export default function EditProfilePage() {
                   <div className='relative group'>
                     <Avatar className='h-32 w-32 border-4 border-white dark:border-slate-800 shadow-xl'>
                       <AvatarImage 
-                        src={imagePreview || user.image || undefined} 
+                        src={imagePreview || (user.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined)} 
                         alt={user.name || 'User'} 
+                        className="object-cover"
                       />
                       <AvatarFallback className='text-3xl bg-gradient-to-br from-blue-500 to-purple-500 text-white'>
                         {userInitials}

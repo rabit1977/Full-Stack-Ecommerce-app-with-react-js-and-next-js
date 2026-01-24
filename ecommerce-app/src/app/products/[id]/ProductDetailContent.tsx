@@ -1,3 +1,4 @@
+import { getMeAction } from '@/actions/auth-actions';
 import { getCartAction } from '@/actions/cart-actions';
 import { getProductByIdAction } from '@/actions/product-actions';
 import { getWishlistAction } from '@/actions/wishlist-actions';
@@ -15,6 +16,7 @@ export async function ProductDetailContent({
   const product = await getProductByIdAction(productId);
   const { wishlist } = await getWishlistAction();
   const cart = await getCartAction();
+  const { user } = await getMeAction();
 
   if (!product) {
     notFound();
@@ -40,7 +42,11 @@ export async function ProductDetailContent({
         </div>
       </div>
       <div className='mt-20 sm:mt-24 lg:mt-32'>
-        <ReviewsSection productId={product.id} product={product} />
+        <ReviewsSection 
+          productId={product.id} 
+          product={product} 
+          helpfulReviews={user?.helpfulReviews || []} 
+        />
       </div>
       <div className='mt-20 sm:mt-24 lg:mt-32'>
         <RelatedProducts currentProduct={product} />

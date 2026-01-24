@@ -77,6 +77,7 @@ export type ProductWithRelations = Product & {
     createdAt: Date;
     user: {
       name: string | null;
+      image: string | null;
     };
   }[];
 };

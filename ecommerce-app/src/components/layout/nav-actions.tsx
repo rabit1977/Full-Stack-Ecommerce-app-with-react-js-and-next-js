@@ -162,7 +162,7 @@ export const NavActions = ({
               </span>
               <Avatar className='h-7 w-7 sm:h-8 sm:w-8 border border-slate-200 dark:border-slate-800 transition-transform group-hover:scale-105'>
                 <AvatarImage 
-                  src={user.image || undefined} 
+                  src={user.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined} 
                   alt={user.name || 'User'} 
                   className="object-cover"
                 />

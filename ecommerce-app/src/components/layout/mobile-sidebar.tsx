@@ -1,20 +1,21 @@
 'use client';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useOnClickOutside } from '@/lib/hooks/useOnClickOutside';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Home,
-  Info,
-  LogOut,
-  Mail,
-  Package,
-  ShoppingBag,
-  User,
-  UserCircle,
-  X,
+    Home,
+    Info,
+    LogOut,
+    Mail,
+    Package,
+    ShoppingBag,
+    User,
+    UserCircle,
+    X,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -223,9 +224,16 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                   {user ? (
                     <div className='rounded-lg border bg-card p-4 shadow-sm'>
                       <div className='flex items-center gap-3'>
-                        <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary/80 text-primary-foreground font-semibold shadow-md'>
-                          {userInitials || <User className='h-6 w-6' />}
-                        </div>
+                        <Avatar className='h-12 w-12 border border-slate-200 dark:border-slate-800 shadow-sm'>
+                          <AvatarImage 
+                            src={user.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined} 
+                            alt={user.name || 'User'} 
+                            className="object-cover"
+                          />
+                          <AvatarFallback className='bg-linear-to-br from-primary to-primary/80 text-primary-foreground font-semibold text-lg'>
+                            {userInitials || <User className='h-6 w-6' />}
+                          </AvatarFallback>
+                        </Avatar>
                         <div className='min-w-0 flex-1'>
                           <p className='truncate font-semibold text-foreground'>
                             {user.name}

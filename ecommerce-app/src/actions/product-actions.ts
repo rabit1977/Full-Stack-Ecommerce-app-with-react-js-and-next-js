@@ -127,6 +127,7 @@ export async function getProductsAction(
           select: {
             id: true,
             userId: true,
+            productId: true,
             rating: true,
             title: true,
             comment: true,
@@ -136,6 +137,7 @@ export async function getProductsAction(
             user: {
               select: {
                 name: true,
+                image: true,
               },
             },
           },
@@ -180,6 +182,7 @@ export async function getProductByIdAction(
           select: {
             id: true,
             userId: true,
+            productId: true,
             rating: true,
             title: true,
             comment: true,
@@ -189,6 +192,7 @@ export async function getProductByIdAction(
             user: {
               select: {
                 name: true,
+                image: true,
               },
             },
           },

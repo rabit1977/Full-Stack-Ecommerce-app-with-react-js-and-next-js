@@ -1,8 +1,8 @@
 'use server';
 
 import { auth } from '@/auth';
-import { prisma } from '@/lib/db';
 import { Prisma, UserRole } from '@/generated/prisma/client';
+import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 
@@ -236,5 +236,29 @@ export async function updateProfileAction(data: {
     return { success: true, message: 'Profile updated successfully.', user };
   } catch {
     return { success: false, message: 'Failed to update profile' };
+  }
+}
+
+/**
+ * Get current user with all relations
+ */
+export async function getMeAction() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        coupon: true,
+      },
+    });
+
+    return { success: true, user };
+  } catch (error) {
+    console.error('getMeAction Error:', error);
+    return { success: false, error: 'Failed to fetch user' };
   }
 }

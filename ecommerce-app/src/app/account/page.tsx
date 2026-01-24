@@ -11,14 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/utils/formatters';
 import {
-  Calendar,
-  Heart,
-  Mail,
-  Package,
-  Settings,
-  Shield,
-  ShoppingCart,
-  TrendingUp,
+    Calendar,
+    Heart,
+    Mail,
+    Package,
+    Settings,
+    Shield,
+    ShoppingCart,
+    TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -88,7 +88,7 @@ const AccountPage = async () => {
               <div className='relative group'>
                 <Avatar className='w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-lg ring-4 ring-white dark:ring-slate-800 transition-transform group-hover:scale-105'>
                   <AvatarImage 
-                    src={user?.image || undefined} 
+                    src={user?.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined} 
                     alt={user?.name || 'User'} 
                     className="object-cover"
                   />

@@ -1,9 +1,10 @@
 'use client';
 
+import { addOrUpdateReviewAction } from '@/actions/review-actions';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { addOrUpdateReviewAction } from '@/actions/review-actions';
 import { Star } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -112,10 +113,27 @@ export const AddReviewForm = ({
   }
 
   return (
-    <div className='mt-8 p-6 bg-slate-100 rounded-lg dark:bg-slate-800'>
-      <h3 className='text-lg font-semibold dark:text-white'>
-        {reviewToEdit ? 'Edit Your Review' : 'Write a Review'}
-      </h3>
+    <div className='mt-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all'>
+      <div className='flex items-center gap-4 mb-6'>
+        <Avatar className='w-12 h-12 rounded-xl shadow-sm'>
+          <AvatarImage 
+            src={user?.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined} 
+            alt={user?.name || 'User'} 
+            className="object-cover"
+          />
+          <AvatarFallback className='bg-primary/10 text-primary font-bold text-lg rounded-xl'>
+            {(user?.name || '?').charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <h3 className='text-lg font-bold text-slate-900 dark:text-white'>
+            {reviewToEdit ? 'Update Your Review' : 'Write a Review'}
+          </h3>
+          <p className='text-sm text-slate-500 dark:text-slate-400'>
+            Share your experience with others
+          </p>
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className='mt-4 space-y-4'>
         <div>
           <p className="mb-2 font-medium dark:text-slate-300">Your Rating</p>
