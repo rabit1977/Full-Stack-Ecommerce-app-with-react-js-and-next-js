@@ -122,7 +122,7 @@ const OrderDetailPage = async ({ params }: OrderDetailPageProps) => {
                 />
              </div>
              
-            {statusSteps.map((step, index) => {
+            {statusSteps.map((step, _index) => {
               const Icon = step.icon;
               const isCompleted = step.status === 'complete';
               const isCurrent = step.status === 'current';

@@ -8,7 +8,7 @@ import { AlertCircle, CheckCircle2, Eye, EyeOff, KeyRound, Loader2, Lock, Mail, 
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-const PASSWORD_MIN_LENGTH = 6;
+// Password minimum length is 6 (used in getPasswordStrength)
 
 const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
   let score = 0;

@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity,
-  Calendar,
-  DollarSign,
-  Eye,
-  Package,
-  ShoppingCart,
-  Sparkles,
-  TrendingUp,
-  Users
+    Activity,
+    Calendar,
+    DollarSign,
+    Eye,
+    Package,
+    ShoppingCart,
+    Sparkles,
+    TrendingUp,
+    Users
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -567,7 +567,7 @@ export default function DashboardClient({
           { label: 'View Orders', href: '/admin/orders', icon: ShoppingCart, color: 'bg-blue-100 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400' },
           { label: 'Manage Users', href: '/admin/users', icon: Users, color: 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' },
           { label: 'Coupons', href: '/admin/coupons', icon: Sparkles, color: 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400' },
-        ].map((action, index) => (
+        ].map((action, _index) => (
           <Link
             key={action.label}
             href={action.href}

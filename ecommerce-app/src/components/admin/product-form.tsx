@@ -73,8 +73,8 @@ export const ProductForm = ({
   const [isUploading, setIsUploading] = useState(false);
 
   // Initialize form
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<ProductFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(productFormSchema) as any,
     defaultValues: {
       title: product?.title || '',
@@ -91,11 +91,12 @@ export const ProductForm = ({
       isFeatured: product?.isFeatured || false,
       isArchived: product?.isArchived || false,
       tags: product?.tags || [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dimensions: product?.dimensions && typeof product.dimensions === 'object' 
         ? {
-            length: 'length' in product.dimensions ? Number((product.dimensions as any).length) : undefined,
-            width: 'width' in product.dimensions ? Number((product.dimensions as any).width) : undefined,
-            height: 'height' in product.dimensions ? Number((product.dimensions as any).height) : undefined,
+            length: 'length' in product.dimensions ? Number((product.dimensions as Record<string, unknown>).length) : undefined,
+            width: 'width' in product.dimensions ? Number((product.dimensions as Record<string, unknown>).width) : undefined,
+            height: 'height' in product.dimensions ? Number((product.dimensions as Record<string, unknown>).height) : undefined,
           }
         : undefined,
       specifications: product?.specifications && Array.isArray(product.specifications)
@@ -578,7 +579,7 @@ export const ProductForm = ({
                                 ))}
                                 {fields.length === 0 && (
                                     <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border">
-                                        No specifications added yet. Click "Add Spec" to define custom features.
+                                        No specifications added yet. Click &quot;Add Spec&quot; to define custom features.
                                     </div>
                                 )}
                             </div>

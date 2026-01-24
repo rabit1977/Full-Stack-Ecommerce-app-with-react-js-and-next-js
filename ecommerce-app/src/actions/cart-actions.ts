@@ -282,7 +282,7 @@ export async function getCartAction() {
         where: { id: session.user.id },
         include: { coupon: true },
       });
-    } catch (error) {
+    } catch (_error) {
       console.warn('Warning: Failed to fetch user data (likely due to missing DB columns). Using session fallback.');
       // Fallback: create a minimal user object from session if DB fetch fails
       if (!user && session.user) {

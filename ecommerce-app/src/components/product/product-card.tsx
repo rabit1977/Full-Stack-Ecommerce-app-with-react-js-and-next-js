@@ -25,7 +25,7 @@ export const ProductCard = memo(
     const [isWished, setIsWished] = useState(initialIsWished);
     const [optimisticIsWished, toggleOptimisticIsWished] = useOptimistic(
       isWished,
-      (state: boolean, _: unknown) => !state
+      (state: boolean) => !state
     );
 
     const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -107,7 +107,7 @@ export const ProductCard = memo(
           setIsAddingToCart(false);
         });
       },
-      [product.id, isOutOfStock],
+      [product.id, isOutOfStock, addOptimisticStock],
     );
 
     const effectivePrice = discount ? discount.discountedPrice : product.price;
