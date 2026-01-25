@@ -12,9 +12,13 @@ const pool =
   globalForPrisma.pool ??
   new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 10, // Increased to handle concurrent Server Component fetches
+    max: 10,
     connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
+    // Add SSL for production environments (required by most cloud providers like Neon, Vercel Postgres, etc.)
+    ssl: process.env.NODE_ENV === 'production' 
+      ? { rejectUnauthorized: false } 
+      : undefined,
   })
 const adapter = globalForPrisma.adapter ?? new PrismaPg(pool)
 
