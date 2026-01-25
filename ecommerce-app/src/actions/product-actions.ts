@@ -170,7 +170,9 @@ export async function getProductsAction(
     };
   } catch (error) {
     console.error('Error fetching products:', error);
-    throw new Error('Failed to fetch products');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
+    console.error('Error fetching products:', error);
+    throw new Error(`Failed to fetch products: ${errorMessage}`);
   }
 }
 
