@@ -138,7 +138,7 @@ export const HeroHeader = () => {
         {/* Trust Indicators */}
         <motion.div
           variants={fadeInUpVariants}
-          className='pt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-12'
+          className='pt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-12'
         >
           {[
             { icon: Truck, label: 'Free Shipping', subtext: 'On orders $50+' },
@@ -150,9 +150,9 @@ export const HeroHeader = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 + index * 0.1 }}
-              className='flex items-center gap-3 group'
+              className='flex items-center gap-3 group w-48 sm:w-auto'
             >
-              <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors'>
+              <div className='w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors'>
                 <item.icon className='h-5 w-5 text-primary' />
               </div>
               <div className='text-left'>

@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CartItemWithProduct } from '@/lib/types/cart';
+import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import { Bookmark, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
@@ -53,125 +54,146 @@ export const CartItem = React.memo(
     const options = item.selectedOptions || {};
 
     return (
-      <li className='group flex flex-col py-6 sm:flex-row px-4 sm:px-6 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/50'>
-        <div className='relative h-32 w-full sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-xl border border-border bg-muted'>
-          <Image
-            src={getProductImage(item.product)}
-            alt={item.product.title}
-            fill
-            className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
-          />
-        </div>
-        <div className='mt-4 flex flex-1 flex-col justify-between sm:ml-6 sm:mt-0'>
-          <div className='relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0'>
-            <div>
-              <div className='flex justify-between'>
-                <h3 className='text-base font-semibold text-foreground'>
-                  <Link
-                    href={`/products/${item.productId}`}
-                    className='hover:text-primary transition-colors'
-                  >
-                    {item.product.title}
-                  </Link>
-                </h3>
-              </div>
-              <div className='mt-1 flex text-sm'>
-                <p className='text-muted-foreground font-medium'>
-                   {item.product.brand && <span className='uppercase tracking-wider text-xs mr-2 border border-border px-1.5 py-0.5 rounded'>{item.product.brand}</span>}
-                </p>
-              </div>
-              {Object.keys(options).length > 0 && (
-                <div className='mt-2 flex flex-wrap gap-2'>
-                  {Object.entries(options).map(([name, value]) => (
-                    <span 
-                      key={name} 
-                      className='inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-gray-500/10'
-                    >
-                      {name}: {value as string}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className='mt-4 sm:mt-0 sm:pr-9 text-right'>
-              <p className='text-lg font-bold text-foreground tabular-nums'>
-                {formatPrice(item.product.price * item.quantity)}
-              </p>
-              {item.quantity > 1 && (
-                <p className='text-xs text-muted-foreground mt-0.5'>
-                  {formatPrice(item.product.price)} each
-                </p>
-              )}
-            </div>
+      <li className='group p-3 sm:p-6'>
+        {/* Mobile Layout: Image left, info right */}
+        <div className='flex gap-3 sm:gap-6'>
+          {/* Product Image */}
+          <div className='relative h-20 w-20 sm:h-28 sm:w-28 md:h-36 md:w-36 shrink-0 overflow-hidden rounded-xl border border-border bg-muted'>
+            <Image
+              src={getProductImage(item.product)}
+              alt={item.product.title}
+              fill
+              className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
+            />
           </div>
 
-          <div className='mt-4 flex items-center justify-between'>
-             {/* Quantity Control */}
-            <div className='flex items-center rounded-full border border-border bg-background shadow-sm'>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='h-8 w-8 rounded-l-full hover:bg-secondary'
-                onClick={handleQuantityDecrease}
-                aria-label='Decrease quantity'
-                disabled={isPending || item.quantity <= 1}
-              >
-                <Minus className='h-3.5 w-3.5' />
-              </Button>
-              <div className='w-10 text-center text-sm font-semibold tabular-nums border-x border-border/50 h-full flex items-center justify-center bg-secondary/30'>
-                 {item.quantity}
-              </div>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='h-8 w-8 rounded-r-full hover:bg-secondary'
-                onClick={handleQuantityIncrease}
-                aria-label='Increase quantity'
-                disabled={isPending || item.quantity >= item.product.stock}
-              >
-                <Plus className='h-3.5 w-3.5' />
-              </Button>
+          {/* Product Details */}
+          <div className='flex-1 min-w-0 flex flex-col'>
+            {/* Title + Price Row */}
+            <div className='flex items-start justify-between gap-2'>
+              <h3 className='text-sm sm:text-base font-semibold text-foreground line-clamp-2'>
+                <Link
+                  href={`/products/${item.productId}`}
+                  className='hover:underline transition-all'
+                >
+                  {item.product.title}
+                </Link>
+              </h3>
+              <p className='text-sm sm:text-lg font-bold text-foreground tabular-nums shrink-0'>
+                {formatPrice(item.product.price * item.quantity)}
+              </p>
             </div>
 
-            <div className='flex items-center gap-4'>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={handleSaveForLater}
-                disabled={isPending}
-                className='text-muted-foreground hover:text-primary text-xs sm:text-sm font-medium'
-              >
-                Save for later
-              </Button>
-              <span className="text-border h-4 w-px bg-border/50" />
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    className='text-muted-foreground hover:text-destructive hover:bg-destructive/5 text-xs sm:text-sm font-medium'
-                    disabled={isPending}
+            {/* Brand */}
+            {item.product.brand && (
+              <p className='text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mt-0.5'>
+                {item.product.brand}
+              </p>
+            )}
+
+            {/* Options */}
+            {Object.keys(options).length > 0 && (
+              <div className='mt-1.5 flex flex-wrap gap-1'>
+                {Object.entries(options).map(([name, value]) => (
+                  <span 
+                    key={name} 
+                    className='inline-flex items-center rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground'
                   >
-                    <Trash2 className='h-3.5 w-3.5 mr-1.5' />
-                    Remove
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Remove Item</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to remove this item from your cart?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleRemove} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
-                      Remove
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                    {name}: {value as string}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Unit price if multiple */}
+            {item.quantity > 1 && (
+              <p className='text-[10px] sm:text-xs text-muted-foreground mt-1'>
+                {formatPrice(item.product.price)} each
+              </p>
+            )}
+
+            {/* Spacer */}
+            <div className='flex-1' />
+
+            {/* Actions Row - Quantity + Buttons */}
+            <div className='flex items-center justify-between gap-2 mt-3'>
+              {/* Quantity Control */}
+              <div className='flex items-center rounded-full border border-border bg-background shadow-sm'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-7 w-7 sm:h-8 sm:w-8 rounded-l-full hover:bg-secondary'
+                  onClick={handleQuantityDecrease}
+                  aria-label='Decrease quantity'
+                  disabled={isPending || item.quantity <= 1}
+                >
+                  <Minus className='h-3 w-3' />
+                </Button>
+                <div className='w-8 sm:w-10 text-center text-xs sm:text-sm font-semibold tabular-nums border-x border-border/50 h-full flex items-center justify-center bg-secondary/30'>
+                  {item.quantity}
+                </div>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-7 w-7 sm:h-8 sm:w-8 rounded-r-full hover:bg-secondary'
+                  onClick={handleQuantityIncrease}
+                  aria-label='Increase quantity'
+                  disabled={isPending || item.quantity >= item.product.stock}
+                >
+                  <Plus className='h-3 w-3' />
+                </Button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className='flex items-center gap-1'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  onClick={handleSaveForLater}
+                  disabled={isPending}
+                  className={cn(
+                    'h-8 w-8 rounded-full',
+                    'text-muted-foreground hover:text-primary hover:bg-primary/10'
+                  )}
+                  title='Save for later'
+                >
+                  <Bookmark className='h-4 w-4' />
+                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className={cn(
+                        'h-8 w-8 rounded-full',
+                        'text-muted-foreground hover:text-destructive hover:bg-destructive/10'
+                      )}
+                      disabled={isPending}
+                      title='Remove item'
+                    >
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className='max-w-[90vw] sm:max-w-md rounded-2xl'>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remove Item</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to remove this item from your cart?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className='flex-col sm:flex-row gap-2'>
+                      <AlertDialogCancel className='w-full sm:w-auto'>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleRemove} 
+                        className='w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                      >
+                        Remove
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           </div>
         </div>

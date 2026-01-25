@@ -106,22 +106,22 @@ function CouponInput({
   };
 
   return (
-    <div className='flex gap-2 p-1'>
+    <div className='flex gap-2'>
       <div className='relative flex-1 group'>
-        <Tag className='absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors' />
+        <Tag className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground group-focus-within:text-primary transition-colors' />
         <Input
-          placeholder='Enter coupon code'
+          placeholder='Enter code'
           value={couponCode}
           onChange={(e) => setCouponCode(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleApply()}
-          className='pl-10 h-11 bg-background/50 border-transparent focus:border-primary/20 hover:bg-background/80 transition-all rounded-xl focus:ring-2 focus:ring-primary/20'
+          className='pl-8 sm:pl-10 h-9 sm:h-11 text-sm bg-background/50 border-transparent focus:border-primary/20 hover:bg-background/80 transition-all rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary/20'
           disabled={isApplying}
         />
       </div>
       <Button
         onClick={handleApply}
         disabled={isApplying || !couponCode.trim()}
-        className='h-11 px-6 rounded-xl font-bold bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20'
+        className='h-9 sm:h-11 px-4 sm:px-6 rounded-lg sm:rounded-xl text-sm font-bold bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20'
       >
         {isApplying ? <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : 'Apply'}
       </Button>
@@ -276,38 +276,45 @@ export function CartClient({
   }
 
   return (
-    <div className='min-h-[80vh] bg-slate-50/50 dark:bg-slate-950/50 pb-20'>
-      <div className='container mx-auto px-1 py-10 sm:py-16'>
-        <div className='flex items-center justify-between mb-10'>
-          <div className='space-y-2'>
-            <div className='flex items-center gap-4'>
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={() => router.push('/products')}
-                className='rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 '
-              >
-                <ArrowLeft className='h-5 w-5' />
-              </Button>
-              <h1 className='text-xl xs:text-2xl md:text-3xl font-black tracking-tight text-foreground'>
+    <div className='min-h-[80vh] bg-slate-50/50 dark:bg-slate-950/50 '>
+      <div className='container mx-auto px-3 sm:px-6 pt-4 sm:pt-8 pb-2 sm:pb-10'>
+        {/* Header - Row layout with center alignment */}
+        <div className='flex items-center justify-between gap-4 mb-6 sm:mb-10'>
+          <div className='flex items-center gap-2 sm:gap-4'>
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={() => router.push('/products')}
+              className='h-9 w-9 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 shrink-0'
+            >
+              <ArrowLeft className='h-5 w-5' />
+            </Button>
+            <div>
+              <h1 className='text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-foreground'>
                 Shopping Cart
               </h1>
+              {cartItems.length > 0 && (
+                <p className='text-xs sm:text-sm text-muted-foreground font-medium'>
+                  {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                </p>
+              )}
             </div>
-            {cartItems.length > 0 && (
-              <p className='text-sm text-muted-foreground ml-14 font-medium'>
-                You have {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
-              </p>
-            )}
           </div>
+          
           {cartItems.length > 0 && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant='outline' size='sm' disabled={isPending} className="rounded-full px-4 border-border/60 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all mb-7">
-                  <Trash2 className='h-4 w-4 mr-2' />
-                  Clear Cart
+                <Button 
+                  variant='outline' 
+                  size='sm' 
+                  disabled={isPending} 
+                  className='rounded-full h-9 px-3 sm:px-4 border-border/60 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all shrink-0'
+                >
+                  <Trash2 className='h-4 w-4 sm:mr-2' />
+                  <span className='hidden sm:inline'>Clear Cart</span>
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="rounded-2xl">
+              <AlertDialogContent className='max-w-[90vw] sm:max-w-md rounded-2xl'>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Clear Cart</AlertDialogTitle>
                   <AlertDialogDescription>
@@ -315,9 +322,12 @@ export function CartClient({
                     This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleClearCart} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                <AlertDialogFooter className='flex-col sm:flex-row gap-2'>
+                  <AlertDialogCancel className='w-full sm:w-auto rounded-xl'>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleClearCart} 
+                    className='w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl'
+                  >
                     Clear Cart
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -362,16 +372,16 @@ export function CartClient({
         )}
 
         {cartItems.length > 0 ? (
-          <div className='grid lg:grid-cols-12 gap-8'>
-            <div className='lg:col-span-8 space-y-8'>
-              <div className='glass-card rounded-3xl overflow-hidden'>
-                <div className='p-6 border-b border-border/50 bg-secondary/10'>
-                  <h2 className='text-xl font-bold flex items-center gap-2'>
-                    <ShoppingCart className='h-5 w-5 text-primary' />
+          <div className='grid lg:grid-cols-12 gap-4 sm:gap-8'>
+            <div className='lg:col-span-8 flex flex-col gap-4 sm:gap-8'>
+              <div className='glass-card rounded-2xl sm:rounded-3xl overflow-hidden flex-1 flex flex-col'>
+                <div className='p-3 sm:p-6 border-b border-border/50 bg-secondary/10'>
+                  <h2 className='text-base sm:text-xl font-bold flex items-center gap-2'>
+                    <ShoppingCart className='h-4 w-4 sm:h-5 sm:w-5 text-primary' />
                     Cart Items
                   </h2>
                 </div>
-                <div className='p-0'>
+                <div className='p-0 flex-1'>
                   <ul className='divide-y divide-border/50'>
                     {cartItems.map((item) => (
                       <CartItem
@@ -387,14 +397,14 @@ export function CartClient({
                 </div>
               </div>
 
-              <div className='glass-card rounded-3xl overflow-hidden'>
-                <div className='p-6 border-b border-border/50 bg-secondary/10'>
-                  <h2 className='text-xl font-bold flex items-center gap-2'>
-                    <Tag className='h-5 w-5 text-primary' />
+              <div className='glass-card rounded-2xl sm:rounded-3xl overflow-hidden'>
+                <div className='p-3 sm:p-6 border-b border-border/50 bg-secondary/10'>
+                  <h2 className='text-base sm:text-xl font-bold flex items-center gap-2'>
+                    <Tag className='h-4 w-4 sm:h-5 sm:w-5 text-primary' />
                     Discount Code
                   </h2>
                 </div>
-                <div className='p-6'>
+                <div className='p-3 sm:p-6'>
                   {appliedCoupon ? (
                     (() => {
                       const isCouponValid =
@@ -405,27 +415,27 @@ export function CartClient({
                       return (
                         <div
                           className={cn(
-                            'flex items-center justify-between p-4 rounded-2xl border transition-all duration-300',
+                            'flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300',
                             isCouponValid
                               ? 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900'
                               : 'bg-red-50/50 dark:bg-red-950/30 border-red-200 dark:border-red-900'
                           )}
                         >
-                          <div className='flex items-center gap-4'>
+                          <div className='flex items-center gap-2 sm:gap-4 min-w-0'>
                             <div
                               className={cn(
-                                'h-12 w-12 rounded-xl flex items-center justify-center',
+                                'h-9 w-9 sm:h-12 sm:w-12 shrink-0 rounded-lg sm:rounded-xl flex items-center justify-center',
                                 isCouponValid
                                   ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400'
                                   : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
                               )}
                             >
-                              <Tag className='h-6 w-6' />
+                              <Tag className='h-4 w-4 sm:h-6 sm:w-6' />
                             </div>
-                            <div>
+                            <div className='min-w-0'>
                               <p
                                 className={cn(
-                                  'font-black uppercase tracking-widest text-lg',
+                                  'font-black uppercase tracking-widest text-sm sm:text-lg truncate',
                                   isCouponValid
                                     ? 'text-emerald-900 dark:text-emerald-100'
                                     : 'text-red-900 dark:text-red-100'
@@ -435,7 +445,7 @@ export function CartClient({
                               </p>
                               <p
                                 className={cn(
-                                  'text-xs font-medium mt-0.5',
+                                  'text-[10px] sm:text-xs font-medium mt-0.5',
                                   isCouponValid
                                     ? 'text-emerald-700 dark:text-emerald-300'
                                     : 'text-red-700 dark:text-red-300'
@@ -443,26 +453,26 @@ export function CartClient({
                               >
                                 {isCouponValid
                                   ? appliedCoupon.type === 'PERCENTAGE'
-                                    ? `${appliedCoupon.discount}% discount applied`
-                                    : `$${appliedCoupon.discount.toFixed(2)} discount applied`
-                                  : 'Coupon found but is currently expired or inactive'}
+                                    ? `${appliedCoupon.discount}% off`
+                                    : `$${appliedCoupon.discount.toFixed(2)} off`
+                                  : 'Expired or inactive'}
                               </p>
                             </div>
                           </div>
                           <Button
                             variant='ghost'
-                            size='sm'
+                            size='icon'
                             onClick={handleRemoveCoupon}
                             disabled={isApplyingCoupon}
                             className={cn(
-                              'hover:bg-opacity-10 rounded-xl h-10 px-4 font-bold',
+                              'h-8 w-8 sm:h-10 sm:w-auto sm:px-4 rounded-full sm:rounded-xl shrink-0',
                               isCouponValid
                                 ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100'
                                 : 'text-red-600 hover:text-red-700 hover:bg-red-100'
                             )}
                           >
-                            <X className='h-4 w-4 mr-2' />
-                            Remove
+                            <X className='h-4 w-4 sm:mr-2' />
+                            <span className='hidden sm:inline font-bold'>Remove</span>
                           </Button>
                         </div>
                       );
@@ -476,7 +486,7 @@ export function CartClient({
                 </div>
               </div>
             </div>
-            <div className='lg:col-span-4'>
+            <div className='lg:col-span-4 lg:h-full'>
               <CartSummary
                 subtotal={subtotal}
                 discount={discount}

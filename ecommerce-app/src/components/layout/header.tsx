@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import {
-  Briefcase,
-  Headset,
-  Info,
-  LucideIcon,
-  Menu,
-  Package,
-  Zap,
+    Briefcase,
+    Headset,
+    Info,
+    LucideIcon,
+    Menu,
+    Package,
+    Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -174,7 +174,7 @@ const Header = ({
       
       {/* Mobile Search Bar - Visible only on mobile screens below sm */}
       <motion.div 
-        className='sm:hidden px-4 pb-3'
+        className='md:hidden px-4 pt-2 pb-4 border-t border-border/30'
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
