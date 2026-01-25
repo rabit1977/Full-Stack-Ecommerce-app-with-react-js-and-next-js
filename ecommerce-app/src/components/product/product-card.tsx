@@ -7,7 +7,7 @@ import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import { motion } from 'framer-motion';
-import { Eye, Heart, ShoppingBag, Sparkles, Star, Zap } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, Heart, Package, ShoppingBag, Sparkles, Star, XCircle, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { memo, useCallback, useMemo, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -31,16 +31,49 @@ export const ProductCard = memo(
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const { openModal } = useQuickView();
 
-    const [optimisticStock, addOptimisticStock] = useOptimistic(
-      product.stock,
-      (state: number, amount: number) => Math.max(0, state + amount)
-    );
+    // Stock status helpers
+    const stock = product.stock;
+    const isOutOfStock = stock === 0;
+    const isLowStock = !isOutOfStock && stock < 10;
+    const isVeryLowStock = !isOutOfStock && stock <= 3;
 
-    const isOutOfStock = useMemo(() => optimisticStock === 0, [optimisticStock]);
-    const isLowStock = useMemo(
-      () => !isOutOfStock && optimisticStock < 10,
-      [isOutOfStock, optimisticStock],
-    );
+    // Stock status config
+    const stockStatus = useMemo(() => {
+      if (isOutOfStock) {
+        return {
+          label: 'Out of Stock',
+          color: 'text-red-600 dark:text-red-400',
+          bgColor: 'bg-red-500/10',
+          dotColor: 'bg-red-500',
+          icon: XCircle,
+        };
+      }
+      if (isVeryLowStock) {
+        return {
+          label: `Only ${stock} left!`,
+          color: 'text-orange-600 dark:text-orange-400',
+          bgColor: 'bg-orange-500/10',
+          dotColor: 'bg-orange-500',
+          icon: AlertTriangle,
+        };
+      }
+      if (isLowStock) {
+        return {
+          label: `${stock} in stock`,
+          color: 'text-amber-600 dark:text-amber-400',
+          bgColor: 'bg-amber-500/10',
+          dotColor: 'bg-amber-500',
+          icon: Package,
+        };
+      }
+      return {
+        label: `${stock} in stock`,
+        color: 'text-emerald-600 dark:text-emerald-400',
+        bgColor: 'bg-emerald-500/10',
+        dotColor: 'bg-emerald-500',
+        icon: CheckCircle,
+      };
+    }, [stock, isOutOfStock, isLowStock, isVeryLowStock]);
 
     const discount = useMemo(() => {
       if (product.discount && product.discount > 0) {
@@ -97,7 +130,6 @@ export const ProductCard = memo(
         if (isOutOfStock) return;
         setIsAddingToCart(true);
         startTransition(async () => {
-          addOptimisticStock(-1);
           const result = await addItemToCartAction(product.id, 1);
           if (result.success) {
             toast.success('Added to cart!');
@@ -107,10 +139,11 @@ export const ProductCard = memo(
           setIsAddingToCart(false);
         });
       },
-      [product.id, isOutOfStock, addOptimisticStock],
+      [product.id, isOutOfStock],
     );
 
     const effectivePrice = discount ? discount.discountedPrice : product.price;
+    const StockIcon = stockStatus.icon;
 
     return (
       <motion.div
@@ -118,14 +151,14 @@ export const ProductCard = memo(
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-        className='group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1'
+        className='group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 hover:-translate-y-1'
       >
         {/* --- Image Section --- */}
         <div className='relative aspect-square w-full overflow-hidden bg-muted'>
           <ProductImageCarousel product={product} />
 
           {/* Gradient Overlay on Hover */}
-          <div className='absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
+          <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 
           {/* Badges (Top Left) */}
           <div className='absolute left-3 top-3 z-10 flex flex-col gap-2'>
@@ -139,14 +172,24 @@ export const ProductCard = memo(
                 -{Math.round(discount.percentage)}%
               </motion.span>
             )}
-            {isLowStock && (
+            {isVeryLowStock && (
+              <motion.span 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg animate-pulse'
+              >
+                <Zap className='h-3 w-3' />
+                Only {stock} left!
+              </motion.span>
+            )}
+            {isLowStock && !isVeryLowStock && (
               <span className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg'>
                 <Zap className='h-3 w-3' />
                 Low Stock
               </span>
             )}
             {isOutOfStock && (
-              <span className='inline-flex items-center rounded-lg bg-gray-900 px-2.5 py-1 text-xs font-bold text-white'>
+              <span className='inline-flex items-center rounded-lg bg-gray-900/90 backdrop-blur-sm px-2.5 py-1 text-xs font-bold text-white'>
                 Out of Stock
               </span>
             )}
@@ -157,7 +200,7 @@ export const ProductCard = memo(
             <Button
               size='icon'
               variant='secondary'
-              className='h-9 w-9 rounded-full bg-white shadow-md hover:bg-primary/10 hover:text-primary dark:bg-card dark:hover:bg-primary/20 transition-all duration-200'
+              className='h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-primary/10 hover:text-primary dark:bg-card/90 dark:hover:bg-primary/20 transition-all duration-200'
               onClick={handleQuickView}
               title='Quick View'
             >
@@ -167,9 +210,9 @@ export const ProductCard = memo(
               size='icon'
               variant='secondary'
               className={cn(
-                'h-9 w-9 rounded-full bg-white shadow-md transition-all duration-200 dark:bg-card',
+                'h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm shadow-md transition-all duration-200 dark:bg-card/90',
                 optimisticIsWished 
-                  ? 'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900'
+                  ? 'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950/80 dark:hover:bg-red-900'
                   : 'hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20',
               )}
               onClick={handleToggleWishlist}
@@ -194,10 +237,13 @@ export const ProductCard = memo(
               {product.brand}
             </p>
             {avgRating > 0 && (
-              <div className='flex items-center gap-1'>
-                <Star className='h-3.5 w-3.5 fill-amber-400 text-amber-400' />
-                <span className='text-xs font-medium text-muted-foreground'>
+              <div className='flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-full'>
+                <Star className='h-3 w-3 fill-amber-400 text-amber-400' />
+                <span className='text-xs font-semibold text-amber-600 dark:text-amber-400'>
                   {avgRating.toFixed(1)}
+                </span>
+                <span className='text-[10px] text-muted-foreground'>
+                  ({product.reviews?.length || 0})
                 </span>
               </div>
             )}
@@ -213,25 +259,35 @@ export const ProductCard = memo(
           {/* Spacer */}
           <div className='flex-1 min-h-2' />
 
-          {/* Price Area */}
-          <div className='mt-3 flex items-end justify-between gap-2'>
-            <div className='space-y-0.5'>
-              <div className='flex items-baseline gap-2'>
-                <span className='text-xl sm:text-2xl font-black text-foreground tracking-tight'>
-                  {formatPrice(effectivePrice)}
+          {/* Price & Stock Area */}
+          <div className='mt-3 space-y-2'>
+            {/* Price */}
+            <div className='flex items-baseline gap-2 flex-wrap'>
+              <span className='text-xl sm:text-2xl font-black text-foreground tracking-tight'>
+                {formatPrice(effectivePrice)}
+              </span>
+              {discount && (
+                <span className='text-sm text-muted-foreground line-through font-medium'>
+                  {formatPrice(discount.originalPrice)}
                 </span>
-                {discount && (
-                  <span className='text-sm text-muted-foreground line-through font-medium'>
-                    {formatPrice(discount.originalPrice)}
-                  </span>
-                )}
-              </div>
-              {!isOutOfStock && (
-                <p className='text-[11px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1'>
-                  <span className='block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse' />
-                  {optimisticStock > 10 ? 'In stock' : `${optimisticStock} left in stock`}
-                </p>
               )}
+            </div>
+            
+            {/* Stock Status - Always visible */}
+            <div className={cn(
+              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all',
+              stockStatus.bgColor,
+              stockStatus.color
+            )}>
+              <span className={cn(
+                'h-1.5 w-1.5 rounded-full',
+                stockStatus.dotColor,
+                !isOutOfStock && 'animate-pulse shadow-sm'
+              )} 
+              style={{ boxShadow: !isOutOfStock ? `0 0 6px currentColor` : undefined }}
+              />
+              <StockIcon className='h-3 w-3' />
+              <span>{stockStatus.label}</span>
             </div>
           </div>
 
@@ -242,13 +298,16 @@ export const ProductCard = memo(
                 'h-11 w-full rounded-xl font-bold transition-all duration-300 relative overflow-hidden',
                 isOutOfStock
                   ? 'cursor-not-allowed bg-muted text-muted-foreground hover:bg-muted'
-                  : 'btn-premium hover:shadow-primary/40'
+                  : 'btn-premium hover:shadow-lg hover:shadow-primary/30'
               )}
               onClick={handleAddToCart}
               disabled={isOutOfStock || isPending}
             >
               {isOutOfStock ? (
-                'Out of Stock'
+                <>
+                  <XCircle className='mr-2 h-4 w-4' />
+                  Out of Stock
+                </>
               ) : isAddingToCart ? (
                 <span className='flex items-center gap-2'>
                   <motion.div

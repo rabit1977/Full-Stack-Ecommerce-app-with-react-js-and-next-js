@@ -5,6 +5,11 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
+/**
+ * Add item to cart
+ * NOTE: Stock is NOT decremented here. Stock is only decremented when an order is placed.
+ * This prevents inventory issues from abandoned carts.
+ */
 export async function addItemToCartAction(
   productId: string,
   quantity: number = 1,
@@ -16,36 +21,43 @@ export async function addItemToCartAction(
   }
   const userId = session.user.id;
 
-   try {
-    // Start a transaction to ensure data integrity
+  try {
+    // Use a transaction for data integrity
     return await prisma.$transaction(async (tx) => {
-      // 1. Check current stock with a read (or use update with a where clause)
+      // 1. Check product exists and has sufficient stock
       const product = await tx.product.findUnique({
         where: { id: productId },
-        select: { id: true, stock: true },
+        select: { id: true, stock: true, title: true },
       });
 
-      if (!product) throw new Error('Product not found');
+      if (!product) {
+        return { success: false, message: 'Product not found' };
+      }
+
+      // 2. Check existing cart quantity for this product
+      const existingCartItems = await tx.cartItem.findMany({
+        where: { userId, productId },
+      });
       
-      // 2. Validate stock availability
-      if (product.stock < quantity) {
+      const currentCartQuantity = existingCartItems.reduce((sum, item) => sum + item.quantity, 0);
+      const totalRequestedQuantity = currentCartQuantity + quantity;
+
+      // 3. Validate stock availability (check against total cart quantity, not just this request)
+      if (product.stock < totalRequestedQuantity) {
+        const availableToAdd = product.stock - currentCartQuantity;
+        if (availableToAdd <= 0) {
+          return {
+            success: false,
+            message: `You already have the maximum available quantity (${product.stock}) in your cart`,
+          };
+        }
         return {
           success: false,
-          message: `Only ${product.stock} items available`,
+          message: `Only ${availableToAdd} more items available. You have ${currentCartQuantity} in cart.`,
         };
       }
 
-      // 3. Decrease the stock immediately
-      await tx.product.update({
-        where: { id: productId },
-        data: {
-          stock: {
-            decrement: quantity,
-          },
-        },
-      });
-
-      // 4. Handle cleanup (Wishlist/Saved for Later)
+      // 4. Handle cleanup (remove from Wishlist/Saved for Later when adding to cart)
       const optionsToSave = options && Object.keys(options).length > 0 ? options : {};
       
       await tx.wishlistItem.deleteMany({ where: { userId, productId } });
@@ -72,11 +84,13 @@ export async function addItemToCartAction(
         });
       }
 
+      // NOTE: Stock is NOT decremented here - only on order creation
+      
       revalidatePath('/cart');
       revalidatePath('/wishlist');
-      revalidatePath(`/product/${productId}`); // Revalidate product page to show new stock
+      revalidatePath(`/product/${productId}`);
       
-      return { success: true, message: 'Item added to cart and stock updated' };
+      return { success: true, message: 'Item added to cart' };
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -88,6 +102,10 @@ export async function addItemToCartAction(
   }
 }
 
+/**
+ * Update cart item quantity
+ * Validates against current stock before updating
+ */
 export async function updateCartItemQuantityAction(
   cartItemId: string,
   quantity: number
@@ -102,34 +120,42 @@ export async function updateCartItemQuantityAction(
       return removeCartItemAction(cartItemId);
     }
 
-    const cartItem = await prisma.cartItem.findFirst({
-      where: { id: cartItemId, userId: session.user.id },
-      include: { product: { select: { stock: true } } },
+    return await prisma.$transaction(async (tx) => {
+      const cartItem = await tx.cartItem.findFirst({
+        where: { id: cartItemId, userId: session.user.id },
+        include: { product: { select: { stock: true, title: true } } },
+      });
+
+      if (!cartItem) {
+        return { success: false, message: 'Cart item not found' };
+      }
+
+      // Validate that requested quantity doesn't exceed available stock
+      if (quantity > cartItem.product.stock) {
+        return {
+          success: false,
+          message: `Only ${cartItem.product.stock} items available in stock`,
+        };
+      }
+
+      await tx.cartItem.update({
+        where: { id: cartItemId },
+        data: { quantity },
+      });
+
+      revalidatePath('/cart');
+      return { success: true, message: 'Quantity updated' };
     });
-
-    if (!cartItem) {
-      return { success: false, message: 'Cart item not found' };
-    }
-
-    if (quantity > cartItem.product.stock) {
-      return {
-        success: false,
-        message: `Only ${cartItem.product.stock} items available`,
-      };
-    }
-
-    await prisma.cartItem.update({
-      where: { id: cartItemId },
-      data: { quantity },
-    });
-
-    revalidatePath('/cart');
-    return { success: true, message: 'Quantity updated' };
-  } catch {
+  } catch (error) {
+    console.error('Error updating cart quantity:', error);
     return { success: false, message: 'Failed to update quantity' };
   }
 }
 
+/**
+ * Remove item from cart
+ * NOTE: Stock is NOT restored here since it was never decremented
+ */
 export async function removeCartItemAction(cartItemId: string) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -137,17 +163,30 @@ export async function removeCartItemAction(cartItemId: string) {
   }
 
   try {
-    await prisma.cartItem.delete({
+    const cartItem = await prisma.cartItem.findFirst({
       where: { id: cartItemId, userId: session.user.id },
     });
 
+    if (!cartItem) {
+      return { success: false, message: 'Cart item not found' };
+    }
+
+    await prisma.cartItem.delete({
+      where: { id: cartItemId },
+    });
+
     revalidatePath('/cart');
+    revalidatePath(`/product/${cartItem.productId}`);
     return { success: true, message: 'Item removed from cart' };
-  } catch {
+  } catch (error) {
+    console.error('Error removing cart item:', error);
     return { success: false, message: 'Failed to remove item' };
   }
 }
 
+/**
+ * Save item for later (move from cart to saved)
+ */
 export async function saveForLaterAction(cartItemId: string) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -164,8 +203,16 @@ export async function saveForLaterAction(cartItemId: string) {
     }
 
     await prisma.$transaction([
-      prisma.savedForLater.create({
-        data: {
+      // Check if already saved
+      prisma.savedForLater.upsert({
+        where: {
+          userId_productId: {
+            userId: session.user.id,
+            productId: cartItem.productId,
+          },
+        },
+        update: {}, // No update needed if exists
+        create: {
           userId: session.user.id,
           productId: cartItem.productId,
         },
@@ -177,12 +224,15 @@ export async function saveForLaterAction(cartItemId: string) {
 
     revalidatePath('/cart');
     return { success: true, message: 'Item saved for later' };
-  } catch {
-    // Handle potential unique constraint violation if item already saved
+  } catch (error) {
+    console.error('Error saving item for later:', error);
     return { success: false, message: 'Failed to save item for later' };
   }
 }
 
+/**
+ * Clear all items from cart
+ */
 export async function clearCartAction() {
   const session = await auth();
   if (!session?.user?.id) {
@@ -193,13 +243,18 @@ export async function clearCartAction() {
     await prisma.cartItem.deleteMany({
       where: { userId: session.user.id },
     });
+    
     revalidatePath('/cart');
     return { success: true, message: 'Cart cleared' };
-  } catch {
+  } catch (error) {
+    console.error('Error clearing cart:', error);
     return { success: false, message: 'Failed to clear cart' };
   }
 }
 
+/**
+ * Get cart with all items and saved for later
+ */
 export async function getCartAction() {
   const session = await auth();
   const emptyCart = { items: [], savedForLater: [], user: null };
@@ -209,7 +264,6 @@ export async function getCartAction() {
   }
 
   try {
-    // Run queries independently to handle potential schema mismatches gracefully
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let cartItems: any[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -276,15 +330,12 @@ export async function getCartAction() {
     }
 
     try {
-      // This query was causing crashes due to "column not available" (couponId)
-      // We wrap it separately so cart still loads even if this fails
       user = await prisma.user.findUnique({
         where: { id: session.user.id },
         include: { coupon: true },
       });
     } catch (_error) {
-      console.warn('Warning: Failed to fetch user data (likely due to missing DB columns). Using session fallback.');
-      // Fallback: create a minimal user object from session if DB fetch fails
+      console.warn('Warning: Failed to fetch user data. Using session fallback.');
       if (!user && session.user) {
          user = { 
            ...session.user, 
@@ -305,52 +356,66 @@ export async function getCartAction() {
   }
 }
 
+/**
+ * Remove item from saved for later list
+ */
 export async function removeSavedForLaterItemAction(savedItemId: string) {
-    const session = await auth();
-    if (!session?.user?.id) {
-        return { success: false, message: 'Not authenticated' };
-    }
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: 'Not authenticated' };
+  }
 
-    try {
-        await prisma.savedForLater.delete({
-            where: { id: savedItemId, userId: session.user.id },
-        });
-        revalidatePath('/cart');
-        return { success: true, message: 'Item removed from saved for later' };
-    } catch {
-        return { success: false, message: 'Failed to remove item' };
-    }
+  try {
+    await prisma.savedForLater.delete({
+      where: { id: savedItemId, userId: session.user.id },
+    });
+    revalidatePath('/cart');
+    return { success: true, message: 'Item removed from saved for later' };
+  } catch (error) {
+    console.error('Error removing saved item:', error);
+    return { success: false, message: 'Failed to remove item' };
+  }
 }
 
+/**
+ * Move item from saved for later back to cart
+ */
 export async function moveToCartAction(savedItemId: string) {
-    const session = await auth();
-    if (!session?.user?.id) {
-        return { success: false, message: 'Not authenticated' };
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: 'Not authenticated' };
+  }
+
+  try {
+    const savedItem = await prisma.savedForLater.findFirst({
+      where: { id: savedItemId, userId: session.user.id },
+      include: { product: { select: { stock: true, title: true } } },
+    });
+
+    if (!savedItem) {
+      return { success: false, message: 'Item not found' };
     }
 
-    try {
-        const savedItem = await prisma.savedForLater.findFirst({
-            where: { id: savedItemId, userId: session.user.id },
-        });
-
-        if (!savedItem) {
-            return { success: false, message: 'Item not found' };
-        }
-
-        // Use addItemToCartAction to handle adding the product to the cart
-        const addResult = await addItemToCartAction(savedItem.productId, 1);
-
-        if (!addResult.success) {
-            // If adding to cart failed, don't remove it from saved for later
-            return { success: false, message: addResult.message || 'Failed to move to cart' };
-        }
-        
-        // addItemToCartAction already handles removing the product from saved for later
-        // so we just need to return the result
-        
-        revalidatePath('/cart');
-        return { success: true, message: 'Item moved to cart' };
-    } catch {
-        return { success: false, message: 'Failed to move item to cart' };
+    // Check if product is in stock
+    if (savedItem.product.stock <= 0) {
+      return { 
+        success: false, 
+        message: `"${savedItem.product.title}" is currently out of stock` 
+      };
     }
+
+    // Use addItemToCartAction which handles all the logic including stock validation
+    const addResult = await addItemToCartAction(savedItem.productId, 1);
+
+    if (!addResult.success) {
+      return { success: false, message: addResult.message || 'Failed to move to cart' };
+    }
+    
+    // addItemToCartAction already removes the item from saved for later
+    revalidatePath('/cart');
+    return { success: true, message: 'Item moved to cart' };
+  } catch (error) {
+    console.error('Error moving item to cart:', error);
+    return { success: false, message: 'Failed to move item to cart' };
+  }
 }

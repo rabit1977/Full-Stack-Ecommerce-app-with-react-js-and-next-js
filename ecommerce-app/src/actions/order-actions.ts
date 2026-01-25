@@ -386,9 +386,17 @@ export async function createOrderAction(details: {
       return order;
     });
 
+    // Revalidate all affected pages
     revalidatePath('/account/orders');
     revalidatePath('/cart');
     revalidatePath('/checkout');
+    revalidatePath('/products'); // Revalidate product listings
+    
+    // Revalidate individual product pages to reflect stock changes
+    for (const item of details.items) {
+      revalidatePath(`/product/${item.productId}`);
+      revalidatePath(`/products/${item.productId}`);
+    }
 
     return { success: true, orderId: result.id };
   } catch (error) {
