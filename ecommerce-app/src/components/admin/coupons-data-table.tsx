@@ -8,17 +8,11 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { MoreHorizontal, Power, PowerOff, Trash } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Calendar, MoreHorizontal, Percent, Power, PowerOff, Tag, Ticket, Trash, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
@@ -41,6 +35,10 @@ interface CouponsDataTableProps {
   coupons: CouponWithStats[];
 }
 
+/**
+ * Mobile-optimized Coupons Data Table
+ * Displays coupons as cards for better touch interaction
+ */
 export const CouponsDataTable = ({ coupons }: CouponsDataTableProps) => {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -71,79 +69,155 @@ export const CouponsDataTable = ({ coupons }: CouponsDataTableProps) => {
     });
   };
 
+  if (coupons.length === 0) {
+    return (
+      <div className='flex flex-col items-center justify-center py-12 text-center'>
+        <Ticket className='h-12 w-12 text-muted-foreground/30 mb-3' />
+        <p className='text-muted-foreground font-medium'>No coupons found</p>
+      </div>
+    );
+  }
+
   return (
-    <div className='rounded-lg border bg-white dark:bg-slate-900 dark:border-slate-800'>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Code</TableHead>
-            <TableHead>Discount</TableHead>
-            <TableHead>Expires</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className='hidden md:table-cell'>Usage</TableHead>
-            <TableHead>
-              <span className='sr-only'>Actions</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {coupons.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                No coupons found.
-              </TableCell>
-            </TableRow>
-          ) : (
-            coupons.map((coupon) => (
-              <TableRow key={coupon.id}>
-                <TableCell className='font-bold uppercase'>
-                  {coupon.code}
-                </TableCell>
-                <TableCell>
-                  {coupon.type === 'PERCENTAGE' ? `${coupon.discount}%` : `$${coupon.discount}`}
-                </TableCell>
-                <TableCell>
-                  {coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleDateString() : 'Never'}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={coupon.isActive ? 'default' : 'secondary'}>
-                    {coupon.isActive ? 'Active' : 'Inactive'}
+    <div className='space-y-2 sm:space-y-3'>
+      {coupons.map((coupon) => {
+        const isExpired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
+        const isActiveNow = coupon.isActive && !isExpired;
+
+        return (
+          <div
+            key={coupon.id}
+            className={cn(
+              'group relative bg-card border border-border/50 rounded-xl',
+              'p-3 sm:p-4',
+              'hover:bg-muted/30 hover:border-primary/20 transition-all duration-200',
+              !isActiveNow && 'opacity-60'
+            )}
+          >
+            <div className='flex items-start gap-3'>
+              {/* Icon */}
+              <div className={cn(
+                'shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center',
+                isActiveNow 
+                  ? 'bg-emerald-100 dark:bg-emerald-950/50' 
+                  : 'bg-muted'
+              )}>
+                <Ticket className={cn(
+                  'h-5 w-5 sm:h-6 sm:w-6',
+                  isActiveNow 
+                    ? 'text-emerald-600 dark:text-emerald-400' 
+                    : 'text-muted-foreground'
+                )} />
+              </div>
+
+              {/* Coupon Info */}
+              <div className='flex-1 min-w-0 space-y-1'>
+                {/* Code + Status */}
+                <div className='flex items-center gap-2 flex-wrap'>
+                  <span className='font-bold text-sm sm:text-base text-foreground uppercase tracking-wider'>
+                    {coupon.code}
+                  </span>
+                  <Badge 
+                    variant={isActiveNow ? 'default' : 'secondary'}
+                    className='text-[9px] sm:text-[10px] px-1.5 py-0 h-5'
+                  >
+                    {isActiveNow ? 'Active' : isExpired ? 'Expired' : 'Inactive'}
                   </Badge>
-                </TableCell>
-                <TableCell className='hidden md:table-cell'>
-                  {coupon._count.orders} orders
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size='icon' variant='ghost' disabled={isPending}>
-                        <MoreHorizontal className='h-4 w-4' />
-                        <span className='sr-only'>Actions</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}>
-                        {coupon.isActive ? (
-                          <div className="flex items-center"><PowerOff className="mr-2 h-4 w-4" /> Deactivate</div>
-                        ) : (
-                          <div className="flex items-center"><Power className="mr-2 h-4 w-4" /> Activate</div>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => handleDelete(coupon.id)}
-                      >
-                        <div className="flex items-center"><Trash className="mr-2 h-4 w-4" /> Delete</div>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                </div>
+
+                {/* Discount + Expiry */}
+                <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground'>
+                  <span className='inline-flex items-center gap-1 font-semibold text-foreground'>
+                    {coupon.type === 'PERCENTAGE' ? (
+                      <><Percent className='h-3 w-3' />{coupon.discount}% off</>
+                    ) : (
+                      <><Tag className='h-3 w-3' />${coupon.discount} off</>
+                    )}
+                  </span>
+                  <span className='hidden sm:inline'>•</span>
+                  <span className='inline-flex items-center gap-1'>
+                    <Calendar className='h-3 w-3' />
+                    {coupon.expiresAt 
+                      ? new Date(coupon.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      : 'Never expires'
+                    }
+                  </span>
+                </div>
+
+                {/* Usage + Actions Row */}
+                <div className='flex items-center justify-between gap-2 mt-2'>
+                  <span className='inline-flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground'>
+                    <Users className='h-3 w-3' />
+                    {coupon._count.orders} uses
+                  </span>
+
+                  {/* Actions */}
+                  <div className='flex items-center gap-1'>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
+                      disabled={isPending}
+                      className={cn(
+                        'h-8 px-2 sm:px-3 rounded-lg text-xs',
+                        coupon.isActive 
+                          ? 'text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30' 
+                          : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
+                      )}
+                    >
+                      {coupon.isActive ? (
+                        <>
+                          <PowerOff className='h-3.5 w-3.5 sm:mr-1' />
+                          <span className='hidden sm:inline'>Deactivate</span>
+                        </>
+                      ) : (
+                        <>
+                          <Power className='h-3.5 w-3.5 sm:mr-1' />
+                          <span className='hidden sm:inline'>Activate</span>
+                        </>
+                      )}
+                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          size='sm' 
+                          variant='ghost' 
+                          disabled={isPending}
+                          className='h-8 w-8 p-0 rounded-lg'
+                        >
+                          <MoreHorizontal className='h-4 w-4' />
+                          <span className='sr-only'>Actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end' className='w-40'>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
+                          className='cursor-pointer'
+                        >
+                          {coupon.isActive ? (
+                            <><PowerOff className='mr-2 h-4 w-4' /> Deactivate</>
+                          ) : (
+                            <><Power className='mr-2 h-4 w-4' /> Activate</>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className='text-destructive focus:text-destructive cursor-pointer'
+                          onClick={() => handleDelete(coupon.id)}
+                        >
+                          <Trash className='mr-2 h-4 w-4' /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

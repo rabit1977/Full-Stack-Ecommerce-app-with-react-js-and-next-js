@@ -1,30 +1,30 @@
 'use client';
 
 import {
-    clearCartAction,
-    moveToCartAction,
-    removeCartItemAction,
-    removeSavedForLaterItemAction,
-    saveForLaterAction,
-    updateCartItemQuantityAction,
+  clearCartAction,
+  moveToCartAction,
+  removeCartItemAction,
+  removeSavedForLaterItemAction,
+  saveForLaterAction,
+  updateCartItemQuantityAction,
 } from '@/actions/cart-actions';
 import {
-    applyCouponAction,
-    removeCouponAction,
+  applyCouponAction,
+  removeCouponAction,
 } from '@/actions/coupon-actions';
 import { CartItem } from '@/components/cart/cart-item';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { SavedItem } from '@/components/cart/saved-item';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,13 @@ import { Input } from '@/components/ui/input';
 import { CartItemWithProduct } from '@/lib/types/cart';
 import { cn } from '@/lib/utils';
 import {
-    ArrowLeft,
-    Check,
-    Package,
-    ShoppingCart,
-    Tag,
-    Trash2,
-    X,
+  ArrowLeft,
+  Check,
+  Package,
+  ShoppingCart,
+  Tag,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
@@ -277,7 +277,7 @@ export function CartClient({
 
   return (
     <div className='min-h-[80vh] bg-slate-50/50 dark:bg-slate-950/50 pb-20'>
-      <div className='container-wide py-10 sm:py-16'>
+      <div className='container mx-auto px-1 py-10 sm:py-16'>
         <div className='flex items-center justify-between mb-10'>
           <div className='space-y-2'>
             <div className='flex items-center gap-4'>
@@ -285,16 +285,16 @@ export function CartClient({
                 variant='ghost'
                 size='icon'
                 onClick={() => router.push('/products')}
-                className='rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800'
+                className='rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 '
               >
                 <ArrowLeft className='h-5 w-5' />
               </Button>
-              <h1 className='text-3xl sm:text-5xl font-black tracking-tight text-foreground'>
+              <h1 className='text-xl xs:text-2xl md:text-3xl font-black tracking-tight text-foreground'>
                 Shopping Cart
               </h1>
             </div>
             {cartItems.length > 0 && (
-              <p className='text-lg text-muted-foreground ml-14 font-medium'>
+              <p className='text-sm text-muted-foreground ml-14 font-medium'>
                 You have {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
               </p>
             )}
@@ -302,7 +302,7 @@ export function CartClient({
           {cartItems.length > 0 && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant='outline' size='sm' disabled={isPending} className="rounded-full px-4 border-border/60 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all">
+                <Button variant='outline' size='sm' disabled={isPending} className="rounded-full px-4 border-border/60 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all mb-7">
                   <Trash2 className='h-4 w-4 mr-2' />
                   Clear Cart
                 </Button>

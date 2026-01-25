@@ -3,7 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Product } from '@/generated/prisma/client';
-import { Edit, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Edit, Package, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -11,15 +12,13 @@ import { toast } from 'sonner';
 import { DeleteProductButton } from './delete-product-button';
 import { ProductImage } from './product-image';
 
-// 1. Define a "Serialized" type that matches what the Server Component sends
-// This takes the Prisma Product but changes Date fields to strings
+// Serialized type for Client Component
 type SerializedProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
   createdAt: string;
   updatedAt: string;
 };
 
 interface ProductsClientProps {
-  // 2. Use the new SerializedProduct type here
   products: SerializedProduct[];
   deleteProductAction: (
     id: string
@@ -74,16 +73,18 @@ export function ProductsClient({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
+      {/* Header Actions */}
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 bg-muted/30 rounded-xl border border-border/50'>
+        <div className='flex items-center gap-3'>
           <Checkbox
             id='select-all'
             checked={isAllSelected}
             onCheckedChange={handleSelectAll}
             aria-label='Select all'
+            className='h-5 w-5'
           />
-          <label htmlFor='select-all' className='text-sm font-medium'>
-            Select All
+          <label htmlFor='select-all' className='text-sm font-medium cursor-pointer'>
+            Select All ({products.length})
           </label>
         </div>
 
@@ -93,63 +94,122 @@ export function ProductsClient({
             size='sm'
             onClick={handleDeleteSelected}
             disabled={isPending}
+            className='w-full sm:w-auto'
           >
             <Trash2 className='h-4 w-4 mr-2' />
-            Delete Selected ({selectedIds.length})
+            Delete ({selectedIds.length})
           </Button>
         )}
       </div>
 
-      {products.map((product) => (
-        <div
-          key={product.id}
-          className='flex items-center gap-4 p-4 border dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors'
-        >
-          <Checkbox
-            checked={selectedIds.includes(product.id)}
-            onCheckedChange={(checked) =>
-              handleSelectRow(product.id, !!checked)
-            }
-            aria-label={`Select product ${product.title}`}
-          />
+      {/* Products Grid/List */}
+      <div className='space-y-2 sm:space-y-3'>
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className={cn(
+              'group relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4',
+              'bg-card border border-border/50 rounded-xl',
+              'hover:bg-muted/30 hover:border-primary/20 transition-all duration-200',
+              selectedIds.includes(product.id) && 'bg-primary/5 border-primary/30'
+            )}
+          >
+            {/* Checkbox + Image */}
+            <div className='flex items-center gap-3 sm:gap-4'>
+              <Checkbox
+                checked={selectedIds.includes(product.id)}
+                onCheckedChange={(checked) =>
+                  handleSelectRow(product.id, !!checked)
+                }
+                aria-label={`Select ${product.title}`}
+                className='h-5 w-5 shrink-0'
+              />
 
-          <ProductImage
-            src={
-              product.thumbnail?.trim()
-                ? product.thumbnail
-                : '/images/placeholder.jpg'
-            }
-            alt={product.title}
-            className='h-16 w-16 object-cover rounded border dark:border-slate-700'
-          />
+              <div className='relative'>
+                <ProductImage
+                  src={
+                    product.thumbnail?.trim()
+                      ? product.thumbnail
+                      : '/images/placeholder.jpg'
+                  }
+                  alt={product.title}
+                  className='h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg border border-border/50 shadow-sm'
+                />
+                {product.stock === 0 && (
+                  <div className='absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center'>
+                    <span className='text-[8px] font-bold text-white uppercase'>Out</span>
+                  </div>
+                )}
+              </div>
+            </div>
 
-          <div className='flex-1 min-w-0'>
-            <h3 className='font-semibold dark:text-white truncate'>
-              {product.title}
-            </h3>
-            <div className='flex items-center gap-4 mt-1 text-sm text-slate-600 dark:text-slate-400'>
-              <span>${product?.price?.toFixed(2)}</span>
-              <span>•</span>
-              <span>Stock: {product.stock}</span>
-              <span>•</span>
-              <span>{product.brand}</span>
+            {/* Product Info */}
+            <div className='flex-1 min-w-0 space-y-1'>
+              <h3 className='font-semibold text-sm sm:text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors'>
+                {product.title}
+              </h3>
+              
+              {/* Mobile: Stacked info */}
+              <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground'>
+                <span className='font-bold text-foreground'>
+                  ${product?.price?.toFixed(2)}
+                </span>
+                <span className='hidden sm:inline'>•</span>
+                <span className={cn(
+                  'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-medium',
+                  product.stock === 0 
+                    ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400'
+                    : product.stock < 10
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                )}>
+                  <Package className='h-3 w-3' />
+                  {product.stock === 0 ? 'Out of stock' : `${product.stock} in stock`}
+                </span>
+                <span className='hidden sm:inline'>•</span>
+                <span className='text-muted-foreground truncate max-w-[100px]'>
+                  {product.brand}
+                </span>
+              </div>
+              
+              {/* Category badge - visible on mobile */}
+              <div className='flex sm:hidden gap-2 mt-1'>
+                <span className='text-[10px] px-2 py-0.5 bg-secondary rounded-full text-muted-foreground'>
+                  {product.category}
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className='flex items-center gap-2 mt-2 sm:mt-0 sm:ml-auto'>
+              <Button 
+                variant='outline' 
+                size='sm' 
+                asChild 
+                className='flex-1 sm:flex-none h-9 sm:h-8 rounded-lg'
+              >
+                <Link href={`/admin/products/${product.id}/edit`}>
+                  <Edit className='h-4 w-4 sm:mr-0 mr-2' />
+                  <span className='sm:hidden'>Edit</span>
+                </Link>
+              </Button>
+              <DeleteProductButton
+                productId={product.id}
+                productTitle={product.title}
+                deleteProductAction={deleteProductAction}
+              />
             </div>
           </div>
+        ))}
+      </div>
 
-          <div className='flex gap-2'>
-            <Button variant='outline' size='sm' asChild>
-              <Link href={`/admin/products/${product.id}/edit`}>
-                <Edit className='h-4 w-4' />
-              </Link>
-            </Button>
-            <DeleteProductButton
-              productId={product.id}
-              productTitle={product.title}
-              deleteProductAction={deleteProductAction}
-            />
-          </div>
+      {/* Empty State */}
+      {products.length === 0 && (
+        <div className='flex flex-col items-center justify-center py-12 text-center'>
+          <Package className='h-12 w-12 text-muted-foreground/30 mb-3' />
+          <p className='text-muted-foreground'>No products found</p>
         </div>
-      ))}
+      )}
     </div>
   );
 }

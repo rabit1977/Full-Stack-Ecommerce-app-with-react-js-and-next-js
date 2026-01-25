@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    Activity,
-    Calendar,
-    DollarSign,
-    Eye,
-    Package,
-    ShoppingCart,
-    Sparkles,
-    TrendingUp,
-    Users
+  Activity,
+  Calendar,
+  DollarSign,
+  Eye,
+  Package,
+  ShoppingCart,
+  Sparkles,
+  TrendingUp,
+  Users
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -248,15 +248,15 @@ export default function DashboardClient({
       >
         <div className='space-y-1'>
           <div className='flex items-center gap-3'>
-            <h1 className='text-2xl sm:text-3xl font-bold tracking-tight'>
-              {greeting}! <Sparkles className='inline h-6 w-6 text-amber-500' />
+            <h1 className='text-xl sm:text-2xl md:text-3xl font-bold tracking-tight'>
+              {greeting}! <Sparkles className='inline h-5 w-5 text-amber-500' />
             </h1>
           </div>
-          <p className='text-muted-foreground'>
+          <p className='text-muted-foreground text-xs sm:text-sm'>
             Here&apos;s what&apos;s happening with your store today
           </p>
         </div>
-        <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+        <div className='flex items-center gap-2 text-xs sm:text-sm text-muted-foreground'>
           <Calendar className='h-4 w-4' />
           <span>{currentTime?.toLocaleDateString('en-US', { 
             weekday: 'long', 
@@ -275,18 +275,18 @@ export default function DashboardClient({
         className='relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 dark:from-primary/20 dark:via-primary/10 dark:to-accent/15 p-6 border border-primary/10'
       >
         <div className='absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2' />
-        <div className='relative flex flex-wrap gap-6 sm:gap-12'>
+        <div className='relative flex flex-wrap gap-6 sm:gap-12 justify-between'>
           <div className='space-y-1'>
             <p className='text-sm text-muted-foreground font-medium'>Today&apos;s Revenue</p>
-            <p className='text-2xl sm:text-3xl font-bold'>${stats.recentRevenue.toLocaleString()}</p>
+            <p className='text-xl  sm:text-2xl md:text-3xl font-bold'>${stats.recentRevenue.toLocaleString()}</p>
           </div>
           <div className='space-y-1'>
             <p className='text-sm text-muted-foreground font-medium'>New Orders</p>
-            <p className='text-2xl sm:text-3xl font-bold'>{stats.recentOrdersCount}</p>
+            <p className='text-xl sm:text-2xl md:text-3xl font-bold'>{stats.recentOrdersCount}</p>
           </div>
           <div className='space-y-1'>
             <p className='text-sm text-muted-foreground font-medium'>Active Users</p>
-            <p className='text-2xl sm:text-3xl font-bold'>{stats.users}</p>
+            <p className='text-xl sm:text-2xl md:text-3xl font-bold'>{stats.users}</p>
           </div>
         </div>
       </motion.div>
@@ -296,7 +296,7 @@ export default function DashboardClient({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className='grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'
+        className='grid xs:grid-cols-2 2xl:grid-cols-4 gap-4 sm:gap-6'
       >
         {([
           {
@@ -354,10 +354,10 @@ export default function DashboardClient({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className='grid grid-cols-1 sm:grid-cols-3 gap-4'
+        className='grid grid-cols-2 md:grid-cols-3 gap-4'
       >
         <div className='stat-card flex items-center gap-4'>
-          <div className='w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center'>
+          <div className='w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center'>
             <Activity className='h-6 w-6 text-blue-600 dark:text-blue-400' />
           </div>
           <div>
@@ -376,7 +376,7 @@ export default function DashboardClient({
             </p>
           </div>
         </div>
-        <div className='stat-card flex items-center gap-4'>
+        <div className='stat-card col-span-2 md:col-span-1 gap-4 flex'>
           <div className='w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center'>
             <Eye className='h-6 w-6 text-amber-600 dark:text-amber-400' />
           </div>
@@ -392,7 +392,7 @@ export default function DashboardClient({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className='grid grid-cols-1 lg:grid-cols-2 gap-6'
+        className='grid grid-cols-1 xl:grid-cols-2 gap-6'
       >
         {/* Recent Orders */}
         <Card className='card-premium'>
@@ -418,7 +418,7 @@ export default function DashboardClient({
                     transition={{ delay: 0.7 + index * 0.05 }}
                     className='flex items-center justify-between py-3 px-4 -mx-4 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer group'
                   >
-                    <div className='flex items-center gap-3'>
+                    <div className='flex flex-2 items-center gap-3'>
                       <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center'>
                         <ShoppingCart className='h-4 w-4 text-primary' />
                       </div>
@@ -436,11 +436,11 @@ export default function DashboardClient({
                         </p>
                       </div>
                     </div>
-                    <div className='text-right flex items-center gap-3'>
-                      <Badge variant='secondary' className={`text-xs ${getStatusClass(order.status)}`}>
+                    <div className='text-right flex flex-1  items-center justify-end gap-3'>
+                      <Badge variant='secondary' className={`text-xs flex-1 ${getStatusClass(order.status)}`}>
                         {order.status}
                       </Badge>
-                      <span className='font-semibold text-sm'>
+                      <span className='font-semibold text-sm flex-1 min-w-12 flex justify-start '>
                         ${order?.total?.toFixed(2)}
                       </span>
                     </div>
