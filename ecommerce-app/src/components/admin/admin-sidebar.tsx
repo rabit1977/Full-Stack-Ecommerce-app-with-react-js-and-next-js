@@ -22,6 +22,7 @@ import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { UserAvatar } from '../shared/user-avatar';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
@@ -103,7 +104,7 @@ export const AdminSidebar = () => {
         {/* Logo Section */}
         <div className='p-8 pb-6'>
           <Link href='/admin/dashboard' className='flex items-center gap-3 group'>
-            <div className='relative w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 group-hover:scale-105 transition-all duration-300'>
+            <div className='relative w-11 h-11 rounded-full bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 group-hover:scale-105 transition-all duration-300'>
               <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
               <Zap className='h-6 w-6 text-white' fill="currentColor" />
             </div>
@@ -144,7 +145,7 @@ export const AdminSidebar = () => {
                   
                   <span className='relative z-10 flex items-center gap-3.5 w-full'>
                     <div className={cn(
-                        "p-1 rounded-lg transition-all duration-300", 
+                        "p-1 rounded-full transition-all duration-300", 
                         !isActive && "bg-secondary/50 group-hover:bg-white dark:group-hover:bg-white/10"
                     )}>
                         <link.icon className={cn(
@@ -174,19 +175,16 @@ export const AdminSidebar = () => {
               );
             })}
           </div>
-
+          <hr className="border border-border/50" />
           {/* Quick Links Group */}
           <div className='space-y-2'>
-            <p className='px-4 text-xs font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 ml-1'>
-              Shortcuts
-            </p>
             {quickLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className='group flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/50 dark:hover:bg-white/5 hover:text-foreground transition-all duration-200'
+                className='group  flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/50 dark:hover:bg-white/5 hover:text-foreground transition-all duration-200'
               >
-                <div className="p-1.5 rounded-lg bg-secondary/50 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                <div className="p-1.5 rounded-full bg-secondary/50 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                    <link.icon className='h-4 w-4' />
                 </div>
                 <span>{link.label}</span>
@@ -199,11 +197,11 @@ export const AdminSidebar = () => {
         <div className='p-4 m-4 mt-0 bg-secondary/30 rounded-2xl border border-border/50 backdrop-blur-sm'>
           <div className="flex items-center justify-between mb-3">
              <div className="flex items-center gap-3">
-                 <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center ring-2 ring-white dark:ring-slate-900 border border-white/20">
-                    <span className="text-xs font-bold text-white">
-                      {user?.name?.slice(0, 2).toUpperCase() || 'AD'}
-                    </span>
-                 </div>
+                 <UserAvatar 
+                    user={user} 
+                    className="h-8 w-8 ring-2 ring-white dark:ring-slate-900 border border-white/20"
+                    fallbackClassName="text-xs"
+                 />
                  <div className="min-w-0">
                     <p className="text-sm font-bold truncate max-w-[90px]">{user?.name || 'Admin User'}</p>
                     <p className="text-[10px] text-muted-foreground truncate font-medium uppercase tracking-wide">Administrator</p>
@@ -251,19 +249,19 @@ export const AdminMobileHeader = () => {
             </Link>
 
             <div className="flex items-center gap-3 transition-colors group">
-              <Link href="/" className="flex items-center gap-2 group-hover:bg-secondary/50 p-2 rounded-xl transition-colors">
-                <Home className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">View Store</span>
+              <Link href="/" className="flex items-center gap-1.5 group-hover:bg-secondary/50 p-2 rounded-xl transition-colors">
+                <Home className="h-4 w-4 rounded-full bg-secondary/20 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="hidden sm:block text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">View Store</span>
               </Link>
-                <AdminThemeToggle />
-                <DropdownMenu>
+              <AdminThemeToggle />
+              <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 border border-border/50 bg-secondary/20">
-                         <div className="h-full w-full rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center ring-1 ring-white/20">
-                            <span className="text-[10px] font-bold text-white">
-                                {user?.name?.slice(0, 2).toUpperCase() || 'AD'}
-                            </span>
-                        </div>
+                    <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 p-0 border border-border/50 bg-secondary/20 overflow-hidden">
+                        <UserAvatar 
+                            user={user}
+                            className="h-full w-full"
+                            fallbackClassName="text-[10px]"
+                        />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 glass-card p-2 rounded-xl">

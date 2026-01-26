@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/shared/user-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -63,17 +63,6 @@ export const NavActions = ({
   // Get user's first name
   const firstName = useMemo(() => {
     return user?.name?.split(' ')[0] || 'User';
-  }, [user]);
-
-  // Get user initials for avatar
-  const userInitials = useMemo(() => {
-    if (!user?.name) return 'U';
-    return user.name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   }, [user]);
 
   // Handle theme toggle with transition
@@ -204,16 +193,11 @@ export const NavActions = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' className='h-10 gap-2 pl-2 pr-3 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 data-[state=open]:bg-muted/50 ml-1'>
-               <Avatar className='h-8 w-8 border-2 border-background shadow-sm transition-transform group-hover:scale-105'>
-                <AvatarImage 
-                  src={user.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined} 
-                  alt={user.name || 'User'} 
-                  className="object-cover"
-                />
-                <AvatarFallback className='text-xs font-bold bg-gradient-to-br from-primary to-violet-600 text-white'>
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar 
+                user={user}
+                className='h-8 w-8 border-2 border-background shadow-sm transition-transform group-hover:scale-105'
+                fallbackClassName='text-xs font-bold bg-gradient-to-br from-primary to-violet-600 text-white'
+              />
               <span className='hidden md:inline text-sm font-semibold truncate max-w-[100px]'>
                 {firstName}
               </span>

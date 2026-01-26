@@ -1,20 +1,15 @@
 'use client';
 
 import { deleteReviewAction, toggleReviewHelpfulAction } from '@/actions/review-actions';
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Stars } from '@/components/ui/stars';
 import { ProductWithRelations, Review } from '@/lib/types';
@@ -25,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { AddReviewForm } from './add-review-form';
+import { UserAvatar } from '../shared/user-avatar';
 
 interface ReviewsSectionProps {
   productId: string;
@@ -249,23 +245,11 @@ const ReviewsSection = ({
                   >
                     <div className='flex flex-col sm:flex-row gap-6'>
                       <div className='shrink-0'>
-                        <Avatar className='w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-background shadow-sm'>
-                          <AvatarImage 
-                            src={
-                              (isUserReview && user?.image) 
-                                ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`)
-                                : (review.user.image 
-                                    ? (review.user.image.startsWith('http') || review.user.image.startsWith('/') ? review.user.image : `/${review.user.image}`)
-                                    : undefined
-                                  )
-                            } 
-                            alt={review.user.name || 'User'} 
-                            className="object-cover"
-                          />
-                          <AvatarFallback className="bg-gradient-to-br from-muted to-muted/80 text-lg font-bold text-muted-foreground rounded-2xl">
-                            {(review.user.name || '?').charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar 
+                          user={review.user}
+                          className="w-12 h-12 sm:w-14 sm:h-14"
+                          fallbackClassName="text-[10px]"
+                        />
                       </div>
 
                       <div className='flex-1 min-w-0'>
