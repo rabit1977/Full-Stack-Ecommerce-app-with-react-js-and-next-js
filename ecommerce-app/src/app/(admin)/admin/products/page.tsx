@@ -170,7 +170,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
         </div>
         
         {/* Action Buttons - Stack on mobile */}
-        <div className='flex flex-col sm:flex-row gap-2 sm:gap-3'>
+        <div className='flex  gap-2 sm:gap-3'>
           <BulkDiscountModal
             categories={categories.map((c) => c.category)}
             brands={brands.map((b) => b.brand)}
@@ -179,7 +179,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
           <Button 
             asChild 
             size='default'
-            className='w-full sm:w-auto rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all btn-premium'
+            className='w-full sm:w-auto rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all btn-premium flex-1'
           >
             <Link href='/admin/products/new'>
               <PlusCircle className='h-4 w-4 sm:h-5 sm:w-5 mr-2' />
@@ -190,19 +190,19 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
       </div>
 
       {/* Stats Grid - 2 columns on mobile, 4 on desktop */}
-      <div className='grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5'>
+      <div className='grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5'>
         {statItems.map((stat, i) => (
           <div 
             key={i} 
-            className={`glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group border ${stat.border}`}
+            className={`glass-card  p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group border gap-2 flex-row-reverse ${stat.border}`}
           >
             <div className='flex justify-between items-start mb-2'>
               <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl ${stat.bg} ${stat.color} ring-1 ring-inset ring-white/10 group-hover:scale-110 transition-transform`}>
                 <stat.icon className='h-4 w-4 sm:h-6 sm:w-6' />
               </div>
             </div>
-            <div>
-              <h3 className='text-xl sm:text-3xl font-black tracking-tight text-foreground'>
+            <div className='flex flex-col items-start min-w-24'>
+              <h3 className='text-xl sm:text-3xl font-black tracking-tight  text-foreground'>
                 {stat.value}
               </h3>
               <p className='text-[10px] sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-0.5 sm:mt-1'>

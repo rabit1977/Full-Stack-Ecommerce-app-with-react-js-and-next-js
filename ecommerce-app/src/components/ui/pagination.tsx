@@ -48,13 +48,10 @@ export function PaginationControls({
   const limit = searchParams.get('limit') || '12';
 
   return (
-    <div className='flex items-center justify-between px-2'>
-      <div className='flex-1 text-sm text-muted-foreground'>
-        Page {currentPage} of {totalPages}
-      </div>
-      <div className='flex items-center space-x-6 lg:space-x-8'>
+    <div className='flex items-center justify-between px-2 '>
+      <div className='flex items-center space-x-6 lg:space-x-8 mx-auto'>
         <div className='flex items-center space-x-2'>
-          <p className='text-sm font-medium'>Rows per page</p>
+          <p className='text-sm font-medium hidden'>Rows per page</p>
           <Select value={limit} onValueChange={handlePageSizeChange}>
             <SelectTrigger className='h-8 w-[70px]'>
               <SelectValue placeholder={limit} />
@@ -68,7 +65,7 @@ export function PaginationControls({
             </SelectContent>
           </Select>
         </div>
-        <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
+        <div className='flex w-[100px] items-center justify-center text-sm font-medium '>
           Page {currentPage} of {totalPages}
         </div>
         <div className='flex items-center space-x-2'>

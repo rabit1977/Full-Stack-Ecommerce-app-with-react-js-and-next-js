@@ -111,10 +111,12 @@ export function ProductsClient({
               'group relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4',
               'bg-card border border-border/50 rounded-xl',
               'hover:bg-muted/30 hover:border-primary/20 transition-all duration-200',
-              selectedIds.includes(product.id) && 'bg-primary/5 border-primary/30'
+              selectedIds.includes(product.id) && 'bg-primary/5 border-primary/30 '
             )}
           >
             {/* Checkbox + Image */}
+            <div className='flex items-center justify-between gap-3 sm:gap-4'>
+
             <div className='flex items-center gap-3 sm:gap-4'>
               <Checkbox
                 checked={selectedIds.includes(product.id)}
@@ -123,18 +125,18 @@ export function ProductsClient({
                 }
                 aria-label={`Select ${product.title}`}
                 className='h-5 w-5 shrink-0'
-              />
+                />
 
               <div className='relative'>
                 <ProductImage
                   src={
                     product.thumbnail?.trim()
-                      ? product.thumbnail
-                      : '/images/placeholder.jpg'
+                    ? product.thumbnail
+                    : '/images/placeholder.jpg'
                   }
                   alt={product.title}
-                  className='h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg border border-border/50 shadow-sm'
-                />
+                  className='h-18 w-18 sm:h-20   sm:w-20 object-cover rounded-lg border border-border/50 shadow-sm'
+                  />
                 {product.stock === 0 && (
                   <div className='absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center'>
                     <span className='text-[8px] font-bold text-white uppercase'>Out</span>
@@ -145,40 +147,34 @@ export function ProductsClient({
 
             {/* Product Info */}
             <div className='flex-1 min-w-0 space-y-1'>
-              <h3 className='font-semibold text-sm sm:text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors'>
+              <h3 className='font-semibold text-sm sm:text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors ml-1'>
                 {product.title}
               </h3>
               
               {/* Mobile: Stacked info */}
               <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground'>
-                <span className='font-bold text-foreground'>
+                <span className='font-bold text-foreground ml-1'>
                   ${product?.price?.toFixed(2)}
                 </span>
                 <span className='hidden sm:inline'>•</span>
                 <span className={cn(
                   'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-medium',
                   product.stock === 0 
-                    ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400'
-                    : product.stock < 10
-                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
-                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                  ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400'
+                  : product.stock < 10
+                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
                 )}>
                   <Package className='h-3 w-3' />
                   {product.stock === 0 ? 'Out of stock' : `${product.stock} in stock`}
                 </span>
                 <span className='hidden sm:inline'>•</span>
-                <span className='text-muted-foreground truncate max-w-[100px]'>
-                  {product.brand}
-                </span>
-              </div>
-              
-              {/* Category badge - visible on mobile */}
-              <div className='flex sm:hidden gap-2 mt-1'>
                 <span className='text-[10px] px-2 py-0.5 bg-secondary rounded-full text-muted-foreground'>
                   {product.category}
                 </span>
               </div>
             </div>
+                  </div>
 
             {/* Actions */}
             <div className='flex items-center gap-2 mt-2 sm:mt-0 sm:ml-auto'>

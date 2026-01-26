@@ -250,7 +250,11 @@ export const AdminMobileHeader = () => {
                 <span className='font-bold text-lg tracking-tight'>Electro<span className="text-primary">Admin</span></span>
             </Link>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 transition-colors group">
+              <Link href="/" className="flex items-center gap-2 group-hover:bg-secondary/50 p-2 rounded-xl transition-colors">
+                <Home className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">View Store</span>
+              </Link>
                 <AdminThemeToggle />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

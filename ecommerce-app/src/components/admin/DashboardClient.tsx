@@ -356,7 +356,7 @@ export default function DashboardClient({
         transition={{ delay: 0.4 }}
         className='grid grid-cols-2 md:grid-cols-3 gap-4'
       >
-        <div className='stat-card flex items-center gap-4'>
+        <div className='stat-card flex items-center gap-4 flex-row-reverse justify-between'>
           <div className='w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center'>
             <Activity className='h-6 w-6 text-blue-600 dark:text-blue-400' />
           </div>
@@ -365,7 +365,7 @@ export default function DashboardClient({
             <p className='text-2xl font-bold'>{stats.activeOrders}</p>
           </div>
         </div>
-        <div className='stat-card flex items-center gap-4'>
+        <div className='stat-card flex items-center gap-4 flex-row-reverse justify-between'>
           <div className='w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center'>
             <TrendingUp className='h-6 w-6 text-purple-600 dark:text-purple-400' />
           </div>
@@ -376,7 +376,7 @@ export default function DashboardClient({
             </p>
           </div>
         </div>
-        <div className='stat-card col-span-2 md:col-span-1 gap-4 flex'>
+        <div className='stat-card col-span-2 flex md:col-span-1 gap-4 flex-row-reverse justify-between'>
           <div className='w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center'>
             <Eye className='h-6 w-6 text-amber-600 dark:text-amber-400' />
           </div>
@@ -436,13 +436,15 @@ export default function DashboardClient({
                         </p>
                       </div>
                     </div>
-                    <div className='text-right flex flex-1  items-center justify-end gap-3'>
-                      <Badge variant='secondary' className={`text-xs flex-1 ${getStatusClass(order.status)}`}>
+                    <div className='flex flex-1 items-center gap-1 sm:gap-3'>
+                    <div className='text-right flex flex-col sm:flex-row flex-1 items-center justify-end gap-1 sm:gap-3'>
+                      <Badge variant='secondary' className={`text-xs flex-1  min-w-12           ${getStatusClass(order.status)}`}>
                         {order.status}
                       </Badge>
-                      <span className='font-semibold text-sm flex-1 min-w-12 flex justify-start '>
+                      <span className='font-semibold text-xs min-w-12 flex justify-end '>
                         ${order?.total?.toFixed(2)}
                       </span>
+                    </div>
                     </div>
                   </motion.div>
                 ))}
