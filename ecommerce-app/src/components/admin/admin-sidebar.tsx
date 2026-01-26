@@ -60,7 +60,7 @@ const AdminThemeToggle = () => {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-8 h-8 rounded-lg bg-background/50 hover:bg-background border border-border/50 shadow-sm"
+            className="w-8 h-8 rounded-full bg-background/50 hover:bg-background border border-border/50 shadow-sm"
         >
             <AnimatePresence mode="wait" initial={false}>
                 {isDark ? (
@@ -249,9 +249,9 @@ export const AdminMobileHeader = () => {
             </Link>
 
             <div className="flex items-center gap-3 transition-colors group">
-              <Link href="/" className="flex items-center gap-1.5 group-hover:bg-secondary/50 p-2 rounded-xl transition-colors">
-                <Home className="h-4 w-4 rounded-full bg-secondary/20 text-muted-foreground group-hover:text-foreground transition-colors" />
-                <span className="hidden sm:block text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">View Store</span>
+              <Link href="/" className="flex items-center gap-1.5 sm:group-hover:bg-secondary/50 p-2 rounded-xl transition-colors">
+                <Home className="h-7 w-7 rounded-full bg-secondary/20 text-muted-foreground group-hover:text-indigo-400 transition-colors dark:text-indigo-400 hover:bg-indigo-400/10  border-1 border-text-foreground p-1.5" />
+                <span className="hidden sm:block text-sm font-medium text-muted-foreground group-hover:text-indigo-400 transition-colors">View Store</span>
               </Link>
               <AdminThemeToggle />
               <DropdownMenu modal={false}>
