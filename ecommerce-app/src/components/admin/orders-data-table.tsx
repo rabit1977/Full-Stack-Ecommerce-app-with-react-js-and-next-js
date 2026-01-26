@@ -4,24 +4,24 @@ import { updateOrderStatusAction } from '@/actions/order-actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Order, OrderStatus } from '@/generated/prisma/client';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import {
-    CheckCircle,
-    ChevronRight,
-    Clock,
-    MoreVertical,
-    Package,
-    RefreshCw,
-    Truck,
-    XCircle
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  MoreVertical,
+  Package,
+  RefreshCw,
+  Truck,
+  XCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -143,16 +143,6 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                       <span className='font-bold text-base text-foreground'>
                         #{order.id.slice(-8)}
                       </span>
-                      <Badge 
-                        variant='secondary'
-                        className={cn(
-                          'text-[10px] font-bold px-2 py-0.5 rounded-full border',
-                          config?.bgClass,
-                          config?.className
-                        )}
-                      >
-                        {config?.label || order.status}
-                      </Badge>
                     </div>
                     
                     {/* Customer Name */}
@@ -238,7 +228,16 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                 <div className='flex items-center gap-4 mt-3 pt-3 border-t border-border/50'>
                   <div className='flex items-center gap-1.5 text-xs text-muted-foreground'>
                     <StatusIcon className={cn('h-3.5 w-3.5', config?.className)} />
-                    <span>{config?.label}</span>
+                   <Badge 
+                        variant='secondary'
+                        className={cn(
+                          'text-[10px] font-bold px-2 py-0.5 rounded-full border',
+                          config?.bgClass,
+                          config?.className
+                        )}
+                      >
+                        {config?.label || order.status}
+                   </Badge>
                   </div>
                   <div className='flex-1' />
                   <div className='flex items-center gap-1 text-xs text-primary font-medium'>

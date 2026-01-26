@@ -89,19 +89,19 @@ function OrderStats({ orders }: { orders: Order[] }) {
   ];
 
   return (
-    <div className='grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5'>
+    <div className='grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5'>
       {statItems.map((stat, i) => (
         <div 
           key={i} 
           className={cn(
             'glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl',
-            'flex flex-col justify-between',
+            'flex flex-col justify-between flex-row-reverse',
             'hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300',
             'relative overflow-hidden group border',
             stat.border
           )}
         >
-          <div className='flex justify-between items-start mb-2'>
+          <div className='flex flex justify-between items-start mb-2'>
             <div className={cn(
               'p-2 sm:p-3 rounded-xl sm:rounded-2xl',
               stat.bg, stat.color,
@@ -112,10 +112,10 @@ function OrderStats({ orders }: { orders: Order[] }) {
             </div>
           </div>
           <div>
-            <h3 className='text-xl sm:text-3xl font-black tracking-tight text-foreground'>
+            <h3 className='text-lg xs:text-xl sm:text-2xl font-black tracking-tight text-foreground'>
               {stat.value}
             </h3>
-            <p className='text-[10px] sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-0.5 sm:mt-1'>
+            <p className='text-[10px] text-center xs:text-left sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-0.5 sm:mt-1'>
               {stat.label}
             </p>
           </div>
