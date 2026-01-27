@@ -394,6 +394,16 @@ export function ProductPurchasePanel({
                 <span className='font-medium'>{product.weight} kg</span>
               </div>
             )}
+            {product.dimensions && 
+             typeof product.dimensions === 'object' && 
+             ('length' in product.dimensions || 'width' in product.dimensions || 'height' in product.dimensions) && (
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>Dimensions</span>
+                <span className='font-medium text-xs'>
+                  {(product.dimensions as any).length || '?'} x {(product.dimensions as any).width || '?'} x {(product.dimensions as any).height || '?'} cm
+                </span>
+              </div>
+            )}
           </div>
         </>
       )}

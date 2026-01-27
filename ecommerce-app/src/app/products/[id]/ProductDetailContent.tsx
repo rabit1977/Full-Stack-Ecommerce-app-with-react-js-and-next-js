@@ -3,6 +3,7 @@ import { getCartAction } from '@/actions/cart-actions';
 import { getProductByIdAction } from '@/actions/product-actions';
 import { getWishlistAction } from '@/actions/wishlist-actions';
 import { ProductDetailGallery } from '@/components/product/product-detail-gallery';
+import { ProductInfoTabs } from '@/components/product/product-info-tabs';
 import { RelatedProducts } from '@/components/product/related-products';
 import { ReviewsSection } from '@/components/product/reviews-section';
 import { notFound } from 'next/navigation';
@@ -30,7 +31,7 @@ export async function ProductDetailContent({
   return (
     <div className='container-wide py-8 sm:py-12 lg:py-16'>
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16 items-start'>
-        <div className='w-full'>
+        <div className='w-full space-y-8'>
           <ProductDetailGallery product={product} />
         </div>
         <div className='w-full lg:sticky lg:top-24'>
@@ -41,6 +42,11 @@ export async function ProductDetailContent({
           />
         </div>
       </div>
+
+      <div className='mt-16 sm:mt-24'>
+         <ProductInfoTabs product={product} />
+      </div>
+
       <div className='mt-20 sm:mt-24 lg:mt-32'>
         <ReviewsSection 
           productId={product.id} 
