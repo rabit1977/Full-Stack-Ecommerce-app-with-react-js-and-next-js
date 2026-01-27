@@ -153,7 +153,7 @@ export default function DashboardClient({
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 50);
+    const timer = setTimeout(() => setIsReady(true), 50); //  change this value to delay the loading of the dashboard
     setCurrentTime(new Date());
     return () => clearTimeout(timer);
   }, []);

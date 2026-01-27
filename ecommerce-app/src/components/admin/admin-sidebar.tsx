@@ -293,7 +293,7 @@ export const AdminBottomNav = () => {
 
   return (
     <nav className='lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-2xl border-t border-border/50 shadow-2xl safe-area-pb'>
-      <div className='grid grid-cols-5 h-[4.5rem] items-end pb-2 max-w-md mx-auto'>
+      <div className='grid grid-cols-5 h-20 items-end pb-2 max-w-md mx-auto'>
         {navLinks.map((link) => {
           const isActive = pathname.startsWith(link.href);
           const Icon = link.icon;
@@ -303,7 +303,7 @@ export const AdminBottomNav = () => {
               key={link.href}
               href={link.href}
               className={cn(
-                'relative flex flex-col items-center justify-center h-full pb-2 gap-1 text-xs transition-all duration-300',
+                'relative flex flex-col items-center justify-center h-full gap-1 text-xs transition-all duration-300',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
