@@ -4,13 +4,14 @@ import { deleteCouponAction, toggleCouponStatusAction } from '@/actions/coupon-a
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { CouponType } from '@/generated/prisma/enums';
 import { cn } from '@/lib/utils';
 import { Calendar, MoreHorizontal, Percent, Power, PowerOff, Tag, Ticket, Trash, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -21,7 +22,7 @@ export interface CouponWithStats {
   id: string;
   code: string;
   discount: number;
-  type: 'PERCENTAGE' | 'FIXED';
+  type: CouponType;
   expiresAt: Date | null;
   isActive: boolean;
   createdAt: Date;
