@@ -92,7 +92,8 @@ export function EditProfileForm({
   isSubmitting,
 }: EditProfileFormProps) {
   const form = useForm<EditProfileFormValues>({
-    resolver: zodResolver(editProfileSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(editProfileSchema) as any,
     defaultValues: {
       name: user?.name || '',
       bio: user?.bio || '',

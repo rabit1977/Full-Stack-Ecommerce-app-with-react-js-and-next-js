@@ -55,7 +55,8 @@ export function EditUserForm({
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<EditUserFormValues>({
-    resolver: zodResolver(editUserFormSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(editUserFormSchema) as any,
     defaultValues: {
       name: user.name || '',
       email: user.email || '',

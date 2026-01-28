@@ -56,7 +56,8 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<BrandFormValues>({
-    resolver: zodResolver(brandSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(brandSchema) as any,
     defaultValues: {
       name: '',
       slug: '',

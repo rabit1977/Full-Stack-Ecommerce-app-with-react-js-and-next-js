@@ -62,6 +62,7 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<StoreSettingsValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(storeSettingsSchema) as any,
     defaultValues: {
       storeName: initialData?.storeName || 'My E-Commerce Store',

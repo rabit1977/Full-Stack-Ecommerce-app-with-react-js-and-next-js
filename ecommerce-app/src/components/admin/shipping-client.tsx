@@ -1,21 +1,21 @@
 'use client';
 
 import {
-    createShippingRate,
-    createShippingZone,
-    deleteShippingRate,
-    deleteShippingZone,
-    getShippingRates,
-    getShippingZones
+  createShippingRate,
+  createShippingZone,
+  deleteShippingRate,
+  deleteShippingZone,
+  getShippingRates,
+  getShippingZones
 } from '@/actions/admin/shipping-actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -64,7 +64,8 @@ export function ShippingClient({ initialZones = [], initialRates = [] }: Shippin
   const [isPending, startTransition] = useTransition();
 
   const zoneForm = useForm<ZoneFormValues>({
-    resolver: zodResolver(zoneSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(zoneSchema) as any,
     defaultValues: {
       name: '',
       countries: '',
@@ -73,7 +74,8 @@ export function ShippingClient({ initialZones = [], initialRates = [] }: Shippin
   });
 
   const rateForm = useForm<RateFormValues>({
-    resolver: zodResolver(rateSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(rateSchema) as any,
     defaultValues: {
       zoneId: '',
       name: '',
