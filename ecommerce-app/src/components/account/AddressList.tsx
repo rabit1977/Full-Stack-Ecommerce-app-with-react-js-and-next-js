@@ -2,7 +2,7 @@
 
 import { deleteAddressAction, setDefaultAddressAction } from '@/actions/address-actions';
 import { Button } from '@/components/ui/button';
-import { Address } from '@/generated/prisma/client';
+import { Address } from '@/generated/prisma/browser';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, MapPin, Plus } from 'lucide-react';
 import { useState, useTransition } from 'react';

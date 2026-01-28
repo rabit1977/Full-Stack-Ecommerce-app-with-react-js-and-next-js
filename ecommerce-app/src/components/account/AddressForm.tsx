@@ -20,7 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Address, AddressType } from '@/generated/prisma/client';
+import { Address, AddressType } from '@/generated/prisma/browser';
 import { cn } from '@/lib/utils';
 import { Building2, Home, Loader2, Truck } from 'lucide-react';
 import { useState, useTransition } from 'react';

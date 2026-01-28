@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { UserRole } from '@/generated/prisma/client';
+import { UserRole } from '@/generated/prisma/enums';
 import { User } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save } from 'lucide-react';
@@ -35,8 +35,8 @@ import * as z from 'zod';
  */
 const editUserFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.email('Invalid email address'),
-  role: z.enum(UserRole),
+  email: z.string().email('Invalid email address'),
+  role: z.nativeEnum(UserRole),
   bio: z.string().optional(),
 });
 

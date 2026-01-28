@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Order, OrderStatus } from '@/generated/prisma/client';
+import { Order, OrderStatus } from '@/generated/prisma/browser';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import {
@@ -33,12 +33,12 @@ interface OrdersDataTableProps {
 }
 
 // Status configuration
-const statusConfig: Record<OrderStatus, { 
+const statusConfig: Partial<Record<OrderStatus, { 
   label: string; 
   icon: React.ElementType; 
   className: string;
   bgClass: string;
-}> = {
+}>> = {
   Pending: { 
     label: 'Pending', 
     icon: Clock, 
@@ -81,7 +81,7 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
 
   const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
     startTransition(async () => {
-      const result = await updateOrderStatusAction(orderId, newStatus);
+      const result = await updateOrderStatusAction(orderId, newStatus as any);
       if (result.success) {
         toast.success(result.message);
         router.refresh();
@@ -196,6 +196,7 @@ export const OrdersDataTable = ({ orders }: OrdersDataTableProps) => {
                           ] as OrderStatus[]
                         ).map((status) => {
                           const statusConf = statusConfig[status];
+                          if (!statusConf) return null;
                           const Icon = statusConf.icon;
                           const isCurrentStatus = order.status === status;
                           return (

@@ -5,7 +5,7 @@ import {
     Order as PrismaOrder,
     Review as PrismaReview,
     User as PrismaUser,
-} from '@/generated/prisma/client';
+} from '@/generated/prisma/browser';
 
 // Re-export Prisma types
 export type User = PrismaUser;

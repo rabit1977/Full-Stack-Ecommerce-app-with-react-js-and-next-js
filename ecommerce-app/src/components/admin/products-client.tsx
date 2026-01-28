@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Product } from '@/generated/prisma/client';
+import { Product } from '@/generated/prisma/browser';
 import { cn } from '@/lib/utils';
 import { Edit, Package, Trash2 } from 'lucide-react';
 import Link from 'next/link';

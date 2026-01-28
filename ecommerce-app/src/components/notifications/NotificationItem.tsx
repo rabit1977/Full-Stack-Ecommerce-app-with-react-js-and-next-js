@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { NotificationType } from '@/generated/prisma/client';
+import { NotificationType } from '@/generated/prisma/browser';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import {

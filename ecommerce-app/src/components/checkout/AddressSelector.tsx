@@ -5,7 +5,7 @@ import { AddressCard } from '@/components/account/AddressCard';
 import { AddressForm } from '@/components/account/AddressForm';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Address } from '@/generated/prisma/client';
+import { Address } from '@/generated/prisma/browser';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Loader2, MapPin, Plus } from 'lucide-react';

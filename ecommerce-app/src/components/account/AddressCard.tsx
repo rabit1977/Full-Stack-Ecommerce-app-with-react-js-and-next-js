@@ -10,7 +10,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Address } from '@/generated/prisma/client';
+import { Address } from '@/generated/prisma/browser';
 import { cn } from '@/lib/utils';
 import {
     Building2,

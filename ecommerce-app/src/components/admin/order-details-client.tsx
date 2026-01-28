@@ -1,54 +1,54 @@
 'use client';
 
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Prisma } from '@/generated/prisma/browser';
 import {
-    formatDateTime,
-    formatOrderDate,
-    formatPrice,
+  formatDateTime,
+  formatOrderDate,
+  formatPrice,
 } from '@/lib/utils/formatters';
-import { Prisma } from '@/generated/prisma/client';
 import {
-    ArrowLeft,
-    Calendar,
-    CreditCard,
-    Download,
-    Loader2,
-    Mail,
-    MapPin,
-    Package,
-    Phone,
-    Printer,
-    Trash2,
-    Truck,
-    User,
+  ArrowLeft,
+  Calendar,
+  CreditCard,
+  Download,
+  Loader2,
+  Mail,
+  MapPin,
+  Package,
+  Phone,
+  Printer,
+  Trash2,
+  Truck,
+  User,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -141,7 +141,7 @@ export default function OrderDetailsClient({
   const handleStatusChange = async (newStatus: OrderStatus) => {
     if (!order) return;
     startTransition(async () => {
-      const result = await updateOrderStatusAction(newStatus);
+      const result = await updateOrderStatusAction(newStatus as any);
       if (result.success) {
         toast.success(`Order status updated to ${newStatus}`);
       } else {

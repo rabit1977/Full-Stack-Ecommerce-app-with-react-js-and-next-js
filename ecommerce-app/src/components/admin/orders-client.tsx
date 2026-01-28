@@ -3,7 +3,7 @@
 import { OrdersDataTable } from '@/components/admin/orders-data-table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Order } from '@/generated/prisma/client';
+import { Order } from '@/generated/prisma/browser';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import { CheckCircle, Clock, DollarSign, ShoppingBag, TrendingUp, Truck, XCircle } from 'lucide-react';
