@@ -18,7 +18,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { NotificationType } from '@/generated/prisma/client';
+import { NotificationType } from '@/generated/prisma/browser';
 import {
     AlertCircle,
     Bell,

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Address } from '@/generated/prisma/client';
+import { Address } from '@/generated/prisma/browser';
 import { CartItemWithProduct, UserWithRelations } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';

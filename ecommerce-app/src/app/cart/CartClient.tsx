@@ -1,30 +1,30 @@
 'use client';
 
 import {
-  clearCartAction,
-  moveToCartAction,
-  removeCartItemAction,
-  removeSavedForLaterItemAction,
-  saveForLaterAction,
-  updateCartItemQuantityAction,
+    clearCartAction,
+    moveToCartAction,
+    removeCartItemAction,
+    removeSavedForLaterItemAction,
+    saveForLaterAction,
+    updateCartItemQuantityAction,
 } from '@/actions/cart-actions';
 import {
-  applyCouponAction,
-  removeCouponAction,
+    applyCouponAction,
+    removeCouponAction,
 } from '@/actions/coupon-actions';
 import { CartItem } from '@/components/cart/cart-item';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { SavedItem } from '@/components/cart/saved-item';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,13 @@ import { Input } from '@/components/ui/input';
 import { CartItemWithProduct } from '@/lib/types/cart';
 import { cn } from '@/lib/utils';
 import {
-  ArrowLeft,
-  Check,
-  Package,
-  ShoppingCart,
-  Tag,
-  Trash2,
-  X,
+    ArrowLeft,
+    Check,
+    Package,
+    ShoppingCart,
+    Tag,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
@@ -129,7 +129,7 @@ function CouponInput({
   );
 }
 
-import { Coupon, User } from '@/generated/prisma/client';
+import { Coupon, User } from '@/generated/prisma/browser';
 
 interface CartClientProps {
   cartItems: CartItemWithProduct[];

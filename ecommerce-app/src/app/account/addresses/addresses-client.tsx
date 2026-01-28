@@ -1,7 +1,7 @@
 'use client';
 
 import { AddressList } from '@/components/account/AddressList';
-import { Address } from '@/generated/prisma/client';
+import { Address } from '@/generated/prisma/browser';
 import { useRouter } from 'next/navigation';
 
 interface AddressesClientProps {
