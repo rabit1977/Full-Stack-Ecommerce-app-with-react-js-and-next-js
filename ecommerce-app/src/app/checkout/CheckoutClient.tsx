@@ -3,6 +3,7 @@
 import { clearCartAction } from '@/actions/cart-actions';
 import { createOrderAction } from '@/actions/order-actions';
 import { CartSummary } from '@/components/cart/cart-summary';
+import { AddressSelector } from '@/components/checkout/AddressSelector';
 import { CheckoutSteps } from '@/components/checkout/checkout-steps';
 import {
     Accordion,
@@ -12,10 +13,11 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Address } from '@/generated/prisma/client';
 import { CartItemWithProduct, UserWithRelations } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
-import { Loader2, ShoppingCart } from 'lucide-react';
+import { Edit2, Loader2, MapPin, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, {
@@ -126,6 +128,8 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 	const [isPending, startTransition] = useTransition();
 
 	const [step, setStep] = useState(1);
+	const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+	const [useManualAddress, setUseManualAddress] = useState(false);
 	const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
 		firstName: user?.name?.split(' ')[0] || '',
 		lastName: user?.name?.split(' ')[1] || '',
@@ -191,8 +195,13 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 	);
 
 	const isShippingValid = useMemo(
-		() => Object.values(shippingInfo).every((field) => field.trim() !== ''),
-		[shippingInfo]
+		() => {
+			// If using saved address, just check if one is selected
+			if (!useManualAddress && selectedAddress) return true;
+			// Otherwise validate manual form
+			return Object.values(shippingInfo).every((field) => field.trim() !== '');
+		},
+		[shippingInfo, selectedAddress, useManualAddress]
 	);
 
 	const isPaymentValid = useMemo(
@@ -204,8 +213,33 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 		setStep(targetStep);
 	}, []);
 
+	// Build shipping address from either saved address or manual form
+	const getShippingAddressData = useCallback(() => {
+		if (!useManualAddress && selectedAddress) {
+			return {
+				name: `${selectedAddress.firstName} ${selectedAddress.lastName}`,
+				street: selectedAddress.street1 + (selectedAddress.street2 ? `, ${selectedAddress.street2}` : ''),
+				city: selectedAddress.city,
+				state: selectedAddress.state,
+				zip: selectedAddress.postalCode,
+				country: selectedAddress.country,
+				phone: selectedAddress.phone,
+				deliveryInstructions: selectedAddress.deliveryInstructions,
+			};
+		}
+		return {
+			name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+			street: shippingInfo.address,
+			city: shippingInfo.city,
+			state: shippingInfo.state,
+			zip: shippingInfo.zip,
+			country: 'USA',
+		};
+	}, [selectedAddress, shippingInfo, useManualAddress]);
+
 	const handlePlaceOrder = useCallback(async () => {
 		startTransition(async () => {
+			const shippingAddressData = getShippingAddressData();
 			const orderDetails = {
 				items: cartItems.map((item) => ({
 					productId: item.productId,
@@ -220,22 +254,8 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 				shipping: shippingCost,
 				discount,
 				couponId: appliedCoupon?.id,
-				shippingAddress: JSON.stringify({
-					name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
-					street: shippingInfo.address,
-					city: shippingInfo.city,
-					state: shippingInfo.state,
-					zip: shippingInfo.zip,
-					country: 'USA',
-				}),
-				billingAddress: JSON.stringify({
-					name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
-					street: shippingInfo.address,
-					city: shippingInfo.city,
-					state: shippingInfo.state,
-					zip: shippingInfo.zip,
-					country: 'USA',
-				}),
+				shippingAddress: JSON.stringify(shippingAddressData),
+				billingAddress: JSON.stringify(shippingAddressData),
 				shippingMethod: JSON.stringify({
 					method: shippingMethod,
 					cost: shippingCost,
@@ -265,9 +285,9 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 		shippingCost,
 		discount,
 		appliedCoupon,
-		shippingInfo,
 		shippingMethod,
 		router,
+		getShippingAddressData,
 	]);
 
 	return (
@@ -305,57 +325,103 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
                               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">1</span>
 										Shipping Information
 									</h2>
-									<div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
-										<Input
-											name='firstName'
-											placeholder='First Name'
-											value={shippingInfo.firstName}
-											onChange={handleShippingChange}
-											required
-                                 className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
-										/>
-										<Input
-											name='lastName'
-											placeholder='Last Name'
-											value={shippingInfo.lastName}
-											onChange={handleShippingChange}
-											required
-                                 className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
-										/>
-										<Input
-											name='address'
-											placeholder='Street Address'
-											className='sm:col-span-2 h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium'
-											value={shippingInfo.address}
-											onChange={handleShippingChange}
-											required
-										/>
-										<Input
-											name='city'
-											placeholder='City'
-											value={shippingInfo.city}
-											onChange={handleShippingChange}
-											required
-                                 className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
-										/>
-										<Input
-											name='state'
-											placeholder='State'
-											value={shippingInfo.state}
-											onChange={handleShippingChange}
-											required
-                                 className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
-										/>
-										<Input
-											name='zip'
-											placeholder='ZIP Code'
-											value={shippingInfo.zip}
-											onChange={handleShippingChange}
-											maxLength={5}
-											required
-                                 className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
-										/>
-									</div>
+
+									{/* Saved Address Selector - Only show for logged in users */}
+									{user && !useManualAddress && (
+										<div className="space-y-4 mb-6">
+											<div className="flex items-center justify-between">
+												<h3 className="text-lg font-semibold flex items-center gap-2">
+													<MapPin className="w-4 h-4 text-primary" />
+													Saved Addresses
+												</h3>
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => setUseManualAddress(true)}
+													className="text-muted-foreground hover:text-foreground"
+												>
+													<Edit2 className="w-4 h-4 mr-1" />
+													Enter manually
+												</Button>
+											</div>
+											<AddressSelector
+												selectedAddress={selectedAddress}
+												onSelect={setSelectedAddress}
+												addressType="SHIPPING"
+											/>
+										</div>
+									)}
+
+									{/* Manual Address Form - Show if not logged in or user chose manual entry */}
+									{(!user || useManualAddress) && (
+										<div className="space-y-4">
+											{user && useManualAddress && (
+												<div className="flex items-center justify-between mb-4">
+													<h3 className="text-lg font-semibold">Enter New Address</h3>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => setUseManualAddress(false)}
+														className="text-muted-foreground hover:text-foreground"
+													>
+														<MapPin className="w-4 h-4 mr-1" />
+														Use saved address
+													</Button>
+												</div>
+											)}
+											<div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
+												<Input
+													name='firstName'
+													placeholder='First Name'
+													value={shippingInfo.firstName}
+													onChange={handleShippingChange}
+													required
+													className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
+												/>
+												<Input
+													name='lastName'
+													placeholder='Last Name'
+													value={shippingInfo.lastName}
+													onChange={handleShippingChange}
+													required
+													className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
+												/>
+												<Input
+													name='address'
+													placeholder='Street Address'
+													className='sm:col-span-2 h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium'
+													value={shippingInfo.address}
+													onChange={handleShippingChange}
+													required
+												/>
+												<Input
+													name='city'
+													placeholder='City'
+													value={shippingInfo.city}
+													onChange={handleShippingChange}
+													required
+													className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
+												/>
+												<Input
+													name='state'
+													placeholder='State'
+													value={shippingInfo.state}
+													onChange={handleShippingChange}
+													required
+													className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
+												/>
+												<Input
+													name='zip'
+													placeholder='ZIP Code'
+													value={shippingInfo.zip}
+													onChange={handleShippingChange}
+													maxLength={5}
+													required
+													className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
+												/>
+											</div>
+										</div>
+									)}
 									<div className='mt-10'>
 										<h3 className='text-lg font-bold mb-6 flex items-center gap-2'>
                                  <span className="w-1.5 h-6 bg-primary rounded-full" />
@@ -512,21 +578,26 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 													Edit
 												</Button>
 											</div>
-											<p className='text-muted-foreground text-sm leading-relaxed pl-3.5 border-l-2 border-border/50 ml-0.5'>
-												<span className="font-semibold text-foreground">{shippingInfo.firstName} {shippingInfo.lastName}</span>
-												<br />
-												{shippingInfo.address}
-												<br />
-												{shippingInfo.city}, {shippingInfo.state}{' '}
-												{shippingInfo.zip}
-											</p>
-											<p className='text-sm text-primary font-medium mt-3 pl-4 flex items-center gap-2'>
-                                    <div className="w-1 h-1 rounded-full bg-primary/50" />
-												{shippingMethod === 'express'
-													? 'Express'
-													: 'Standard'}{' '}
-												Shipping
-											</p>
+											{(() => {
+												const addr = getShippingAddressData();
+												return (
+													<>
+														<p className='text-muted-foreground text-sm leading-relaxed pl-3.5 border-l-2 border-border/50 ml-0.5'>
+															<span className="font-semibold text-foreground">{addr.name}</span>
+															<br />
+															{addr.street}
+															<br />
+															{addr.city}, {addr.state} {addr.zip}
+															<br />
+															{addr.country}
+														</p>
+														<p className='text-sm text-primary font-medium mt-3 pl-4 flex items-center gap-2'>
+															<span className="w-1 h-1 rounded-full bg-primary/50" />
+															{shippingMethod === 'express' ? 'Express' : 'Standard'} Shipping
+														</p>
+													</>
+												);
+											})()}
 										</div>
 										<div className='group border border-border/50 rounded-2xl p-6 bg-secondary/10 hover:border-primary/30 transition-colors'>
 											<div className='flex items-center justify-between mb-4'>

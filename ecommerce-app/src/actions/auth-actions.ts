@@ -247,6 +247,9 @@ export async function updateProfileAction(data: {
   email?: string;
   bio?: string;
   image?: string;
+  phone?: string;
+  dateOfBirth?: string; // ISO date string
+  gender?: string;
 }) {
   try {
     const session = await auth();
@@ -271,16 +274,113 @@ export async function updateProfileAction(data: {
       }
     }
 
+    // Build update data with proper date conversion
+    const updateData: Prisma.UserUpdateInput = {
+      ...(data.name && { name: data.name }),
+      ...(data.email && { email: data.email }),
+      ...(data.bio !== undefined && { bio: data.bio }),
+      ...(data.image && { image: data.image }),
+      ...(data.phone !== undefined && { phone: data.phone || null }),
+      ...(data.gender !== undefined && { gender: data.gender || null }),
+    };
+
+    // Handle date conversion for dateOfBirth
+    if (data.dateOfBirth !== undefined) {
+      updateData.dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
+    }
+
     const user = await prisma.user.update({
       where: { id: userId },
-      data,
+      data: updateData,
     });
 
     revalidatePath('/account');
+    revalidatePath('/account/edit');
 
     return { success: true, message: 'Profile updated successfully.', user };
   } catch {
     return { success: false, message: 'Failed to update profile' };
+  }
+}
+
+/**
+ * Update email preferences for current user
+ */
+export async function updateEmailPreferencesAction(data: {
+  marketingEmails?: boolean;
+  orderEmails?: boolean;
+  reviewEmails?: boolean;
+}) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        ...(data.marketingEmails !== undefined && { marketingEmails: data.marketingEmails }),
+        ...(data.orderEmails !== undefined && { orderEmails: data.orderEmails }),
+        ...(data.reviewEmails !== undefined && { reviewEmails: data.reviewEmails }),
+      },
+    });
+
+    revalidatePath('/account');
+
+    return { success: true, message: 'Email preferences updated.' };
+  } catch {
+    return { success: false, message: 'Failed to update email preferences' };
+  }
+}
+
+/**
+ * Get current user's full profile including loyalty and referral data
+ */
+export async function getUserProfileAction() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized', data: null };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        bio: true,
+        phone: true,
+        dateOfBirth: true,
+        gender: true,
+        // Email Preferences
+        marketingEmails: true,
+        orderEmails: true,
+        reviewEmails: true,
+        // Loyalty Program
+        loyaltyPoints: true,
+        loyaltyTier: true,
+        // Referral Program
+        referralCode: true,
+        referralCount: true,
+        // Account Info
+        createdAt: true,
+        lastLoginAt: true,
+        loginCount: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      return { success: false, error: 'User not found', data: null };
+    }
+
+    return { success: true, data: user };
+  } catch (error) {
+    console.error('getUserProfileAction Error:', error);
+    return { success: false, error: 'Failed to fetch profile', data: null };
   }
 }
 

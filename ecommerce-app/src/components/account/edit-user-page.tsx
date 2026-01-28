@@ -1,31 +1,54 @@
 'use client';
 
-import { updateProfileAction } from '@/actions/auth-actions';
+import { getUserProfileAction, updateProfileAction } from '@/actions/auth-actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  ArrowLeft,
-  Calendar,
-  Camera,
-  Mail,
-  Shield,
-  User as UserIcon
+    ArrowLeft,
+    Calendar,
+    Camera,
+    Mail,
+    Shield,
+    User as UserIcon
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { EditProfileForm, EditProfileFormValues } from './edit-user-form';
+import { EmailPreferencesCard } from './EmailPreferencesCard';
+import { LoyaltyCard } from './LoyaltyCard';
+import { ReferralCard } from './ReferralCard';
+
+interface UserProfile {
+  id: string;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+  bio: string | null;
+  phone: string | null;
+  dateOfBirth: Date | null;
+  gender: string | null;
+  marketingEmails: boolean;
+  orderEmails: boolean;
+  reviewEmails: boolean;
+  loyaltyPoints: number;
+  loyaltyTier: string | null;
+  referralCode: string | null;
+  referralCount: number;
+  createdAt: Date;
+  role: string;
+}
 
 /**
  * Loading State Component
@@ -49,11 +72,31 @@ function ProfileSkeleton() {
  * - Profile statistics
  * - Account information
  * - Bio editing
+ * - Email Preferences
+ * - Loyalty Points
+ * - Referral Code
  */
 export default function EditProfilePage() {
   const { data: session, status, update } = useSession();
   const [isPending, startTransition] = useTransition();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Fetch full user profile on mount
+  useEffect(() => {
+    async function fetchProfile() {
+      const result = await getUserProfileAction();
+      if (result.success && result.data) {
+        setUserProfile(result.data as UserProfile);
+      }
+      setIsLoadingProfile(false);
+    }
+    
+    if (status === 'authenticated') {
+      fetchProfile();
+    }
+  }, [status]);
 
   const handleUpdateProfile = async (values: EditProfileFormValues) => {
     startTransition(async () => {
@@ -85,8 +128,12 @@ export default function EditProfilePage() {
         }
 
         const result = await updateProfileAction({
-          ...values,
+          name: values.name,
+          bio: values.bio,
           image: uploadedImageUrl,
+          phone: values.phone || undefined,
+          dateOfBirth: values.dateOfBirth?.toISOString(),
+          gender: values.gender || undefined,
         });
 
         if (result.success) {
@@ -102,6 +149,12 @@ export default function EditProfilePage() {
               image: uploadedImageUrl,
             },
           });
+          
+          // Refresh profile data
+          const profileResult = await getUserProfileAction();
+          if (profileResult.success && profileResult.data) {
+            setUserProfile(profileResult.data as UserProfile);
+          }
           
           setImagePreview(null); // Clear preview after successful save
         } else {
@@ -130,7 +183,7 @@ export default function EditProfilePage() {
     }
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || isLoadingProfile) {
     return (
       <div className='min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950'>
         <div className='container mx-auto px-4 py-12'>
@@ -265,7 +318,7 @@ export default function EditProfilePage() {
                     <span>Role</span>
                   </div>
                   <Badge variant='secondary' className='capitalize'>
-                    {(user as { role?: string }).role?.toLowerCase() || 'User'}
+                    {userProfile?.role?.toLowerCase() || 'User'}
                   </Badge>
                 </div>
 
@@ -277,8 +330,8 @@ export default function EditProfilePage() {
                     <span>Member Since</span>
                   </div>
                   <p className='font-medium'>
-                    {(user as { createdAt?: string | Date }).createdAt
-                      ? new Date((user as { createdAt?: string | Date }).createdAt!).toLocaleDateString('en-US', {
+                    {userProfile?.createdAt
+                      ? new Date(userProfile.createdAt).toLocaleDateString('en-US', {
                           month: 'long',
                           year: 'numeric',
                         })
@@ -287,10 +340,21 @@ export default function EditProfilePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Email Preferences Card */}
+            {userProfile && (
+              <EmailPreferencesCard
+                initialPreferences={{
+                  marketingEmails: userProfile.marketingEmails,
+                  orderEmails: userProfile.orderEmails,
+                  reviewEmails: userProfile.reviewEmails,
+                }}
+              />
+            )}
           </div>
 
-          {/* Right Column - Edit Form */}
-          <div className='lg:col-span-2'>
+          {/* Right Column - Edit Form & Rewards */}
+          <div className='lg:col-span-2 space-y-6'>
             <Card>
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
@@ -300,12 +364,26 @@ export default function EditProfilePage() {
               </CardHeader>
               <CardContent>
                 <EditProfileForm
-                  user={user}
+                  user={userProfile || user}
                   onSubmit={handleUpdateProfile}
                   isSubmitting={isPending}
                 />
               </CardContent>
             </Card>
+
+            {/* Rewards Section */}
+            {userProfile && (
+              <div className='grid md:grid-cols-2 gap-6'>
+                <LoyaltyCard
+                  loyaltyPoints={userProfile.loyaltyPoints}
+                  loyaltyTier={userProfile.loyaltyTier}
+                />
+                <ReferralCard
+                  referralCode={userProfile.referralCode}
+                  referralCount={userProfile.referralCount}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
