@@ -3,15 +3,16 @@
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+  Activity,
   BarChart,
   ChevronRight,
   Home,
   LayoutDashboard,
   LogOut,
   MessageCircle,
-
   Moon,
   Package,
+  RotateCcw,
   Settings,
   ShoppingCart,
   Star,
@@ -38,6 +39,8 @@ const navLinks = [
   { href: '/admin/coupons', label: 'Coupons', icon: Ticket, description: 'Discounts & promos' },
   { href: '/admin/questions', label: 'Q&A', icon: MessageCircle, description: 'Manage questions' },
   { href: '/admin/reviews', label: 'Reviews', icon: Star, description: 'User feedback' },
+  { href: '/admin/returns', label: 'Returns', icon: RotateCcw, description: 'Requests & refunds' },
+  { href: '/admin/activity', label: 'Activity', icon: Activity, description: 'Audit logs' },
 ];
 
 const quickLinks = [
