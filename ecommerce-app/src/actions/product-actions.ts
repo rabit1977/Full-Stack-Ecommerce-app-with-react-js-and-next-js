@@ -41,6 +41,21 @@ export interface GetProductsResult {
 }
 
 /**
+ * Helper to create URL-friendly slug
+ */
+function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')     // Replace spaces with -
+    .replace(/[^\w-]+/g, '')  // Remove all non-word chars
+    .replace(/--+/g, '-')     // Replace multiple - with single -
+    .replace(/^-+/, '')       // Trim - from start
+    .replace(/-+$/, '');      // Trim - from end
+}
+
+/**
  * Get products with filters and pagination
  */
 export async function getProductsAction(
@@ -171,7 +186,6 @@ export async function getProductsAction(
   } catch (error) {
     console.error('Error fetching products:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
-    console.error('Error fetching products:', error);
     throw new Error(`Failed to fetch products: ${errorMessage}`);
   }
 }
@@ -217,6 +231,56 @@ export async function getProductByIdAction(
     return product as ProductWithRelations | null;
   } catch (error) {
     console.error('Error fetching product:', error);
+    return null;
+  }
+}
+
+/**
+ * Get single product by Slug with all relations
+ */
+export async function getProductBySlugAction(
+  slug: string,
+): Promise<ProductWithRelations | null> {
+  try {
+    const product = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: slug },
+          { id: slug }
+        ]
+      },
+      include: {
+        images: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+        reviews: {
+          select: {
+            id: true,
+            userId: true,
+            productId: true,
+            rating: true,
+            title: true,
+            comment: true,
+            helpful: true,
+            verifiedPurchase: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return product as ProductWithRelations | null;
+  } catch (error) {
+    console.error('Error fetching product by slug:', error);
     return null;
   }
 }
@@ -304,6 +368,19 @@ export async function createProductAction(data: ProductFormValues) {
     const validatedData = productFormSchema.parse(data);
     const { images, ...productData } = validatedData;
     
+    // Generate slug
+    let slug = productData.slug || slugify(productData.title);
+    
+    // Ensure slug uniqueness
+    const existingProduct = await prisma.product.findUnique({
+      where: { slug },
+    });
+    
+    if (existingProduct) {
+        // Append a random string if duplicate
+        slug = `${slug}-${Math.floor(Math.random() * 1000)}`;
+    }
+
     // Explicitly handle fields potentially undefined in validatedData but needed for Prisma
     const product = await prisma.product.create({
       data: {
@@ -323,6 +400,11 @@ export async function createProductAction(data: ProductFormValues) {
         thumbnail: images?.[0] || null,
         tags: productData.tags || [],
         
+        // SEO
+        slug,
+        metaTitle: productData.metaTitle || productData.title,
+        metaDescription: productData.metaDescription || productData.description.slice(0, 160),
+
         // JSON conversions
         dimensions: (productData.dimensions || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
         specifications: (productData.specifications || Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
@@ -368,6 +450,21 @@ export async function updateProductAction(
     const validatedData = productFormSchema.partial().parse(data);
     const { images, ...productData } = validatedData;
 
+    // Handle slug update if provided
+    let slug = productData.slug;
+    if (slug) {
+        slug = slugify(slug);
+        const existing = await prisma.product.findFirst({
+            where: { 
+                slug, 
+                NOT: { id } // Exclude current product
+            }
+        });
+        if (existing) {
+             throw new Error('Slug already exists');
+        }
+    }
+
     await prisma.product.update({
       where: { id },
       data: {
@@ -386,6 +483,11 @@ export async function updateProductAction(
         discount: productData.discount,
         tags: productData.tags,
         
+        // SEO
+        ...(slug && { slug }),
+        ...(productData.metaTitle && { metaTitle: productData.metaTitle }),
+        ...(productData.metaDescription && { metaDescription: productData.metaDescription }),
+
         // JSON conversions
         ...(productData.dimensions !== undefined && { 
             dimensions: productData.dimensions as unknown as Prisma.InputJsonValue 

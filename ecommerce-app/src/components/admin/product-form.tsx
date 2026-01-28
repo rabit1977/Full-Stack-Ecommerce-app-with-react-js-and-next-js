@@ -24,6 +24,7 @@ import { ProductWithRelations } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     DollarSign,
+    Globe,
     Image as ImageIcon,
     Layers,
     LayoutList,
@@ -102,6 +103,10 @@ export const ProductForm = ({
       specifications: product?.specifications && Array.isArray(product.specifications)
         ? (product.specifications as { key: string; value: string }[])
         : [],
+      // SEO
+      slug: product?.slug || '',
+      metaTitle: product?.metaTitle || '',
+      metaDescription: product?.metaDescription || '',
     },
   });
 
@@ -195,6 +200,7 @@ export const ProductForm = ({
                         <TabsTrigger value="pricing" className="rounded-lg py-2">Pricing</TabsTrigger>
                         <TabsTrigger value="specs" className="rounded-lg py-2">Specs</TabsTrigger>
                         <TabsTrigger value="media" className="rounded-lg py-2">Media</TabsTrigger>
+                        <TabsTrigger value="seo" className="rounded-lg py-2">SEO</TabsTrigger>
                     </TabsList>
                     
                     {/* --- GENERAL TAB --- */}
@@ -707,6 +713,79 @@ export const ProductForm = ({
                                 )}
                                 </div>
                             )}
+                        </div>
+                    </TabsContent>
+
+                    {/* --- SEO TAB --- */}
+                    <TabsContent value="seo" className="space-y-6 mt-6">
+                        <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center gap-3 pb-4 border-b border-border/50'>
+                                <div className='w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950/50 flex items-center justify-center'>
+                                    <Globe className='h-5 w-5 text-teal-600 dark:text-teal-400' />
+                                </div>
+                                <div>
+                                    <h3 className='font-semibold text-foreground'>Search Engine Optimization</h3>
+                                    <p className='text-sm text-muted-foreground'>Improve visibility on search engines</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <FormField
+                                    control={form.control}
+                                    name='slug'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>URL Slug</FormLabel>
+                                        <FormControl>
+                                            <div className="flex items-center">
+                                                <span className="text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md px-3 py-2 text-sm">
+                                                    /products/
+                                                </span>
+                                                <Input placeholder='auto-generated-from-title' className='rounded-l-none input-premium' {...field} disabled={isSubmitting} />
+                                            </div>
+                                        </FormControl>
+                                        <FormDescription>Unique URL identifier. Leave empty to auto-generate from title.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name='metaTitle'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Meta Title</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder='Custom title for search results' className='input-premium' {...field} disabled={isSubmitting} />
+                                        </FormControl>
+                                        <FormDescription>Leave empty to use product title.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name='metaDescription'
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Meta Description</FormLabel>
+                                        <FormControl>
+                                            <Textarea 
+                                                placeholder='Brief summary for search results...' 
+                                                rows={3} 
+                                                className='input-premium resize-none' 
+                                                {...field} 
+                                                disabled={isSubmitting} 
+                                            />
+                                        </FormControl>
+                                        <FormDescription>Recommended length: 150-160 characters. Leave empty to use description.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
                         </div>
                     </TabsContent>
                 </Tabs>

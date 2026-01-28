@@ -39,6 +39,11 @@ export const productFormSchema = z.object({
   discount: z.coerce.number().min(0).max(100).optional(),
   tags: z.array(z.string()).optional(),
   thumbnail: z.string().optional(),
+
+  // SEO Fields
+  slug: z.string().optional(), // Auto-generated if empty
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
   
   // Structured Data
   specifications: z.array(z.object({

@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/auth';
+import { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
@@ -145,6 +146,9 @@ export async function toggleWishlistAction(
     };
   } catch (error) {
     console.error('Error toggling wishlist item:', error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      return { success: false, error: 'Session invalid. Please sign out and sign in again.', wishlist: [] };
+    }
     const message = error instanceof Error ? error.message : 'Operation failed.';
     return { success: false, error: message, wishlist: [] };
   }
@@ -301,20 +305,26 @@ export async function moveAllToCartAction() {
               where: { id: existingCartItem.id },
               data: { quantity: newQuantity },
             });
+            // Only remove from wishlist if update succeeded
+            await prisma.wishlistItem.delete({
+               where: { id: item.id },
+            });
+            movedCount++;
+          } else {
+             failedCount++;
+             failedProducts.push(item.product.title);
           }
         } else {
           // Create new cart item
           await prisma.cartItem.create({
             data: { userId, productId: item.productId, quantity: 1 },
           });
+          // Remove from wishlist
+          await prisma.wishlistItem.delete({
+             where: { id: item.id },
+          });
+          movedCount++;
         }
-
-        // Remove from wishlist
-        await prisma.wishlistItem.delete({
-          where: { id: item.id },
-        });
-
-        movedCount++;
       } catch {
         failedCount++;
         failedProducts.push(item.product.title);

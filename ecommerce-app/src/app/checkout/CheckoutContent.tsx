@@ -1,9 +1,9 @@
 'use client';
 
-import { clearCartAction } from '@/actions/cart-actions';
-import { createOrderAction } from '@/actions/order-actions';
+import { createPaymentIntentAction, updatePaymentIntentAction } from '@/actions/payment-actions';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { AddressSelector } from '@/components/checkout/AddressSelector';
+import { CheckoutPaymentFlow } from '@/components/checkout/checkout-payment-flow';
 import { CheckoutSteps } from '@/components/checkout/checkout-steps';
 import {
     Accordion,
@@ -17,6 +17,8 @@ import { Address } from '@/generated/prisma/client';
 import { CartItemWithProduct, UserWithRelations } from '@/lib/types';
 import { formatPrice } from '@/lib/utils/formatters';
 import { getProductImage } from '@/lib/utils/product-images';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { Edit2, Loader2, MapPin, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -29,6 +31,12 @@ import React, {
 } from 'react';
 import { toast } from 'sonner';
 
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+	// Should throw or warn
+	console.error("Missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY");
+}
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
 interface ShippingInfo {
 	firstName: string;
 	lastName: string;
@@ -36,13 +44,6 @@ interface ShippingInfo {
 	city: string;
 	state: string;
 	zip: string;
-}
-
-interface PaymentInfo {
-	cardNumber: string;
-	nameOnCard: string;
-	expiry: string;
-	cvc: string;
 }
 
 interface MobileOrderSummaryProps {
@@ -118,12 +119,12 @@ const MobileOrderSummary = memo(
 );
 MobileOrderSummary.displayName = 'MobileOrderSummary';
 
-interface CheckoutClientProps {
+interface CheckoutContentProps {
 	cartItems: CartItemWithProduct[];
 	user: UserWithRelations | null;
 }
 
-export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
+export function CheckoutContent({ cartItems, user }: CheckoutContentProps) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 
@@ -138,15 +139,13 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 		state: '',
 		zip: '',
 	});
-	const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
-		cardNumber: '',
-		nameOnCard: '',
-		expiry: '',
-		cvc: '',
-	});
 	const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>(
 		'standard'
 	);
+
+    // Stripe State
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
 
 	const appliedCoupon = user?.coupon;
 
@@ -186,14 +185,6 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 		[]
 	);
 
-	const handlePaymentChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const { name, value } = e.target;
-			setPaymentInfo((prev) => ({ ...prev, [name]: value }));
-		},
-		[]
-	);
-
 	const isShippingValid = useMemo(
 		() => {
 			// If using saved address, just check if one is selected
@@ -204,14 +195,10 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 		[shippingInfo, selectedAddress, useManualAddress]
 	);
 
-	const isPaymentValid = useMemo(
-		() => Object.values(paymentInfo).every((field) => field.trim() !== ''),
-		[paymentInfo]
-	);
-
 	const handleStepClick = useCallback((targetStep: number) => {
+        if (targetStep > step) return; // Prevent skipping forward
 		setStep(targetStep);
-	}, []);
+	}, [step]);
 
 	// Build shipping address from either saved address or manual form
 	const getShippingAddressData = useCallback(() => {
@@ -223,8 +210,8 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 				state: selectedAddress.state,
 				zip: selectedAddress.postalCode,
 				country: selectedAddress.country,
-				phone: selectedAddress.phone,
-				deliveryInstructions: selectedAddress.deliveryInstructions,
+                phone: selectedAddress.phone,
+                deliveryInstructions: selectedAddress.deliveryInstructions,
 			};
 		}
 		return {
@@ -237,58 +224,29 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 		};
 	}, [selectedAddress, shippingInfo, useManualAddress]);
 
-	const handlePlaceOrder = useCallback(async () => {
-		startTransition(async () => {
-			const shippingAddressData = getShippingAddressData();
-			const orderDetails = {
-				items: cartItems.map((item) => ({
-					productId: item.productId,
-					quantity: item.quantity,
-					price: item.product.price,
-					title: item.product.title,
-					thumbnail: getProductImage(item.product),
-				})),
-				total,
-				subtotal,
-				tax: taxes,
-				shipping: shippingCost,
-				discount,
-				couponId: appliedCoupon?.id,
-				shippingAddress: JSON.stringify(shippingAddressData),
-				billingAddress: JSON.stringify(shippingAddressData),
-				shippingMethod: JSON.stringify({
-					method: shippingMethod,
-					cost: shippingCost,
-				}),
-				paymentMethod: 'Credit Card', // Mocked
-			};
 
-			try {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const result = await createOrderAction(orderDetails as any);
-				if (result.success && result.orderId) {
-					await clearCartAction();
-					toast.success('Order placed successfully!');
-					router.push(`/order-confirmation?orderId=${result.orderId}`);
-				} else {
-					toast.error(result.message || 'Failed to place order.');
-				}
-			} catch {
-				toast.error('An unexpected error occurred.');
-			}
-		});
-	}, [
-		cartItems,
-		total,
-		subtotal,
-		taxes,
-		shippingCost,
-		discount,
-		appliedCoupon,
-		shippingMethod,
-		router,
-		getShippingAddressData,
-	]);
+    const handleContinueToPayment = async () => {
+        startTransition(async () => {
+            try {
+                if (paymentIntentId) {
+                    await updatePaymentIntentAction(paymentIntentId, total);
+                } else {
+                    const res = await createPaymentIntentAction(total);
+                    if (res.success && res.clientSecret) {
+                         setClientSecret(res.clientSecret);
+                         if (res.paymentIntentId) setPaymentIntentId(res.paymentIntentId);
+                    } else {
+                        toast.error(res.error || "Failed to initialize payment");
+                        return;
+                    }
+                }
+                setStep(2);
+            } catch (e) {
+                toast.error("An error occurred");
+                console.error(e);
+            }
+        });
+    }
 
 	return (
 		<div className='bg-slate-50 min-h-[80vh] dark:bg-slate-950/50'>
@@ -486,205 +444,47 @@ export function CheckoutClient({ cartItems, user }: CheckoutClientProps) {
 									<Button
 										size='lg'
 										className='mt-10 w-full sm:w-auto h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] transition-all'
-										onClick={() => setStep(2)}
-										disabled={!isShippingValid}
+										onClick={handleContinueToPayment}
+										disabled={!isShippingValid || isPending}
 									>
-										Continue to Payment
+                                        {isPending ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Preparing Payment...
+                                            </>
+                                        ) : (
+                                            'Continue to Payment'
+                                        )}
 									</Button>
 								</div>
 							)}
-							{step === 2 && (
-								<div className="relative z-10 animate-in fade-in slide-in-from-right-4 duration-500">
-									<h2 className='text-2xl font-bold mb-8 flex items-center gap-3'>
-                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">2</span>
-										Payment Information
-									</h2>
-									<div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
-										<Input
-											name='cardNumber'
-											placeholder='Card Number'
-											className='sm:col-span-2 h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium font-mono'
-											value={paymentInfo.cardNumber}
-											onChange={handlePaymentChange}
-											maxLength={16}
-											required
-										/>
-										<Input
-											name='nameOnCard'
-											placeholder='Name on Card'
-											className='sm:col-span-2 h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium'
-											value={paymentInfo.nameOnCard}
-											onChange={handlePaymentChange}
-											required
-										/>
-										<Input
-											name='expiry'
-											placeholder='MM/YY'
-											value={paymentInfo.expiry}
-											onChange={handlePaymentChange}
-											maxLength={5}
-											required
-                                 className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium font-mono"
-										/>
-										<Input
-											name='cvc'
-											placeholder='CVC'
-											value={paymentInfo.cvc}
-											onChange={handlePaymentChange}
-											maxLength={3}
-											required
-                                 className="h-12 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all font-medium font-mono"
-										/>
-									</div>
-									<div className='flex flex-col sm:flex-row gap-4 mt-10'>
-										<Button
-											variant='outline'
-											size='lg'
-											onClick={() => setStep(1)}
-											className='w-full sm:w-auto h-12 rounded-xl font-medium border-border/50'
-										>
-											Back
-										</Button>
-										<Button
-											size='lg'
-											onClick={() => setStep(3)}
-											disabled={!isPaymentValid}
-											className='w-full sm:flex-1 h-12 rounded-xl font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40'
-										>
-											Review Order
-										</Button>
-									</div>
-								</div>
-							)}
-							{step === 3 && (
-								<div className="relative z-10 animate-in fade-in slide-in-from-right-4 duration-500">
-									<h2 className='text-2xl font-bold mb-8 flex items-center gap-3'>
-                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">3</span>
-										Review Your Order
-									</h2>
-									<div className='space-y-6'>
-										<div className='group border border-border/50 rounded-2xl p-6 bg-secondary/10 hover:border-primary/30 transition-colors'>
-											<div className='flex items-center justify-between mb-4'>
-												<h3 className='font-bold flex items-center gap-2'>
-                                       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-													Shipping Address
-												</h3>
-												<Button
-													variant='ghost'
-													size='sm'
-													onClick={() => setStep(1)}
-                                       className="text-primary hover:text-primary hover:bg-primary/10"
-												>
-													Edit
-												</Button>
-											</div>
-											{(() => {
-												const addr = getShippingAddressData();
-												return (
-													<>
-														<p className='text-muted-foreground text-sm leading-relaxed pl-3.5 border-l-2 border-border/50 ml-0.5'>
-															<span className="font-semibold text-foreground">{addr.name}</span>
-															<br />
-															{addr.street}
-															<br />
-															{addr.city}, {addr.state} {addr.zip}
-															<br />
-															{addr.country}
-														</p>
-														<p className='text-sm text-primary font-medium mt-3 pl-4 flex items-center gap-2'>
-															<span className="w-1 h-1 rounded-full bg-primary/50" />
-															{shippingMethod === 'express' ? 'Express' : 'Standard'} Shipping
-														</p>
-													</>
-												);
-											})()}
-										</div>
-										<div className='group border border-border/50 rounded-2xl p-6 bg-secondary/10 hover:border-primary/30 transition-colors'>
-											<div className='flex items-center justify-between mb-4'>
-												<h3 className='font-bold flex items-center gap-2'>
-                                       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-													Payment Method
-												</h3>
-												<Button
-													variant='ghost'
-													size='sm'
-													onClick={() => setStep(2)}
-                                       className="text-primary hover:text-primary hover:bg-primary/10"
-												>
-													Edit
-												</Button>
-											</div>
-											<p className='text-muted-foreground text-sm pl-3.5 border-l-2 border-border/50 ml-0.5'>
-                                    <span className="font-semibold text-foreground">{paymentInfo.nameOnCard}</span>
-												<br />
-												Card ending in <span className="font-mono">{paymentInfo.cardNumber.slice(-4)}</span>
-											</p>
-										</div>
-										<div className='border border-border/50 rounded-2xl p-6 bg-secondary/10'>
-											<h3 className='font-bold mb-6 flex items-center gap-2'>
-                                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-												Order Items ({cartItems.length})
-											</h3>
-											<ul className='space-y-4'>
-												{cartItems.map((item) => (
-													<li
-														key={item.id}
-														className='flex items-center gap-4 py-2'
-													>
-														<div className='w-16 h-16 flex shrink-0 relative rounded-xl overflow-hidden border border-border/50'>
-															<Image
-																src={getProductImage(item.product)}
-																alt={item.product.title}
-																fill
-																className='object-cover'
-															/>
-														</div>
-														<div className='flex-1 min-w-0'>
-															<p className='font-bold text-foreground truncate'>
-																{item.product.title}
-															</p>
-															<p className='text-sm text-muted-foreground font-medium'>
-																Qty: {item.quantity}
-															</p>
-														</div>
-														<p className='text-sm font-bold text-foreground'>
-															{formatPrice(
-																item.product.price * item.quantity
-															)}
-														</p>
-													</li>
-												))}
-											</ul>
-										</div>
-									</div>
-									<div className='flex flex-col sm:flex-row gap-4 mt-10'>
-										<Button
-											variant='outline'
-											size='lg'
-											onClick={() => setStep(2)}
-											disabled={isPending}
-											className='w-full sm:w-auto h-12 rounded-xl font-medium border-border/50'
-										>
-											Back
-										</Button>
-										<Button
-											size='lg'
-											className='btn-premium w-full sm:flex-1 h-12 rounded-xl font-bold hover:shadow-primary/40'
-											onClick={handlePlaceOrder}
-											disabled={isPending}
-										>
-											{isPending ? (
-												<>
-													<Loader2 className='mr-2 h-4 w-4 animate-spin' />
-													Processing...
-												</>
-											) : (
-												'Place Order'
-											)}
-										</Button>
-									</div>
-								</div>
-							)}
+                            
+                            {/* STRIPE PAYMENT FLOW */}
+                            {(step === 2 || step === 3) && clientSecret && (
+                                <Elements stripe={stripePromise} options={{ 
+                                    clientSecret, 
+                                    appearance: { 
+                                        theme: 'stripe', // 'night', 'flat' etc.
+                                        variables: {
+                                            colorPrimary: '#6366f1', // Indigo-500
+                                        }
+                                    } 
+                                }}>
+                                    <CheckoutPaymentFlow 
+                                        step={step}
+                                        setStep={setStep}
+                                        cartItems={cartItems}
+                                        total={total}
+                                        subtotal={subtotal}
+                                        taxes={taxes}
+                                        shippingCost={shippingCost}
+                                        discount={discount}
+                                        shippingMethod={shippingMethod}
+                                        appliedCoupon={appliedCoupon}
+                                        shippingAddressData={getShippingAddressData()}
+                                    />
+                                </Elements>
+                            )}
 						</div>
 					</div>
 					<div className='hidden lg:block lg:col-span-4'>

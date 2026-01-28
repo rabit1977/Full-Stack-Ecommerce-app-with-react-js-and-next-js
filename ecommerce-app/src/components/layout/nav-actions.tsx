@@ -1,30 +1,31 @@
 'use client';
 
+import { NotificationBell } from '@/components/notifications';
 import { UserAvatar } from '@/components/shared/user-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Heart,
-  LayoutDashboard,
-  LogOut,
-  Moon,
-  Package,
-  ShoppingCart,
-  Sun,
-  User,
-  UserCircle
+    Heart,
+    LayoutDashboard,
+    LogOut,
+    Moon,
+    Package,
+    ShoppingCart,
+    Sun,
+    User,
+    UserCircle
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
@@ -127,6 +128,9 @@ export const NavActions = ({
         </AnimatePresence>
         <span className='sr-only'>Toggle theme</span>
       </Button>
+
+      {/* Notifications (only for logged-in users) */}
+      {user && <NotificationBell />}
 
       {/* Wishlist */}
       <Link

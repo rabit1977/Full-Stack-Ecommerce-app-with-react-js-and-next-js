@@ -1,6 +1,6 @@
 import { getCartAction } from '@/actions/cart-actions';
 import { redirect } from 'next/navigation';
-import { CheckoutClient } from './CheckoutClient';
+import { CheckoutContent } from './CheckoutContent';
 
 export default async function CheckoutPage() {
 	const { items, user } = await getCartAction();
@@ -9,5 +9,5 @@ export default async function CheckoutPage() {
 		redirect('/cart');
 	}
 
-	return <CheckoutClient cartItems={items} user={user} />;
+	return <CheckoutContent cartItems={items} user={user} />;
 }

@@ -1,6 +1,6 @@
 // components/product/related-products.tsx (Server Component Version)
 
-import { getProductsAction } from '@/actions/product-actions';
+import { getRelatedProductsAction } from '@/actions/product-relation-actions';
 import { ProductWithRelations } from '@/lib/types';
 import { ProductCard } from './product-card';
 
@@ -11,25 +11,16 @@ interface RelatedProductsProps {
 
 /**
  * RelatedProducts Server Component
- *
- * Displays products related to the current product
- * Fetches data on the server for better performance
  */
 export async function RelatedProducts({
   currentProduct,
   limit = 4,
 }: RelatedProductsProps) {
-  // Fetch related products on the server
-  const { products } = await getProductsAction({
-    categories: currentProduct.category,
-    limit: limit + 1, // Get one extra in case current product is included
-    sort: 'rating',
-  });
+  // Fetch related products using advanced logic
+  const { products } = await getRelatedProductsAction(currentProduct.id, limit);
 
-  // Filter out current product and limit results
-  const relatedProducts = products
-    .filter((p) => p.id !== currentProduct.id)
-    .slice(0, limit);
+  // Products are already filtered and prepared by the action
+  const relatedProducts = products || [];
 
   // Don't render if no related products
   if (relatedProducts.length === 0) {

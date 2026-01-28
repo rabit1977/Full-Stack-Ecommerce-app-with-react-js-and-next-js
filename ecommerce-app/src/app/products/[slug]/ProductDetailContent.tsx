@@ -1,27 +1,24 @@
 import { getMeAction } from '@/actions/auth-actions';
 import { getCartAction } from '@/actions/cart-actions';
-import { getProductByIdAction } from '@/actions/product-actions';
 import { getWishlistAction } from '@/actions/wishlist-actions';
+import { FrequentlyBoughtTogether } from '@/components/product/frequently-bought-together';
 import { ProductDetailGallery } from '@/components/product/product-detail-gallery';
 import { ProductInfoTabs } from '@/components/product/product-info-tabs';
+import { QuestionsSection } from '@/components/product/questions-section';
+import { RecentlyViewedProducts } from '@/components/product/recently-viewed-products';
 import { RelatedProducts } from '@/components/product/related-products';
 import { ReviewsSection } from '@/components/product/reviews-section';
-import { notFound } from 'next/navigation';
+import { ProductWithRelations } from '@/lib/types';
 import { ProductPurchaseManager } from './ProductPurchaseManager';
 
 export async function ProductDetailContent({
-  productId,
+  product,
 }: {
-  productId: string;
+  product: ProductWithRelations;
 }) {
-  const product = await getProductByIdAction(productId);
   const { wishlist } = await getWishlistAction();
   const cart = await getCartAction();
   const { user } = await getMeAction();
-
-  if (!product) {
-    notFound();
-  }
 
   const initialIsWished = wishlist.includes(product.id);
   const initialQuantityInCart =
@@ -47,6 +44,14 @@ export async function ProductDetailContent({
          <ProductInfoTabs product={product} />
       </div>
 
+      <div className='mt-12 sm:mt-16'>
+          <FrequentlyBoughtTogether productId={product.id} />
+      </div>
+
+      <div className='mt-20 sm:mt-24 lg:mt-32'>
+        <QuestionsSection productId={product.id} />
+      </div>
+
       <div className='mt-20 sm:mt-24 lg:mt-32'>
         <ReviewsSection 
           productId={product.id} 
@@ -56,6 +61,10 @@ export async function ProductDetailContent({
       </div>
       <div className='mt-20 sm:mt-24 lg:mt-32'>
         <RelatedProducts currentProduct={product} />
+      </div>
+
+      <div className='mt-20 sm:mt-24 lg:mt-32'>
+        <RecentlyViewedProducts currentProduct={product} />
       </div>
     </div>
   );

@@ -250,7 +250,7 @@ export const ProductCard = memo(
           </div>
 
           {/* Title */}
-          <Link href={`/products/${product.id}`} className='block group/title mt-1.5'>
+          <Link href={`/products/${product.slug || product.id}`} className='block group/title mt-1.5'>
             <h3 className='line-clamp-2 text-sm sm:text-base font-semibold text-foreground transition-colors group-hover/title:text-primary leading-snug'>
               {product.title}
             </h3>
