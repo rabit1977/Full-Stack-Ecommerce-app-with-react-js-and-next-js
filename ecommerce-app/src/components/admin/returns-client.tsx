@@ -9,7 +9,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ReturnStatus } from '@prisma/client';
+import { ReturnStatus } from '@/generated/prisma/enums';
 import {
     AlertCircle,
     CheckCircle,
