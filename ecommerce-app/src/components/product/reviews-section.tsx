@@ -305,7 +305,7 @@ const ReviewsSection = ({
                               <Button
                                 variant='ghost'
                                 size='sm'
-                                onClick={() => handleEditClick(review)}
+                                onClick={() => handleEditClick(review as any)}
                                 className='h-8 px-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary'
                               >
                                 <Pencil className='h-3.5 w-3.5 mr-2' />
