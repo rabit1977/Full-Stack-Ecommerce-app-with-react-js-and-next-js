@@ -9,10 +9,12 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
+
   Moon,
   Package,
   Settings,
   ShoppingCart,
+  Star,
   Sun,
   Ticket,
   Users,
@@ -35,6 +37,7 @@ const navLinks = [
   { href: '/admin/users', label: 'Customers', icon: Users, description: 'User management' },
   { href: '/admin/coupons', label: 'Coupons', icon: Ticket, description: 'Discounts & promos' },
   { href: '/admin/questions', label: 'Q&A', icon: MessageCircle, description: 'Manage questions' },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star, description: 'User feedback' },
 ];
 
 const quickLinks = [

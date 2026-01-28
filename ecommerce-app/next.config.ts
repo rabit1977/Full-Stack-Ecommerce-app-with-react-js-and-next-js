@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'admin.ledikom.mk',
+        hostname: 'lh3.googleusercontent.com',
         port: '',
         pathname: '/**',
       },
@@ -39,12 +39,7 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'ae-pic-a1.aliexpress-media.com',
-        port: '',
-        pathname: '/**',
-      },
+     
     ],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
