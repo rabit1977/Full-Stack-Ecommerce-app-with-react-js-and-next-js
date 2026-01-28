@@ -12,15 +12,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Stars } from '@/components/ui/stars';
-import { ProductWithRelations, Review } from '@/lib/types';
+import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Pencil, ThumbsUp, Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { AddReviewForm } from './add-review-form';
 import { UserAvatar } from '../shared/user-avatar';
+import { AddReviewForm } from './add-review-form';
 
 interface ReviewsSectionProps {
   productId: string;
@@ -49,14 +49,14 @@ const ReviewsSection = ({
     return reviews.find((review) => review.userId === user.id) || null;
   }, [reviews, user]);
 
-  const [editingReview, setEditingReview] = useState<Review | null>(null);
+  const [editingReview, setEditingReview] = useState<any | null>(null);
   const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
   const [reviewIdToDelete, setReviewIdToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!product) return null;
 
-  const handleEditClick = (review: Review) => {
+  const handleEditClick = (review: any) => {
     setEditingReview(review);
     // Scroll to form
     const formElement = document.getElementById('review-form-anchor');
