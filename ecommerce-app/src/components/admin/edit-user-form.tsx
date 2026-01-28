@@ -3,29 +3,30 @@
 import { updateUserAction } from '@/actions/user-actions';
 import { Button } from '@/components/ui/button';
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { UserRole } from '@/generated/prisma/client';
 import { User } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -34,8 +35,8 @@ import * as z from 'zod';
  */
 const editUserFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  role: z.enum(['USER', 'ADMIN']),
+  email: z.email('Invalid email address'),
+  role: z.enum(UserRole),
   bio: z.string().optional(),
 });
 
@@ -46,11 +47,6 @@ interface EditUserFormProps {
   isEditingSelf?: boolean;
 }
 
-/**
- * Edit User Form Component
- *
- * Form for editing existing user details
- */
 export function EditUserForm({
   user,
   isEditingSelf = false,
@@ -63,15 +59,12 @@ export function EditUserForm({
     defaultValues: {
       name: user.name || '',
       email: user.email || '',
-      role: user.role || 'USER',
+      role: user.role || UserRole.USER, 
       bio: user.bio || '',
     },
   });
 
-  /**
-   * Handle form submission
-   */
-  const onSubmit = async (values: EditUserFormValues) => {
+  const onSubmit: SubmitHandler<EditUserFormValues> = async (values) => {
     startTransition(async () => {
       try {
         const result = await updateUserAction(user.id, {
@@ -90,11 +83,7 @@ export function EditUserForm({
         }
       } catch (error) {
         console.error('Update user error:', error);
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred',
-        );
+        toast.error('An unexpected error occurred');
       }
     });
   };
@@ -152,6 +141,7 @@ export function EditUserForm({
               <FormLabel>Account Role</FormLabel>
               <Select
                 onValueChange={field.onChange}
+                // ✅ 4. Use the field value directly
                 defaultValue={field.value}
                 disabled={isPending || isEditingSelf}
               >
@@ -161,8 +151,12 @@ export function EditUserForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='USER'>User (Standard Access)</SelectItem>
-                  <SelectItem value='ADMIN'>Admin (Full Access)</SelectItem>
+                  {/* ✅ 5. Iterate over the UserRole enum dynamically */}
+                  {Object.values(UserRole).map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role.charAt(0) + role.slice(1).toLowerCase()}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormDescription>
@@ -188,12 +182,10 @@ export function EditUserForm({
                   className='resize-none'
                   rows={4}
                   {...field}
+                  value={field.value || ''}
                   disabled={isPending}
                 />
               </FormControl>
-              <FormDescription>
-                Optional biography or notes about the user
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
