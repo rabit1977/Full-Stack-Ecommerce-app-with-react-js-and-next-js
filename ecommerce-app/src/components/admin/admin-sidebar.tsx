@@ -6,9 +6,12 @@ import {
   Activity,
   BarChart,
   ChevronRight,
+  Gift,
   Home,
+  Layers,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   MessageCircle,
   Moon,
   Package,
@@ -17,9 +20,11 @@ import {
   ShoppingCart,
   Star,
   Sun,
+  Tags,
   Ticket,
+  Truck,
   Users,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
@@ -34,9 +39,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const navLinks = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Overview & stats' },
   { href: '/admin/products', label: 'Products', icon: Package, description: 'Manage catalog' },
+  { href: '/admin/categories', label: 'Categories', icon: Layers, description: 'Manage hierarchy' },
+  { href: '/admin/brands', label: 'Brands', icon: Tags, description: 'Manage brands' },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart, description: 'Track orders' },
+  { href: '/admin/shipping', label: 'Shipping', icon: Truck, description: 'Zones & rates' },
   { href: '/admin/users', label: 'Customers', icon: Users, description: 'User management' },
-  { href: '/admin/coupons', label: 'Coupons', icon: Ticket, description: 'Discounts & promos' },
+  { href: '/admin/coupons', label: 'Coupons', icon: Ticket, description: 'Discounts' },
+  { href: '/admin/promotions', label: 'Promotions', icon: Megaphone, description: 'Campaigns' },
+  { href: '/admin/gift-cards', label: 'Gift Cards', icon: Gift, description: 'Manage cards' },
   { href: '/admin/questions', label: 'Q&A', icon: MessageCircle, description: 'Manage questions' },
   { href: '/admin/reviews', label: 'Reviews', icon: Star, description: 'User feedback' },
   { href: '/admin/returns', label: 'Returns', icon: RotateCcw, description: 'Requests & refunds' },
