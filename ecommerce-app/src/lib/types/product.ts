@@ -106,7 +106,24 @@ export type ProductWithRelations = Product & {
       }[];
     };
   }[];
+  bundleItems?: {
+    id: string;
+    bundleId: string;
+    productId: string;
+    quantity: number;
+    discount: number;
+    bundle: {
+        id: string;
+        title: string;
+        slug: string;
+        price: number;
+        images: {
+            url: string;
+        }[];
+    };
+  }[];
 };
+
 
 /**
  * Sort options for product listings

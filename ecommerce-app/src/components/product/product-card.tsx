@@ -193,6 +193,17 @@ export const ProductCard = memo(
                 Out of Stock
               </span>
             )}
+             {/* Bundle Badge */}
+             {product.inBundles && product.inBundles.length > 0 && (
+              <motion.span 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className='inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-2.5 py-1 text-xs font-bold text-white shadow-lg'
+              >
+                <Package className='h-3 w-3' />
+                Bundle
+              </motion.span>
+            )}
           </div>
 
           {/* Floating Actions (Top Right) */}

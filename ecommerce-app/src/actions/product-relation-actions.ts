@@ -19,6 +19,7 @@ export async function getRelatedProductsAction(productId: string, limit = 4) {
           include: {
             images: { orderBy: { position: 'asc' }, take: 1 },
             reviews: { select: { rating: true } },
+            inBundles: { select: { id: true } },
           },
         },
       },
@@ -72,6 +73,7 @@ export async function getRelatedProductsAction(productId: string, limit = 4) {
       include: {
         images: { orderBy: { position: 'asc' }, take: 1 },
         reviews: { select: { rating: true } },
+        inBundles: { select: { id: true } },
       },
       take: remainingLimit,
       orderBy: {
@@ -116,6 +118,7 @@ export async function getFrequentlyBoughtTogetherAction(productId: string, limit
            include: {
             images: { orderBy: { position: 'asc' }, take: 1 },
             reviews: { select: { rating: true } },
+            inBundles: { select: { id: true } },
            }
         }
       },

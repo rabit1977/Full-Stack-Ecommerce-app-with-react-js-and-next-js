@@ -320,6 +320,22 @@ export async function getProductBySlugAction(
             }
           }
         },
+        bundleItems: {
+          include: {
+             bundle: {
+               select: {
+                 id: true,
+                 title: true,
+                 slug: true,
+                 price: true,
+                 images: {
+                   select: { url: true },
+                   take: 1
+                 }
+               }
+             }
+          }
+        },
         relatedTo: {
           include: {
              relatedProduct: {
