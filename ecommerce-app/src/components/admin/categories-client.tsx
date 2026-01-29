@@ -112,7 +112,6 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
         } else {
           result = await createCategory(data);
         }
-
         if (result.success) {
           toast.success(editingCategory ? 'Category updated' : 'Category created');
           setIsOpen(false);
@@ -165,19 +164,19 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h2 className='text-3xl font-bold tracking-tight'>Categories</h2>
-          <p className='text-muted-foreground'>Manage your product categories and hierarchy.</p>
+          <h2 className='text-3xl font-bold tracking-tight text-xl sm:text-xl md:text-2xl lg:text-3xl'>Categories</h2>
+          <p className='text-muted-foreground text-xs sm:text-sm md:text-base lg:text-lg'>Manage your product categories and hierarchy.</p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} className='text-xs sm:text-sm md:text-base lg:text-lg h-8 sm:h-9 md:h-10 lg:h-11'>
               <Plus className='mr-2 h-4 w-4' /> New Category
             </Button>
           </DialogTrigger>
           <DialogContent className='sm:max-w-[500px]'>
             <DialogHeader>
-              <DialogTitle>{editingCategory ? 'Edit Category' : 'Create Category'}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className='text-xl sm:text-xl md:text-2xl lg:text-3xl'>{editingCategory ? 'Edit Category' : 'Create Category'}</DialogTitle>
+              <DialogDescription className='text-xs sm:text-sm md:text-base lg:text-lg'>
                 {editingCategory ? 'Make changes to the category details.' : 'Add a new category to your store.'}
               </DialogDescription>
             </DialogHeader>
@@ -187,10 +186,10 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                   control={form.control}
                   name='name'
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
+                    <FormItem >
+                      <FormLabel className='text-xs sm:text-sm md:text-base lg:text-lg'>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder='e.g. Electronics' {...field} />
+                        <Input className='text-xs sm:text-sm md:text-base lg:text-lg' placeholder='e.g. Electronics' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -201,11 +200,11 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                   name='slug'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Slug</FormLabel>
+                      <FormLabel className='text-xs sm:text-sm md:text-base lg:text-lg'>Slug</FormLabel>
                       <FormControl>
-                        <Input placeholder='e.g. electronics' {...field} />
+                        <Input className='text-xs sm:text-sm md:text-base lg:text-lg' placeholder='e.g. electronics' {...field} />
                       </FormControl>
-                      <FormDescription>URL-friendly version of the name.</FormDescription>
+                      <FormDescription className='text-xs sm:text-sm md:text-base lg:text-lg'>URL-friendly version of the name.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -215,9 +214,9 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                   name='description'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel className='text-xs sm:text-sm md:text-base lg:text-lg'>Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder='Category description...' {...field} />
+                        <Textarea className='text-xs sm:text-sm md:text-base lg:text-lg' rows={4} placeholder='Category description...' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -229,8 +228,8 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                   render={({ field }) => (
                     <FormItem className='flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm'>
                       <div className='space-y-0.5'>
-                        <FormLabel>Featured</FormLabel>
-                        <FormDescription>Show on homepage</FormDescription>
+                        <FormLabel className='text-xs sm:text-sm md:text-base lg:text-lg'>Featured</FormLabel>
+                        <FormDescription className='text-xs sm:text-sm md:text-base lg:text-lg'>Show on homepage</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -245,8 +244,8 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                   render={({ field }) => (
                     <FormItem className='flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm'>
                       <div className='space-y-0.5'>
-                        <FormLabel>Active</FormLabel>
-                        <FormDescription>Visible to customers</FormDescription>
+                        <FormLabel  className='text-xs sm:text-sm md:text-base lg:text-lg'>Active</FormLabel>
+                        <FormDescription className='text-xs sm:text-sm md:text-base lg:text-lg'>Visible to customers</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -271,36 +270,36 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
 
       <Card>
         <CardHeader>
-            <CardTitle>All Categories</CardTitle>
-            <CardDescription>
+            <CardTitle className='text-lg font-bold tracking-tight sm:text-xl md:text-2xl lg:text-3xl'>All Categories</CardTitle>
+            <CardDescription className='text-xs sm:text-sm md:text-base lg:text-lg'>
                 You have {categories.length} categories.
             </CardDescription>
         </CardHeader>
         <CardContent>
             <Table>
                 <TableHeader>
-                <TableRow>
+                <TableRow className='text-xs sm:text-sm md:text-base lg:text-lg'>
                     <TableHead>Name</TableHead>
                     <TableHead>Slug</TableHead>
                     <TableHead>Products</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className='text-right'>Actions</TableHead>
+                    <TableHead className='text-right text-xs sm:text-sm md:text-base lg:text-lg'>Actions</TableHead>
                 </TableRow>
                 </TableHeader>
                 <TableBody>
                 {categories.length === 0 ? (
-                    <TableRow>
-                        <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                    <TableRow className='text-xs sm:text-sm md:text-base lg:text-lg'>
+                        <TableCell colSpan={5} className="text-center py-6 text-muted-foreground text-xs sm:text-sm md:text-base lg:text-lg">
                             No categories found. Create one to get started.
                         </TableCell>
                     </TableRow>
                 ) : (
                     categories.map((category) => (
                         <TableRow key={category.id}>
-                        <TableCell className='font-medium'>{category.name}</TableCell>
-                        <TableCell>{category.slug}</TableCell>
-                        <TableCell>-</TableCell> {/* Placeholder for product count if expensive to join */}
-                        <TableCell>
+                        <TableCell className='font-medium text-xs sm:text-sm md:text-base lg:text-lg'>{category.name}</TableCell>
+                        <TableCell className='text-xs sm:text-sm md:text-base lg:text-lg'>{category.slug}</TableCell>
+                        <TableCell className='text-xs sm:text-sm md:text-base lg:text-lg'>-</TableCell> {/* Placeholder for product count if expensive to join */}
+                        <TableCell className='text-xs sm:text-sm md:text-base lg:text-lg'>
                             {category.isActive ? (
                             <span className='inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500/15 text-green-700 dark:text-green-400 hover:bg-green-500/25'>
                                 Active
@@ -311,18 +310,18 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                             </span>
                             )}
                         </TableCell>
-                        <TableCell className='text-right'>
+                        <TableCell className='text-right text-xs sm:text-sm md:text-base lg:text-lg'>
                             <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant='ghost' className='h-8 w-8 p-0'>
-                                <span className='sr-only'>Open menu</span>
-                                <MoreHorizontal className='h-4 w-4' />
+                                <Button variant='ghost' className='h-8 w-8 p-0 text-xs sm:text-sm md:text-base lg:text-lg'>
+                                <span className='sr-only text-xs sm:text-sm md:text-base lg:text-lg'>Open menu</span>
+                                <MoreHorizontal className='h-4 w-4 text-xs sm:text-sm md:text-base lg:text-lg' />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end'>
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuItem onClick={() => openEdit(category)}>
-                                <Edit className='mr-2 h-4 w-4' />
+                                <Edit className='mr-2 h-4 w-4 text-xs sm:text-sm md:text-base lg:text-lg' />
                                 Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => window.open(`/shop/${category.slug}`, '_blank')}>
@@ -330,7 +329,7 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem className='text-destructive' onClick={() => handleDelete(category.id)}>
-                                <Trash className='mr-2 h-4 w-4' />
+                                <Trash className='mr-2 h-4 w-4 text-xs sm:text-sm md:text-base lg:text-lg' />
                                 Delete
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

@@ -4,21 +4,21 @@ import { createBrand, deleteBrand, getBrands, updateBrand } from '@/actions/admi
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Brand } from '@/generated/prisma/browser';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Edit, MoreHorizontal, Plus, Trash } from 'lucide-react';
+import { Edit, Loader2, MoreHorizontal, Plus, Trash } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -161,19 +161,19 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h2 className='text-3xl font-bold tracking-tight'>Brands</h2>
-          <p className='text-muted-foreground'>Manage the brands you sell.</p>
+          <h2 className='text-xl sm:text-2xl lg:text-4xl font-bold tracking-tight'>Brands</h2>
+          <p className='text-muted-foreground text-xs sm:text-sm'>Manage the brands you sell.</p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} className='text-xs sm:text-sm'>
               <Plus className='mr-2 h-4 w-4' /> New Brand
             </Button>
           </DialogTrigger>
-          <DialogContent className='sm:max-w-[500px]'>
+          <DialogContent className='sm:max-w-[500px] text-xs sm:text-sm'>
             <DialogHeader>
-              <DialogTitle>{editingBrand ? 'Edit Brand' : 'Create Brand'}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className='text-lg sm:text-sm'>{editingBrand ? 'Edit Brand' : 'Create Brand'}</DialogTitle>
+              <DialogDescription className='text-xs sm:text-sm'>
                 {editingBrand ? 'Update brand details.' : 'Add a new brand to your catalog.'}
               </DialogDescription>
             </DialogHeader>
@@ -184,7 +184,7 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                   name='name'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel className='text-xs sm:text-sm'>Name</FormLabel>
                       <FormControl>
                         <Input placeholder='e.g. Nike' {...field} />
                       </FormControl>
@@ -197,11 +197,11 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                   name='slug'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Slug</FormLabel>
+                      <FormLabel className='text-xs sm:text-sm'>Slug</FormLabel>
                       <FormControl>
                         <Input placeholder='e.g. nike' {...field} />
                       </FormControl>
-                      <FormDescription>URL-friendly identifier.</FormDescription>
+                      <FormDescription className='text-xs sm:text-sm'>URL-friendly identifier.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -211,9 +211,9 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                   name='website'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Website</FormLabel>
+                      <FormLabel className='text-xs sm:text-sm'>Website</FormLabel>
                       <FormControl>
-                        <Input placeholder='https://nike.com' {...field} value={field.value || ''} />
+                        <Input placeholder='https://nike.com' {...field} className='text-xs sm:text-sm' value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -224,9 +224,9 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                   name='description'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel className='text-xs sm:text-sm'>Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder='About the brand...' {...field} />
+                        <Textarea placeholder='About the brand...' {...field} className='text-xs sm:text-sm' value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -239,8 +239,8 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                     render={({ field }) => (
                       <FormItem className='flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm'>
                         <div className='space-y-0.5'>
-                          <FormLabel>Featured</FormLabel>
-                          <FormDescription>Highlight brand</FormDescription>
+                          <FormLabel className='text-xs sm:text-sm'>Featured</FormLabel>
+                          <FormDescription className='text-xs sm:text-sm'>Highlight brand</FormDescription>
                         </div>
                         <FormControl>
                           <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -254,11 +254,11 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                     render={({ field }) => (
                       <FormItem className='flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm'>
                         <div className='space-y-0.5'>
-                          <FormLabel>Active</FormLabel>
-                          <FormDescription>Visible globally</FormDescription>
+                          <FormLabel className='text-xs sm:text-sm'>Active</FormLabel>
+                          <FormDescription className='text-xs sm:text-sm'>Visible globally</FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch checked={field.value} onCheckedChange={field.onChange} className='text-xs sm:text-sm'/>
                         </FormControl>
                       </FormItem>
                     )}
@@ -270,7 +270,7 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                     Cancel
                   </Button>
                   <Button type='submit' disabled={isPending}>
-                    {isPending ? 'Saving...' : 'Save Brand'}
+                    {isPending ? 'Saving...' : 'Save Brand'} {isPending && <Loader2 className='ml-2 h-4 w-4 animate-spin' />}
                   </Button>
                 </DialogFooter>
               </form>
@@ -281,8 +281,8 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
 
       <Card>
         <CardHeader>
-            <CardTitle>All Brands</CardTitle>
-            <CardDescription>
+            <CardTitle className='text-xs sm:text-sm'>All Brands</CardTitle>
+            <CardDescription className='text-xs sm:text-sm'>
                 You have {brands.length} brands.
             </CardDescription>
         </CardHeader>
@@ -307,9 +307,9 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                 ) : (
                     brands.map((brand) => (
                         <TableRow key={brand.id}>
-                        <TableCell className='font-medium'>{brand.name}</TableCell>
-                        <TableCell>{brand.slug}</TableCell>
-                        <TableCell className="max-w-[200px] truncate">
+                        <TableCell className='font-medium text-xs sm:text-sm'>{brand.name}</TableCell>
+                        <TableCell className='text-xs sm:text-sm'>{brand.slug}</TableCell>
+                        <TableCell className="max-w-[200px] truncate text-xs sm:text-sm">
                             {brand.website ? (
                                 <a href={brand.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                                     {brand.website}
@@ -318,7 +318,7 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                                 <span className="text-muted-foreground">-</span>
                             )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className='text-xs sm:text-sm'>
                             {brand.isActive ? (
                             <span className='inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500/15 text-green-700 dark:text-green-400 hover:bg-green-500/25'>
                                 Active
@@ -329,7 +329,7 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                             </span>
                             )}
                         </TableCell>
-                        <TableCell className='text-right'>
+                        <TableCell className='text-right text-xs sm:text-sm'>
                             <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant='ghost' className='h-8 w-8 p-0'>
@@ -337,14 +337,14 @@ export function BrandsClient({ initialBrands = [] }: BrandsClientProps) {
                                 <MoreHorizontal className='h-4 w-4' />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align='end'>
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => openEdit(brand)}>
+                            <DropdownMenuContent align='end' >
+                                <DropdownMenuLabel className='text-xs sm:text-sm'>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem className='text-xs sm:text-sm' onClick={() => openEdit(brand)}>
                                 <Edit className='mr-2 h-4 w-4' />
                                 Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className='text-destructive' onClick={() => handleDelete(brand.id)}>
+                                <DropdownMenuItem className='text-destructive text-xs sm:text-sm' onClick={() => handleDelete(brand.id)}>
                                 <Trash className='mr-2 h-4 w-4' />
                                 Delete
                                 </DropdownMenuItem>

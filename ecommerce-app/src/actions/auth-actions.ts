@@ -407,3 +407,47 @@ export async function getMeAction() {
     return { success: false, error: 'Failed to fetch user' };
   }
 }
+
+/**
+ * Reset Password with token
+ */
+export async function resetPasswordAction(data: {
+  token: string;
+  password: string;
+}) {
+  try {
+    const { token, password } = data;
+
+    // Find user with valid token and expiration
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    if (!user) {
+      return { success: false, error: 'Invalid or expired token' };
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update user password and clear token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+
+    return { success: true, message: 'Password has been reset successfully' };
+  } catch (error) {
+    console.error('Reset password error:', error);
+    return { success: false, error: 'Failed to reset password' };
+  }
+}

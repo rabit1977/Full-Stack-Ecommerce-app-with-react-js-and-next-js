@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
   BarChart,
+  Bell,
   ChevronRight,
   Gift,
   Home,
@@ -52,6 +53,7 @@ const navLinks = [
   { href: '/admin/reviews', label: 'Reviews', icon: Star, description: 'User feedback' },
   { href: '/admin/returns', label: 'Returns', icon: RotateCcw, description: 'Requests & refunds' },
   { href: '/admin/activity', label: 'Activity', icon: Activity, description: 'Audit logs' },
+  { href: '/admin/notifications', label: 'Notifications', icon: Bell, description: 'Broadcasts' },
 ];
 
 const quickLinks = [

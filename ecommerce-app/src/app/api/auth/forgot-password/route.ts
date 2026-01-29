@@ -1,6 +1,10 @@
+import { ResetPasswordEmail } from '@/components/emails/reset-password-email';
 import { prisma } from '@/lib/db';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * POST /api/auth/forgot-password
@@ -24,6 +28,8 @@ export async function POST(request: Request) {
 
     // Always return success to prevent email enumeration
     if (!user) {
+      // Simulate partial delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       return NextResponse.json({
         message: 'If an account exists, a reset link has been sent',
       });
@@ -33,7 +39,7 @@ export async function POST(request: Request) {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
 
-    // Save token to user (you'll need to add these fields to your User model)
+    // Save token to user
     await prisma.user.update({
       where: { email },
       data: {
@@ -42,24 +48,17 @@ export async function POST(request: Request) {
       },
     });
 
-    // In production, you would send an email here
-    // For now, we'll just log the reset link
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`;
     
-    console.log('Password reset requested for:', email);
-    console.log('Reset URL:', resetUrl);
-    
-    // TODO: Integrate with email service (e.g., Resend, SendGrid, Nodemailer)
-    // await sendEmail({
-    //   to: email,
-    //   subject: 'Reset your password - Electro Store',
-    //   html: `
-    //     <h1>Reset Your Password</h1>
-    //     <p>Click the link below to reset your password:</p>
-    //     <a href="${resetUrl}">${resetUrl}</a>
-    //     <p>This link will expire in 1 hour.</p>
-    //   `,
-    // });
+    // Send email using Resend
+    await resend.emails.send({
+      from: 'Electro Store <onboarding@resend.dev>', // Should use verified domain in production
+      to: email,
+      subject: 'Reset your password - Electro Store',
+      react: ResetPasswordEmail({ email, resetUrl }),
+    });
+
+    console.log('Password reset email sent to:', email); // Log for debugging
 
     return NextResponse.json({
       message: 'If an account exists, a reset link has been sent',

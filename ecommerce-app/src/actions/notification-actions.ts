@@ -278,3 +278,63 @@ export async function createBulkNotificationsAction(
     return { success: false, error: 'Failed to create notifications' };
   }
 }
+
+
+
+// ============================================
+// BROADCAST (ADMIN ONLY)
+// ============================================
+
+/**
+ * Broadcast a notification to ALL users
+ */
+export async function broadcastToAllUsersAction(
+  data: Omit<CreateNotificationData, 'userId'>
+): Promise<{ success: boolean; count?: number; error?: string }> {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+      return { success: false, error: 'Unauthorized: Admin access required' };
+    }
+
+    // 1. Get all user IDs
+    const users = await prisma.user.findMany({
+      select: { id: true },
+      where: { isActive: true } // Only active users
+    });
+
+    if (users.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    // 2. Create operations in chunks of 1000 to avoid query limits
+    const CHUNK_SIZE = 1000;
+    const chunks = [];
+    
+    for (let i = 0; i < users.length; i += CHUNK_SIZE) {
+      chunks.push(users.slice(i, i + CHUNK_SIZE));
+    }
+
+    let totalCount = 0;
+
+    for (const chunk of chunks) {
+      const result = await prisma.notification.createMany({
+        data: chunk.map(u => ({
+            userId: u.id,
+            type: data.type,
+            title: data.title,
+            message: data.message,
+            link: data.link,
+            metadata: data.metadata as Prisma.InputJsonValue | undefined,
+        }))
+      });
+      totalCount += result.count;
+    }
+
+    return { success: true, count: totalCount };
+
+  } catch (error) {
+    console.error('Error broadcasting notifications:', error);
+    return { success: false, error: 'Failed to broadcast notifications' };
+  }
+}
