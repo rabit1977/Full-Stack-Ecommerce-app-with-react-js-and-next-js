@@ -26,14 +26,14 @@ export default async function AdminQuestionsPage(props: AdminQuestionsPageProps)
       {/* Header */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div className='space-y-1'>
-          <h1 className='text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-foreground flex items-center gap-2 sm:gap-3 flex-wrap'>
-            <MessageCircle className="h-8 w-8 text-primary" />
+          <h1 className='text-xl sm:text-2xl lg:text-4xl font-black tracking-tight text-foreground flex items-center gap-2 sm:gap-3 flex-wrap'>
+            <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             Questions & Answers
             <span className='inline-flex items-center justify-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-primary/10 text-primary text-xs font-bold ring-1 ring-inset ring-primary/20'>
               {total || 0}
             </span>
           </h1>
-          <p className='text-sm sm:text-lg text-muted-foreground font-medium'>
+          <p className='text-xs sm:text-sm text-muted-foreground font-medium'>
             Manage customer questions and provide official answers.
           </p>
         </div>

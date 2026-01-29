@@ -106,8 +106,8 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
     <div className='flex-col space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h2 className='text-xl md:text-2xl font-bold tracking-tight'>Store Settings</h2>
-          <p className='text-muted-foreground text-sm'>
+          <h2 className='text-xl md:text-3xl font-bold tracking-tight'>Store Settings</h2>
+          <p className='text-muted-foreground text-sm md:text-base'>
             Manage your store preferences and configurations.
           </p>
         </div>
@@ -116,18 +116,18 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
           <Tabs defaultValue='general' className='space-y-4 text-sm w-full'>
-            <TabsList>
-              <TabsTrigger value='general' className='text-xs'>General</TabsTrigger>
-              <TabsTrigger value='checkout' className='text-xs'>Checkout & Inventory</TabsTrigger>
-              <TabsTrigger value='social' className='text-xs'>Social Media</TabsTrigger>
-              <TabsTrigger value='policies' className='text-xs'>Policies</TabsTrigger>
+            <TabsList className="w-full h-auto p-2 bg-muted/60 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-2">
+              <TabsTrigger value='general' className='h-9 md:h-10 text-xs md:text-sm w-full data-[state=active]:bg-background data-[state=active]:shadow-sm'>General</TabsTrigger>
+              <TabsTrigger value='checkout' className='h-9 md:h-10 text-xs md:text-sm w-full data-[state=active]:bg-background data-[state=active]:shadow-sm'>Checkout & Inventory</TabsTrigger>
+              <TabsTrigger value='social' className='h-9 md:h-10 text-xs md:text-sm w-full data-[state=active]:bg-background data-[state=active]:shadow-sm'>Social Media</TabsTrigger>
+              <TabsTrigger value='policies' className='h-9 md:h-10 text-xs md:text-sm w-full data-[state=active]:bg-background data-[state=active]:shadow-sm'>Policies</TabsTrigger>
             </TabsList>
 
             <TabsContent value='general'>
               <Card>
                 <CardHeader>
-                  <CardTitle className='text-base'>General Information</CardTitle>
-                  <CardDescription className='text-xs'>
+                  <CardTitle className='text-base md:text-xl'>General Information</CardTitle>
+                  <CardDescription className='text-xs md:text-sm'>
                     Basic details about your store.
                   </CardDescription>
                 </CardHeader>
@@ -137,9 +137,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     name='storeName'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className='text-xs'>Store Name</FormLabel>
+                        <FormLabel className='text-xs md:text-sm'>Store Name</FormLabel>
                         <FormControl>
-                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='My Store' {...field} />
+                          <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' placeholder='My Store' {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -151,9 +151,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='storeEmail'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className='text-xs'>Support Email</FormLabel>
+                          <FormLabel className='text-xs md:text-sm'>Support Email</FormLabel>
                           <FormControl>
-                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='support@example.com' {...field} value={field.value || ''} />
+                            <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' placeholder='support@example.com' {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -164,9 +164,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='storePhone'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className='text-xs'>Support Phone</FormLabel>
+                          <FormLabel className='text-xs md:text-sm'>Support Phone</FormLabel>
                           <FormControl>
-                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='+1 (555) 000-0000' {...field} value={field.value || ''} />
+                            <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' placeholder='+1 (555) 000-0000' {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -179,9 +179,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='currency'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className='text-xs'>Currency Code</FormLabel>
+                          <FormLabel className='text-xs md:text-sm'>Currency Code</FormLabel>
                           <FormControl>
-                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='USD' {...field} />
+                            <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' placeholder='USD' {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -192,9 +192,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='currencySymbol'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel   className='text-xs'>Currency Symbol</FormLabel>
+                          <FormLabel   className='text-xs md:text-sm'>Currency Symbol</FormLabel>
                           <FormControl>
-                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground ' placeholder='$' {...field} />
+                            <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground ' placeholder='$' {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -208,18 +208,18 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
             <TabsContent value='checkout'>
               <Card>
                 <CardHeader>
-                  <CardTitle className='text-base'>Checkout & Inventory</CardTitle>
-                  <CardDescription className='text-xs'>
+                  <CardTitle className='text-base md:text-xl'>Checkout & Inventory</CardTitle>
+                  <CardDescription className='text-xs md:text-sm'>
                     Configure how customers shop and checkout.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
                   <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
                     <div className='space-y-0.5'>
-                      <FormLabel className='text-xs'>
+                      <FormLabel className='text-xs md:text-sm'>
                         Guest Checkout
                       </FormLabel>
-                      <FormDescription className='text-xs'>
+                      <FormDescription className='text-xs md:text-sm'>
                         Allow customers to checkout without creating an account.
                       </FormDescription>
                     </div>
@@ -238,10 +238,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                   </div>
                   <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
                     <div className='space-y-0.5'>
-                      <FormLabel className='text-xs'>
+                      <FormLabel className='text-xs md:text-sm'>
                         Track Inventory
                       </FormLabel>
-                      <FormDescription className='text-xs'>
+                      <FormDescription className='text-xs md:text-sm'>
                         Automatically decrease stock when orders are placed.
                       </FormDescription>
                     </div>
@@ -271,8 +271,8 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                             />
                           </FormControl>
                           <div className='space-y-1 leading-none w-full'>
-                            <FormLabel className='text-xs'>Enable Tax</FormLabel>
-                            <FormDescription className='text-xs'>
+                            <FormLabel className='text-xs md:text-sm'>Enable Tax</FormLabel>
+                            <FormDescription className='text-xs md:text-sm'>
                                 Calculate tax on checkout
                             </FormDescription>
                           </div>
@@ -284,9 +284,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         name='taxRate'
                         render={({ field }) => (
                           <FormItem>
-                             <FormLabel className='text-xs'>Tax Rate (%)</FormLabel>
+                             <FormLabel className='text-xs md:text-sm'>Tax Rate (%)</FormLabel>
                              <FormControl>
-                                <Input type="number" step="0.01" className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' {...field} />
+                                <Input type="number" step="0.01" className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' {...field} />
                              </FormControl>
                              <FormMessage />
                           </FormItem>
@@ -298,11 +298,11 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='minOrderAmount'
                       render={({ field }) => (
                         <FormItem className='w-full'>
-                            <FormLabel className='text-xs'>Minimum Order Amount</FormLabel>
+                            <FormLabel className='text-xs md:text-sm'>Minimum Order Amount</FormLabel>
                             <FormControl>
-                                <Input type="number" step="1" className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' {...field} />
+                                <Input type="number" step="1" className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' {...field} />
                             </FormControl>
-                            <FormDescription className='text-xs'>Set to 0 to disable</FormDescription>
+                            <FormDescription className='text-xs md:text-sm'>Set to 0 to disable</FormDescription>
                         </FormItem>
                       )}
                    />
@@ -313,8 +313,8 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
             <TabsContent value='social'>
               <Card>
                 <CardHeader>
-                  <CardTitle className='text-sm'>Social Media Links</CardTitle>
-                  <CardDescription className='text-xs'>
+                  <CardTitle className='text-sm md:text-xl'>Social Media Links</CardTitle>
+                  <CardDescription className='text-xs md:text-sm'>
                     Links to your social media profiles.
                   </CardDescription>
                 </CardHeader>
@@ -324,9 +324,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     name='facebook'
                     render={({ field }) => (
                       <FormItem className='w-full'>
-                        <FormLabel className='text-xs'>Facebook URL</FormLabel>
+                        <FormLabel className='text-xs md:text-sm'>Facebook URL</FormLabel>
                         <FormControl>
-                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='https://facebook.com/yourpage' {...field} value={field.value || ''} />
+                          <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' placeholder='https://facebook.com/yourpage' {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -337,9 +337,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     name='instagram'
                     render={({ field }) => (
                       <FormItem className='w-full'>
-                        <FormLabel className='text-xs'>Instagram URL</FormLabel>
+                        <FormLabel className='text-xs md:text-sm'>Instagram URL</FormLabel>
                         <FormControl>
-                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='https://instagram.com/yourhandle' {...field} value={field.value || ''} />
+                          <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' placeholder='https://instagram.com/yourhandle' {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -350,9 +350,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     name='twitter'
                     render={({ field }) => (
                       <FormItem className='w-full'>
-                        <FormLabel className='text-xs'>Twitter/X URL</FormLabel>
+                        <FormLabel className='text-xs md:text-sm'>Twitter/X URL</FormLabel>
                         <FormControl>
-                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='https://twitter.com/yourhandle' {...field} value={field.value || ''} />
+                          <Input className='text-xs md:text-sm p-2 md:p-3 h-8 md:h-10 w-full rounded-md text-foreground' placeholder='https://twitter.com/yourhandle' {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -365,8 +365,8 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
             <TabsContent value='policies'>
               <Card>
                 <CardHeader>
-                  <CardTitle className='text-sm'>Store Policies</CardTitle>
-                  <CardDescription className='text-xs'>
+                  <CardTitle className='text-sm md:text-xl'>Store Policies</CardTitle>
+                  <CardDescription className='text-xs md:text-sm'>
                     Details for your Terms, Privacy, and Returns.
                   </CardDescription>
                 </CardHeader>
@@ -376,9 +376,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         name='termsOfService'
                         render={({ field }) => (
                         <FormItem className='w-full'>
-                            <FormLabel className='text-xs'>Terms of Service</FormLabel>
+                            <FormLabel className='text-xs md:text-sm'>Terms of Service</FormLabel>
                             <FormControl>
-                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs p-2 h-8 w-full rounded-md text-muted-foreground" placeholder='Your terms...' {...field} value={field.value || ''} />
+                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs md:text-sm p-2 md:p-3 h-8 md:h-auto w-full rounded-md text-foreground" placeholder='Your terms...' {...field} value={field.value || ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -389,9 +389,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         name='privacyPolicy'
                         render={({ field }) => (
                         <FormItem className='w-full'>
-                            <FormLabel className='text-xs'>Privacy Policy</FormLabel>
+                            <FormLabel className='text-xs md:text-sm'>Privacy Policy</FormLabel>
                             <FormControl>
-                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs p-2 h-8 w-full rounded-md text-muted-foreground" placeholder='Your privacy policy...' {...field} value={field.value || ''} />
+                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs md:text-sm p-2 md:p-3 h-8 md:h-auto w-full rounded-md text-foreground" placeholder='Your privacy policy...' {...field} value={field.value || ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -402,9 +402,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         name='returnPolicy'
                         render={({ field }) => (
                         <FormItem className='w-full'>
-                            <FormLabel className='text-xs'>Return Policy</FormLabel>
+                            <FormLabel className='text-xs md:text-sm'>Return Policy</FormLabel>
                             <FormControl>
-                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs p-2 h-8 w-full rounded-md text-muted-foreground" placeholder='Your return policy...' {...field} value={field.value || ''} />
+                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs md:text-sm p-2 md:p-3 h-8 md:h-auto w-full rounded-md text-foreground" placeholder='Your return policy...' {...field} value={field.value || ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
