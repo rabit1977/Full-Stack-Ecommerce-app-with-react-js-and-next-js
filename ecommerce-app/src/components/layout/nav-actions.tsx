@@ -126,14 +126,14 @@ export const NavActions = ({
 
   return (
     <div className='flex items-center gap-1 sm:gap-2'>
-      {/* Animated Theme Toggle */}
+      {/* Animated Theme Toggle - Hidden on mobile, shown in sidebar instead */}
       <Button
         variant='ghost'
         size='icon'
         onClick={handleThemeToggle}
         disabled={isPending}
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-        className='relative h-10 w-10 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 data-[state=open]:bg-muted/50 overflow-hidden'
+        className='relative h-10 w-10 rounded-full hover:bg-muted/50 dark:hover:bg-muted/20 data-[state=open]:bg-muted/50 overflow-hidden hidden sm:flex'
       >
         <AnimatePresence mode='wait' initial={false}>
           {isDark ? (

@@ -181,19 +181,23 @@ export function Footer() {
         <div className='grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8'>
           {/* Brand Section */}
           <div className='lg:col-span-4 space-y-6'>
-            <Link
-              href='/'
-              className='inline-flex items-center gap-3 group'
-              aria-label='Electro home page'
-            >
-              <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-all'>
-                <Zap className='h-6 w-6 text-white' />
-              </div>
-              <div>
-                <span className='text-2xl font-bold text-foreground'>Electro</span>
-                <p className='text-xs text-muted-foreground'>Premium Electronics Store</p>
-              </div>
-            </Link>
+              <Link
+                href='/'
+                className='inline-flex items-center gap-3 group'
+                aria-label='Electro home page'
+              >
+                <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 group-hover:scale-105 transition-all duration-300'>
+                  <Zap className='h-6 w-6 text-white' fill="currentColor" />
+                </div>
+                <div>
+                  <span className='text-2xl font-black tracking-tight text-foreground leading-none block'>
+                    Electro<span className="text-primary">.</span>
+                  </span>
+                  <p className='text-xs text-muted-foreground font-bold tracking-widest uppercase mt-1'>
+                    Premium Store
+                  </p>
+                </div>
+              </Link>
 
             <p className='text-muted-foreground max-w-sm leading-relaxed'>
               Your destination for cutting-edge electronics and premium gadgets. 

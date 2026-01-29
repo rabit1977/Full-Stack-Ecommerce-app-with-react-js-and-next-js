@@ -172,15 +172,7 @@ const Header = ({
         </div>
       </div>
       
-      {/* Mobile Search Bar - Visible only on mobile screens below sm */}
-      <motion.div 
-        className='md:hidden px-4 pt-2 pb-4 border-t border-border/30'
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <SearchBar />
-      </motion.div>
+
     </header>
   );
 };

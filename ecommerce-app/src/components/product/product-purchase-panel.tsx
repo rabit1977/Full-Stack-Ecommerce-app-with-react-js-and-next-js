@@ -155,34 +155,34 @@ export function ProductPurchasePanel({
     <div className='glass-card p-6 sm:p-8 space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700'>
       {/* Header - Brand & SKU */}
       <div className='flex items-center justify-between gap-4 flex-wrap'>
-        <span className='text-sm font-semibold uppercase tracking-wider text-primary'>
+        <span className='text-xs sm:text-sm font-semibold uppercase tracking-wider text-primary'>
           {product.brand}
         </span>
         {product.sku && (
-          <span className='text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded'>
+          <span className='text-[10px] sm:text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded'>
             SKU: {product.sku}
           </span>
         )}
       </div>
 
       {/* Title */}
-      <div className='space-y-3'>
-        <h1 className='text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground leading-tight'>
+      <div className='space-y-2 sm:space-y-3'>
+        <h1 className='text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground leading-tight'>
           {product.title}
         </h1>
 
         {/* Price Section */}
-        <div className='flex items-baseline gap-4 flex-wrap'>
-          <p className='text-3xl sm:text-4xl lg:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-500 to-primary'>
+        <div className='flex items-baseline gap-3 sm:gap-4 flex-wrap'>
+          <p className='text-2xl sm:text-4xl lg:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-500 to-primary'>
             {formattedPrice}
           </p>
           {product.discount && product.discount > 0 && (
             <div className='flex items-center gap-2'>
-              <span className='text-lg sm:text-xl text-muted-foreground line-through font-medium'>
+              <span className='text-base sm:text-xl text-muted-foreground line-through font-medium'>
                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price / (1 - product.discount/100))}
               </span>
-              <span className='px-3 py-1.5 rounded-full bg-gradient-to-r from-rose-500/10 to-pink-500/10 text-rose-600 dark:text-rose-400 text-sm font-bold border border-rose-500/20 shadow-sm flex items-center gap-1'>
-                <Tag className='h-3.5 w-3.5' />
+              <span className='px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-gradient-to-r from-rose-500/10 to-pink-500/10 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold border border-rose-500/20 shadow-sm flex items-center gap-1'>
+                <Tag className='h-3 w-3 sm:h-3.5 sm:w-3.5' />
                 {product.discount}% OFF
               </span>
             </div>
@@ -267,30 +267,30 @@ export function ProductPurchasePanel({
 
       {/* Quantity & Actions */}
       <div className='space-y-4'>
-        <div className='flex flex-col sm:flex-row gap-4'>
+        <div className='flex flex-col sm:flex-row gap-3 sm:gap-4'>
           {/* Quantity Stepper */}
-          <div className='flex items-center justify-between border border-border/60 bg-secondary/30 rounded-full h-14 px-1 shrink-0 min-w-[160px]'>
+          <div className='flex items-center justify-between border border-border/60 bg-secondary/30 rounded-full h-12 sm:h-14 px-1 shrink-0 min-w-[140px] sm:min-w-[160px]'>
             <Button
               variant='ghost'
               size='icon'
-              className='h-11 w-11 rounded-full hover:bg-background shadow-sm transition-all'
+              className='h-9 w-9 sm:h-11 sm:w-11 rounded-full hover:bg-background shadow-sm transition-all'
               disabled={quantity <= 1 || isPending || isOutOfStock}
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             >
-              <Minus className='h-4 w-4' />
+              <Minus className='h-3.5 w-3.5 sm:h-4 sm:w-4' />
             </Button>
             <div className='text-center'>
-              <span className='text-xl font-bold tabular-nums block'>{quantity}</span>
+              <span className='text-lg sm:text-xl font-bold tabular-nums block'>{quantity}</span>
               <span className='text-[10px] text-muted-foreground'>QTY</span>
             </div>
             <Button
               variant='ghost'
               size='icon'
-              className='h-11 w-11 rounded-full hover:bg-background shadow-sm transition-all'
+              className='h-9 w-9 sm:h-11 sm:w-11 rounded-full hover:bg-background shadow-sm transition-all'
               disabled={quantity >= stock || isPending || isOutOfStock}
               onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
             >
-              <Plus className='h-4 w-4' />
+              <Plus className='h-3.5 w-3.5 sm:h-4 sm:w-4' />
             </Button>
           </div>
            
@@ -300,7 +300,7 @@ export function ProductPurchasePanel({
             onClick={handleToggleWishlist}
             disabled={isPending}
             className={cn(
-              'h-14 w-14 rounded-full border transition-all shrink-0',
+              'h-12 w-12 sm:h-14 sm:w-14 rounded-full border transition-all shrink-0 self-end sm:self-auto',
               isWished 
                 ? 'bg-red-50 border-red-200 hover:bg-red-100 dark:bg-red-950/50 dark:border-red-800 dark:hover:bg-red-900/50' 
                 : 'border-border/60 hover:bg-secondary/50 hover:border-primary/30'
@@ -308,7 +308,7 @@ export function ProductPurchasePanel({
             title={isWished ? 'Remove from Wishlist' : 'Add to Wishlist'}
           >
             <Heart
-              className={cn('h-6 w-6 transition-all duration-300', {
+              className={cn('h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300', {
                 'fill-red-500 text-red-500 scale-110': isWished,
                 'text-muted-foreground': !isWished
               })}
@@ -322,7 +322,7 @@ export function ProductPurchasePanel({
           onClick={handleAddToCart}
           disabled={isPending || isOutOfStock}
           className={cn(
-            'w-full h-16 text-lg font-bold rounded-2xl shadow-xl transition-all',
+            'w-full h-12 sm:h-16 text-base sm:text-lg font-bold rounded-2xl shadow-xl transition-all',
             isOutOfStock 
               ? 'bg-muted text-muted-foreground cursor-not-allowed' 
               : 'btn-premium btn-glow shadow-primary/25 hover:shadow-primary/40'
@@ -330,17 +330,17 @@ export function ProductPurchasePanel({
         >
           {isPending ? (
             <>
-              <div className='h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white mr-3' />
+              <div className='h-4 w-4 sm:h-5 sm:w-5 animate-spin rounded-full border-2 border-white/30 border-t-white mr-3' />
               Adding to Cart...
             </>
           ) : isOutOfStock ? (
             <>
-              <XCircle className='mr-3 h-5 w-5' />
+              <XCircle className='mr-3 h-4 w-4 sm:h-5 sm:w-5' />
               Out of Stock
             </>
           ) : (
             <>
-              <ShoppingCart className='mr-3 h-5 w-5' />
+              <ShoppingCart className='mr-3 h-4 w-4 sm:h-5 sm:w-5' />
               Add to Cart — {totalPrice}
             </>
           )}

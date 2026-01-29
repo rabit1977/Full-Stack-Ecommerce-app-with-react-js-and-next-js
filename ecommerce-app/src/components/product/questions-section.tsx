@@ -76,8 +76,8 @@ export function QuestionsSection({ productId }: QuestionsSectionProps) {
   return (
     <div className='w-full space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300'>
       <div className="flex items-center justify-between">
-        <h2 className='text-2xl sm:text-3xl font-bold flex items-center gap-3'>
-          <MessageCircle className='h-6 w-6 sm:h-8 sm:w-8 text-primary' />
+        <h2 className='text-xl sm:text-3xl font-bold flex items-center gap-2 sm:gap-3'>
+          <MessageCircle className='h-5 w-5 sm:h-8 sm:w-8 text-primary' />
           Questions & Answers
         </h2>
         

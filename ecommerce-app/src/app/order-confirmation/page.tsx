@@ -206,39 +206,46 @@ function OrderConfirmationContent() {
 
                {/* Sidebar Info */}
                <div className="lg:col-span-4 space-y-6">
-                  <div className="glass-card p-6 rounded-3xl">
-                     <h3 className="font-bold mb-4 flex items-center gap-2 text-foreground">
-                        <MapPin className="h-5 w-5 text-primary" />
-                        Shipping Details
-                     </h3>
-                     <div className="bg-secondary/20 rounded-2xl p-4 border border-border/50 mb-4">
-                        <p className="font-bold text-sm text-foreground">{order.user?.name}</p>
-                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                           {/* Using mocked address since full address might not be in the initial view payload without parsing */}
-                           123 Main St<br/>
-                           New York, NY 10001
-                        </p>
-                     </div>
-                     <div className="space-y-4">
-                        <div>
-                           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Status</p>
-                           <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30">
-                              {order.status}
-                           </Badge>
+                     <div className="glass-card p-6 rounded-3xl">
+                        <h3 className="font-bold mb-4 flex items-center gap-2 text-foreground">
+                           <MapPin className="h-5 w-5 text-primary" />
+                           Shipping Details
+                        </h3>
+                        <div className="bg-secondary/20 rounded-2xl p-4 border border-border/50 mb-4">
+                           {/* Parse address safely */}
+                           {(() => {
+                              const address = order.shippingAddress
+                                 ? typeof order.shippingAddress === 'string'
+                                    ? JSON.parse(order.shippingAddress)
+                                    : order.shippingAddress
+                                 : null;
+                              
+                              if (!address) return <p className="text-sm text-muted-foreground">No address details available</p>;
+
+                              return (
+                                 <>
+                                    <p className="font-bold text-sm text-foreground">{address.name || order.user?.name}</p>
+                                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                                       {address.street}<br/>
+                                       {address.city}, {address.state} {address.zip}
+                                    </p>
+                                 </>
+                              );
+                           })()}
                         </div>
-                        <div>
-                           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Date</p>
-                           <p className="text-sm font-medium">{formatOrderDate(order.createdAt)}</p>
-                        </div>
-                        <div>
-                           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Payment Method</p>
-                           <div className="flex items-center gap-2">
-                              <div className="w-8 h-5 bg-foreground rounded shadow-sm opacity-80" />
-                              <span className="text-sm font-medium">Credit Card</span>
+                        <div className="space-y-4">
+                           <div>
+                              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Status</p>
+                              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30">
+                                 {order.status}
+                              </Badge>
+                           </div>
+                           <div>
+                              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Date</p>
+                              <p className="text-sm font-medium">{formatOrderDate(order.createdAt)}</p>
                            </div>
                         </div>
                      </div>
-                  </div>
 
                   <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 rounded-3xl p-6">
                      <div className="flex gap-4">
@@ -255,9 +262,9 @@ function OrderConfirmationContent() {
                            </Button>
                         </div>
                      </div>
-                  </div>
-               </div>
-            </div>
+                   </div>
+                </div>
+             </div>
         </div>
     </div>
   );

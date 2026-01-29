@@ -42,7 +42,7 @@ export async function ProductDetailContent({
         </div>
       </div>
 
-      <div className='mt-16 sm:mt-24 space-y-16 sm:space-y-24'>
+      <div className='mt-12 sm:mt-16 space-y-12 sm:space-y-16'>
          {product.inBundles && product.inBundles.length > 0 && (
              <BundleDetails product={product} />
          )}
@@ -53,26 +53,26 @@ export async function ProductDetailContent({
           <FrequentlyBoughtTogether productId={product.id} />
       </div>
 
-      <div className='mt-20 sm:mt-24 lg:mt-32'>
+      <div className='mt-16 sm:mt-24 lg:mt-32'>
         <AvailableBundles product={product} />
       </div>
 
-      <div className='mt-20 sm:mt-24 lg:mt-32'>
+      <div className='mt-16 sm:mt-24 lg:mt-32'>
         <QuestionsSection productId={product.id} />
       </div>
 
-      <div className='mt-20 sm:mt-24 lg:mt-32'>
+      <div className='mt-16 sm:mt-24 lg:mt-32'>
         <ReviewsSection 
           productId={product.id} 
           product={product} 
           helpfulReviews={user?.helpfulReviews || []} 
         />
       </div>
-      <div className='mt-20 sm:mt-24 lg:mt-32'>
+      <div className='mt-16 sm:mt-24 lg:mt-32'>
         <RelatedProducts currentProduct={product} />
       </div>
 
-      <div className='mt-20 sm:mt-24 lg:mt-32'>
+      <div className='mt-16 sm:mt-24 lg:mt-32'>
         <RecentlyViewedProducts currentProduct={product} />
       </div>
     </div>
