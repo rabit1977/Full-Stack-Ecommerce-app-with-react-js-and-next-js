@@ -240,7 +240,7 @@ const AccountPage = async () => {
               {stats.totalOrders > 0 && (
                 <div className='rounded-3xl overflow-hidden shadow-2xl relative'>
                   <div className='absolute inset-0 bg-gradient-to-br from-primary to-violet-600' />
-                  <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
+                  <div className="absolute inset-0 bg-[radial-gradient(#ffffff33_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
                   
                   <div className='relative z-10 p-8 text-white space-y-6'>
                     <h3 className='text-xl font-bold flex items-center gap-3'>
