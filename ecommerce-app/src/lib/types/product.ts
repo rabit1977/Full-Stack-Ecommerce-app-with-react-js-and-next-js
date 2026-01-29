@@ -81,6 +81,31 @@ export type ProductWithRelations = Product & {
       image: string | null;
     };
   }[];
+  inBundles?: {
+    id: string;
+    quantity: number;
+    discount: number;
+    product: {
+      id: string;
+      title: string;
+      price: number;
+      images: {
+        url: string;
+      }[];
+    };
+  }[];
+  relatedTo?: {
+    id: string;
+    relationType: string;
+    relatedProduct: {
+      id: string;
+      title: string;
+      price: number;
+      images: {
+        url: string;
+      }[];
+    };
+  }[];
 };
 
 /**

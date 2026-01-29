@@ -324,7 +324,18 @@ export async function createOrderAction(details: {
 
       const productsFromDb = await tx.product.findMany({
         where: { id: { in: productIds } },
-        select: { id: true, stock: true, title: true },
+        select: { 
+          id: true, 
+          stock: true, 
+          title: true,
+          inBundles: {
+            include: {
+              product: {
+                select: { id: true, stock: true }
+              }
+            }
+          }
+        },
       });
       const productMap = new Map(productsFromDb.map((p) => [p.id, p]));
 
@@ -335,6 +346,16 @@ export async function createOrderAction(details: {
         }
         if (product.stock < item.quantity) {
           throw new Error(`Not enough stock for ${product.title}`);
+        }
+        
+        // Also validate bundle components availability at checkout time
+        if (product.inBundles.length > 0) {
+           for (const bundleItem of product.inBundles) {
+              const requiredQty = bundleItem.quantity * item.quantity;
+              if (bundleItem.product.stock < requiredQty) {
+                  throw new Error(`Not enough stock for bundled component of ${product.title}`);
+              }
+           }
         }
       }
 
@@ -366,10 +387,59 @@ export async function createOrderAction(details: {
       });
 
       for (const item of details.items) {
+        const product = productMap.get(item.productId);
+        
+        if (!product) continue;
+
+        // 1. Log and Decrement Main Product (Bundle itself or Standard Product)
+        await tx.inventoryLog.create({
+            data: {
+                productId: item.productId,
+                type: 'SALE',
+                quantity: -item.quantity,
+                previousStock: product.stock,
+                newStock: product.stock - item.quantity,
+                reason: `Order #${order.orderNumber}`,
+                reference: order.id,
+                performedBy: userId
+            }
+        });
+
         await tx.product.update({
           where: { id: item.productId },
           data: { stock: { decrement: item.quantity } },
         });
+
+        // 2. If it's a bundle, decrement components stock AND log them
+        if (product.inBundles.length > 0) {
+           for (const bundleItem of product.inBundles) {
+               // We need the *current* stock of the component to log accurately
+               // The fetch above in `productsFromDb` didn't get component stock with high fidelity if it wasn't a main item
+               // So we might want to refetch or assume we have it. 
+               // Actually we fetched `inBundles` with `include product select stock`.
+               
+               const componentStock = bundleItem.product.stock;
+               const deductQty = bundleItem.quantity * item.quantity;
+
+               await tx.inventoryLog.create({
+                   data: {
+                       productId: bundleItem.product.id,
+                       type: 'SALE',
+                       quantity: -deductQty,
+                       previousStock: componentStock,
+                       newStock: componentStock - deductQty,
+                       reason: `Bundle Sale: ${product.title} (Order #${order.orderNumber})`,
+                       reference: order.id,
+                       performedBy: userId
+                   }
+               });
+
+               await tx.product.update({
+                   where: { id: bundleItem.product.id },
+                   data: { stock: { decrement: deductQty } }
+               });
+           }
+        }
       }
 
       await tx.cartItem.deleteMany({

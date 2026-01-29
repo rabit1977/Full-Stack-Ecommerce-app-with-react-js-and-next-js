@@ -1,6 +1,7 @@
 import { getMeAction } from '@/actions/auth-actions';
 import { getCartAction } from '@/actions/cart-actions';
 import { getWishlistAction } from '@/actions/wishlist-actions';
+import { BundleDetails } from '@/components/product/bundle-details';
 import { FrequentlyBoughtTogether } from '@/components/product/frequently-bought-together';
 import { ProductDetailGallery } from '@/components/product/product-detail-gallery';
 import { ProductInfoTabs } from '@/components/product/product-info-tabs';
@@ -40,7 +41,10 @@ export async function ProductDetailContent({
         </div>
       </div>
 
-      <div className='mt-16 sm:mt-24'>
+      <div className='mt-16 sm:mt-24 space-y-16 sm:space-y-24'>
+         {product.inBundles && product.inBundles.length > 0 && (
+             <BundleDetails product={product} />
+         )}
          <ProductInfoTabs product={product} />
       </div>
 

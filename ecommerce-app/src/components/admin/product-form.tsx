@@ -13,22 +13,23 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import {
-    productFormSchema,
-    type ProductFormValues,
-} from '@/lib/schemas/product-schema';
-import { ProductWithRelations } from '@/lib/types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import {
+    ArrowRightLeft,
     DollarSign,
     Globe,
     Image as ImageIcon,
     Layers,
     LayoutList,
     Loader2,
+    Package,
     Plus,
     Ruler,
     Save,
@@ -41,6 +42,12 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { ProductPicker } from './product-picker';
+import { ProductFormValues, productFormSchema } from '@/lib/schemas/product-schema';
+import { ProductWithRelations } from '@/lib/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@radix-ui/react-tabs';
+import { Textarea } from '../ui/textarea';
 
 interface ProductFormProps {
   product?: ProductWithRelations | null;
@@ -107,8 +114,96 @@ export const ProductForm = ({
       slug: product?.slug || '',
       metaTitle: product?.metaTitle || '',
       metaDescription: product?.metaDescription || '',
+      
+      // Bundles
+      bundleItems: product?.inBundles?.map(item => ({
+        productId: item.product.id,
+        quantity: item.quantity
+      })) || [],
+
+      // Relations
+      relatedProducts: product?.relatedTo?.map(item => ({
+        relatedId: item.relatedProduct.id,
+        type: item.relationType as 'similar' | 'frequently_bought_together'
+      })) || [],
     },
   });
+
+  const [bundleProducts, setBundleProducts] = useState<Record<string, { title: string; image?: string; price: number }>>(
+    product?.inBundles?.reduce((acc, item) => ({
+        ...acc,
+        [item.product.id]: {
+            title: item.product.title,
+            image: item.product.images[0]?.url,
+            price: item.product.price
+        }
+    }), {}) || {}
+  );
+  
+  const [relatedProductsInfo, setRelatedProductsInfo] = useState<Record<string, { title: string; image?: string; price: number }>>(
+    product?.relatedTo?.reduce((acc, item) => ({
+        ...acc,
+        [item.relatedProduct.id]: {
+            title: item.relatedProduct.title,
+            image: item.relatedProduct.images[0]?.url,
+            price: item.relatedProduct.price
+        }
+    }), {}) || {}
+  );
+
+  const { fields: bundleFields, append: appendBundle, remove: removeBundle } = useFieldArray({
+    control: form.control,
+    name: "bundleItems",
+  });
+
+  const { fields: relatedFields, append: appendRelated, remove: removeRelated } = useFieldArray({
+    control: form.control,
+    name: "relatedProducts",
+  });
+
+  const handleAddBundleProduct = (product: ProductWithRelations) => {
+    // Check if already added
+    if (bundleFields.some(field => field.productId === product.id)) {
+        toast.error("Product already in bundle");
+        return;
+    }
+
+    setBundleProducts(prev => ({
+        ...prev,
+        [product.id]: {
+            title: product.title,
+            image: product.images[0]?.url,
+            price: product.price
+        }
+    }));
+
+    appendBundle({
+        productId: product.id,
+        quantity: 1,
+    });
+  };
+
+  const handleAddRelatedProduct = (product: ProductWithRelations, type: 'similar' | 'frequently_bought_together' = 'similar') => {
+    // Check if already added
+    if (relatedFields.some(field => field.relatedId === product.id)) {
+        toast.error("Product already in relations");
+        return;
+    }
+
+    setRelatedProductsInfo(prev => ({
+        ...prev,
+        [product.id]: {
+            title: product.title,
+            image: product.images[0]?.url,
+            price: product.price
+        }
+    }));
+
+    appendRelated({
+        relatedId: product.id,
+        type: type,
+    });
+  };
 
   const { fields, append, remove } = useFieldArray({
       control: form.control,
@@ -199,6 +294,8 @@ export const ProductForm = ({
                         <TabsTrigger value="organize" className="rounded-lg py-2">Organize</TabsTrigger>
                         <TabsTrigger value="pricing" className="rounded-lg py-2">Pricing</TabsTrigger>
                         <TabsTrigger value="specs" className="rounded-lg py-2">Specs</TabsTrigger>
+                        <TabsTrigger value="bundles" className="rounded-lg py-2">Bundles</TabsTrigger>
+                        <TabsTrigger value="relations" className="rounded-lg py-2">Relations</TabsTrigger>
                         <TabsTrigger value="media" className="rounded-lg py-2">Media</TabsTrigger>
                         <TabsTrigger value="seo" className="rounded-lg py-2">SEO</TabsTrigger>
                     </TabsList>
@@ -586,6 +683,185 @@ export const ProductForm = ({
                                 {fields.length === 0 && (
                                     <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border">
                                         No specifications added yet. Click &quot;Add Spec&quot; to define custom features.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* --- BUNDLES TAB --- */}
+                    <TabsContent value="bundles" className="space-y-6 mt-6">
+                         <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center justify-between pb-4 border-b border-border/50'>
+                                <div className='flex items-center gap-3'>
+                                    <div className='w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/50 flex items-center justify-center'>
+                                        <Package className='h-5 w-5 text-orange-600 dark:text-orange-400' />
+                                    </div>
+                                    <div>
+                                        <h3 className='font-semibold text-foreground'>Product Bundle</h3>
+                                        <p className='text-sm text-muted-foreground'>Combine products into a kit</p>
+                                    </div>
+                                </div>
+                                <ProductPicker 
+                                    onSelect={handleAddBundleProduct}
+                                    excludeIds={[product?.id || '', ...bundleFields.map(f => f.productId)]}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                {bundleFields.length === 0 ? (
+                                    <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border flex flex-col items-center">
+                                        <Package className="h-10 w-10 mb-3 opacity-20" />
+                                        <p>This product is not a bundle yet.</p>
+                                        <p className="text-sm">Add products to create a kit.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-4">
+                                        {bundleFields.map((field, index) => {
+                                            const productInfo = bundleProducts[field.productId];
+                                            return (
+                                                <div key={field.id} className="flex items-center gap-4 p-3 rounded-xl border border-border/50 bg-card/50">
+                                                    <div className="relative h-12 w-12 rounded-lg overflow-hidden border bg-background shrink-0">
+                                                        {productInfo?.image ? (
+                                                            <Image 
+                                                                src={productInfo.image} 
+                                                                alt={productInfo.title || "Product"} 
+                                                                fill 
+                                                                className="object-cover" 
+                                                                unoptimized
+                                                            />
+                                                        ) : (
+                                                            <div className="flex h-full w-full items-center justify-center bg-muted">
+                                                                <Layers className="h-4 w-4 text-muted-foreground" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-semibold truncate">{productInfo?.title || "Unknown Product"}</p>
+                                                        <p className="text-xs text-muted-foreground">ID: {field.productId}</p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <FormLabel className="text-[10px] uppercase text-muted-foreground font-bold">Qty</FormLabel>
+                                                            <FormField
+                                                                control={form.control}
+                                                                name={`bundleItems.${index}.quantity`}
+                                                                render={({ field }) => (
+                                                                    <Input 
+                                                                        type="number" 
+                                                                        min="1" 
+                                                                        className="h-8 w-16 text-center" 
+                                                                        {...field} 
+                                                                    />
+                                                                )}
+                                                            />
+                                                        </div>
+                                                        <Button 
+                                                            type="button" 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            onClick={() => removeBundle(index)}
+                                                            className="text-muted-foreground hover:text-destructive h-8 w-8"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* --- RELATIONS TAB --- */}
+                    <TabsContent value="relations" className="space-y-6 mt-6">
+                        <div className='card-premium p-6 space-y-6'>
+                            <div className='flex items-center justify-between pb-4 border-b border-border/50'>
+                                <div className='flex items-center gap-3'>
+                                    <div className='w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-950/50 flex items-center justify-center'>
+                                        <ArrowRightLeft className='h-5 w-5 text-violet-600 dark:text-violet-400' />
+                                    </div>
+                                    <div>
+                                        <h3 className='font-semibold text-foreground'>Related Products</h3>
+                                        <p className='text-sm text-muted-foreground'>Cross-sells and Up-sells</p>
+                                    </div>
+                                </div>
+                                <ProductPicker 
+                                    onSelect={(p) => handleAddRelatedProduct(p, 'similar')}
+                                    excludeIds={[product?.id || '', ...relatedFields.map(f => f.relatedId)]}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                {relatedFields.length === 0 ? (
+                                     <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border flex flex-col items-center">
+                                        <ArrowRightLeft className="h-10 w-10 mb-3 opacity-20" />
+                                        <p>No related products yet.</p>
+                                        <p className="text-sm">Link products for recommendations.</p>
+                                     </div>
+                                ) : (
+                                    <div className="grid gap-4">
+                                        {relatedFields.map((field, index) => {
+                                            const productInfo = relatedProductsInfo[field.relatedId];
+                                            return (
+                                                <div key={field.id} className="flex items-center gap-4 p-3 rounded-xl border border-border/50 bg-card/50">
+                                                    <div className="relative h-12 w-12 rounded-lg overflow-hidden border bg-background shrink-0">
+                                                        {productInfo?.image ? (
+                                                            <Image 
+                                                                src={productInfo.image} 
+                                                                alt={productInfo.title || "Product"} 
+                                                                fill 
+                                                                className="object-cover" 
+                                                                unoptimized
+                                                            />
+                                                        ) : (
+                                                            <div className="flex h-full w-full items-center justify-center bg-muted">
+                                                                <Layers className="h-4 w-4 text-muted-foreground" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-semibold truncate">{productInfo?.title || "Unknown Product"}</p>
+                                                        <p className="text-xs text-muted-foreground">ID: {field.relatedId}</p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3">
+                                                       <FormField
+                                                            control={form.control}
+                                                            name={`relatedProducts.${index}.type`}
+                                                            render={({ field }) => (
+                                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                                    <FormControl>
+                                                                        <SelectTrigger className="h-8 w-[180px] text-xs">
+                                                                            <SelectValue placeholder="Relation Type" />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="similar">Similar (Up-sell)</SelectItem>
+                                                                        <SelectItem value="frequently_bought_together">Bought Together (Cross-sell)</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            )}
+                                                       />
+                                                        
+                                                        <Button 
+                                                            type="button" 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            onClick={() => removeRelated(index)}
+                                                            className="text-muted-foreground hover:text-destructive h-8 w-8"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>

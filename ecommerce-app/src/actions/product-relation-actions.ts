@@ -26,10 +26,7 @@ export async function getRelatedProductsAction(productId: string, limit = 4) {
       orderBy: { score: 'desc' },
     });
 
-    if (relatedRelations.length > 0) {
-      return {
-        success: true,
-        products: relatedRelations.map((r) => {
+    const manualProducts = relatedRelations.map((r) => {
            const p = r.relatedProduct;
            return {
              ...p,
@@ -41,23 +38,33 @@ export async function getRelatedProductsAction(productId: string, limit = 4) {
              dimensions: p.dimensions as any,
              reviews: [] as any,
            };
-        }),
+    });
+
+    // If we have enough manual relations, return them
+    if (manualProducts.length >= limit) {
+      return {
+        success: true,
+        products: manualProducts,
       };
     }
 
-    // 2. Fallback: Category matching
+    // 2. Fallback: Category matching (Fill the rest)
     const product = await prisma.product.findUnique({
       where: { id: productId },
-      select: { category: true, subCategory: true },
+      select: { category: true },
     });
 
-    if (!product) return { success: false, products: [] };
+    if (!product) return { success: true, products: manualProducts };
 
+    const remainingLimit = limit - manualProducts.length;
+    const manualIds = manualProducts.map(p => p.id);
+    
+    // Fallback: Products in the same category, excluding itself and already selected manual relations
     const fallbackProducts = await prisma.product.findMany({
       where: {
         AND: [
           { id: { not: productId } },
-          // Removed invalid 'active' field, rely on isArchived
+          { id: { notIn: manualIds } },
           { isArchived: false },
           { category: product.category },
         ],
@@ -66,15 +73,13 @@ export async function getRelatedProductsAction(productId: string, limit = 4) {
         images: { orderBy: { position: 'asc' }, take: 1 },
         reviews: { select: { rating: true } },
       },
-      take: limit,
+      take: remainingLimit,
       orderBy: {
-        salesCount: 'desc', // Popular items in same category
+        salesCount: 'desc', 
       },
     });
-
-    return {
-      success: true,
-      products: fallbackProducts.map((p) => ({
+    
+    const formattedFallback = fallbackProducts.map((p) => ({
         ...p,
         rating: p.reviews.length ? p.reviews.reduce((a: number, b: { rating: number }) => a + b.rating, 0) / p.reviews.length : 0,
         reviewCount: p.reviews.length,
@@ -83,7 +88,11 @@ export async function getRelatedProductsAction(productId: string, limit = 4) {
         specifications: p.specifications as any,
         dimensions: p.dimensions as any,
         reviews: [] as any,
-      })),
+    }));
+
+    return {
+      success: true,
+      products: [...manualProducts, ...formattedFallback],
     };
 
   } catch (error) {

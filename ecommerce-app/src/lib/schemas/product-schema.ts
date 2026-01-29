@@ -52,6 +52,18 @@ export const productFormSchema = z.object({
   })).optional(),
   
   options: z.any().optional(),
+
+  // Bundle Fields
+  bundleItems: z.array(z.object({
+    productId: z.string(),
+    quantity: z.coerce.number().min(1).default(1),
+  })).optional(),
+  
+  // Relations Fields
+  relatedProducts: z.array(z.object({
+    relatedId: z.string(),
+    type: z.enum(['similar', 'frequently_bought_together']), 
+  })).optional(),
 });
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;

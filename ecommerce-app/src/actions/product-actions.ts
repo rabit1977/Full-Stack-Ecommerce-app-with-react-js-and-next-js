@@ -169,6 +169,21 @@ export async function getProductsAction(
             },
           },
         },
+        inBundles: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                title: true,
+                price: true,
+                images: {
+                  select: { url: true },
+                  take: 1
+                }
+              }
+            }
+          }
+        },
       },
     });
 
@@ -225,6 +240,21 @@ export async function getProductByIdAction(
             },
           },
         },
+        inBundles: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                title: true,
+                price: true,
+                images: {
+                  select: { url: true },
+                  take: 1
+                }
+              }
+            }
+          }
+        },
       },
     });
 
@@ -274,6 +304,36 @@ export async function getProductBySlugAction(
               },
             },
           },
+        },
+        inBundles: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                title: true,
+                price: true,
+                images: {
+                  select: { url: true },
+                  take: 1
+                }
+              }
+            }
+          }
+        },
+        relatedTo: {
+          include: {
+             relatedProduct: {
+              select: {
+                id: true,
+                title: true,
+                price: true,
+                images: {
+                  select: { url: true },
+                  take: 1
+                }
+              }
+             }
+          }
         },
       },
     });
@@ -341,8 +401,8 @@ export async function getFiltersAction(selectedCategories?: string) {
 
 import { auth } from '@/auth';
 import {
-    productFormSchema,
-    ProductFormValues,
+  productFormSchema,
+  ProductFormValues,
 } from '@/lib/schemas/product-schema';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -366,7 +426,7 @@ export async function createProductAction(data: ProductFormValues) {
     await requireAdmin();
 
     const validatedData = productFormSchema.parse(data);
-    const { images, ...productData } = validatedData;
+    const { images, bundleItems, relatedProducts, ...productData } = validatedData;
     
     // Generate slug
     let slug = productData.slug || slugify(productData.title);
@@ -413,6 +473,22 @@ export async function createProductAction(data: ProductFormValues) {
         images: {
           create: images?.map((url) => ({ url })) || [],
         },
+
+        inBundles: {
+          create: bundleItems?.map(item => ({
+              quantity: item.quantity,
+              product: { connect: { id: item.productId } }
+          })) || [],
+        },
+
+        // Use the 'relatedProducts' relation field (mapped to 'RelatedFrom')
+        relatedProducts: {
+          create: relatedProducts?.map(item => ({
+             relatedProduct: { connect: { id: item.relatedId } },
+             relationType: item.type,
+             score: item.type === 'frequently_bought_together' ? 10 : 5
+          })) || [],
+        }
       },
       include: {
         images: true,
@@ -445,10 +521,19 @@ export async function updateProductAction(
   data: Partial<ProductFormValues>,
 ) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
+    const userId = session.user.id;
 
-    const validatedData = productFormSchema.partial().parse(data);
-    const { images, ...productData } = validatedData;
+    // Fetch current product for previous stock
+    const currentProduct = await prisma.product.findUnique({
+        where: { id },
+        select: { stock: true }
+    });
+
+    if (!currentProduct) throw new Error('Product not found');
+
+    const validatedData = productFormSchema.parse(data);
+    const { images, bundleItems, relatedProducts, ...productData } = validatedData;
 
     // Handle slug update if provided
     let slug = productData.slug;
@@ -500,8 +585,46 @@ export async function updateProductAction(
         }),
 
         ...(images && images.length > 0 && { thumbnail: images[0] }),
+
+        ...(bundleItems !== undefined && {
+             inBundles: {
+                 deleteMany: {},
+                 create: bundleItems.map(item => ({
+                    quantity: item.quantity,
+                    product: { connect: { id: item.productId } }
+                 })),
+             }
+        }),
+
+        ...(relatedProducts !== undefined && {
+            // Use the 'relatedProducts' relation field (mapped to 'RelatedFrom')
+            relatedProducts: {
+                deleteMany: { relationType: { in: ['similar', 'frequently_bought_together'] } },
+                create: relatedProducts.map(item => ({
+                    relatedProduct: { connect: { id: item.relatedId } },
+                    relationType: item.type,
+                    score: item.type === 'frequently_bought_together' ? 10 : 5
+                })),
+            }
+        }),
       },
     });
+
+    // Log Inventory Change if Stock Updated
+    if (productData.stock !== undefined && productData.stock !== currentProduct.stock) {
+        const diff = productData.stock - currentProduct.stock;
+        await prisma.inventoryLog.create({
+            data: {
+                productId: id,
+                type: 'ADJUSTMENT',
+                quantity: diff,
+                previousStock: currentProduct.stock,
+                newStock: productData.stock,
+                reason: 'Manual Adjustment by Admin',
+                performedBy: userId
+            }
+        });
+    }
 
     // Update images if provided
     if (images) {

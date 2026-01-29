@@ -27,7 +27,18 @@ export async function addItemToCartAction(
       // 1. Check product exists and has sufficient stock
       const product = await tx.product.findUnique({
         where: { id: productId },
-        select: { id: true, stock: true, title: true },
+        select: { 
+          id: true, 
+          stock: true, 
+          title: true,
+          inBundles: {
+            include: {
+              product: {
+                select: { id: true, stock: true, title: true }
+              }
+            }
+          }
+        },
       });
 
       if (!product) {
@@ -53,8 +64,26 @@ export async function addItemToCartAction(
         }
         return {
           success: false,
-          message: `Only ${availableToAdd} more items available. You have ${currentCartQuantity} in cart.`,
+          message: `Only ${availableToAdd} more ${product.title} available.`,
         };
+      }
+
+      // 3.1 Validate Bundle Components Stock
+      if (product.inBundles && product.inBundles.length > 0) {
+        for (const bundleItem of product.inBundles) {
+          const requiredComponentQty = bundleItem.quantity * totalRequestedQuantity;
+          const component = bundleItem.product;
+          
+          if (component.stock < requiredComponentQty) {
+             const maxBundleQty = Math.floor(component.stock / bundleItem.quantity);
+             const availableToAdd = Math.max(0, maxBundleQty - currentCartQuantity);
+
+             return {
+                success: false,
+                message: `Not enough stock for component "${component.title}". Only ${maxBundleQty} bundles available.`,
+             };
+          }
+        }
       }
 
       // 4. Handle cleanup (remove from Wishlist/Saved for Later when adding to cart)
@@ -123,7 +152,21 @@ export async function updateCartItemQuantityAction(
     return await prisma.$transaction(async (tx) => {
       const cartItem = await tx.cartItem.findFirst({
         where: { id: cartItemId, userId: session.user.id },
-        include: { product: { select: { stock: true, title: true } } },
+        include: { 
+          product: { 
+            select: { 
+              stock: true, 
+              title: true,
+              inBundles: {
+                include: {
+                  product: {
+                    select: { id: true, stock: true, title: true }
+                  }
+                }
+              }
+            } 
+          } 
+        },
       });
 
       if (!cartItem) {
@@ -136,6 +179,25 @@ export async function updateCartItemQuantityAction(
           success: false,
           message: `Only ${cartItem.product.stock} items available in stock`,
         };
+      }
+
+      // Validate Bundle Components
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const productWithBundles = cartItem.product as any;
+      if (productWithBundles.inBundles && productWithBundles.inBundles.length > 0) {
+         for (const bundleItem of productWithBundles.inBundles) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const component = bundleItem.product as any;
+            const requiredQty = bundleItem.quantity * quantity;
+            
+            if (component.stock < requiredQty) {
+                const maxQty = Math.floor(component.stock / bundleItem.quantity);
+                return {
+                    success: false,
+                    message: `Not enough stock for component "${component.title}". Max bundles: ${maxQty}`,
+                };
+            }
+         }
       }
 
       await tx.cartItem.update({
