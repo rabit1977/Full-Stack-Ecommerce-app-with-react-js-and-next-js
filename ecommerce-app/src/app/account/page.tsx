@@ -9,14 +9,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/utils/formatters';
 import {
-    Calendar,
-    Heart,
-    Mail,
-    Package,
-    Settings,
-    Shield,
-    ShoppingCart,
-    TrendingUp,
+  Calendar,
+  Heart,
+  Mail,
+  MapPin,
+  Package,
+  Settings,
+  Shield,
+  ShoppingCart,
+  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -221,6 +222,7 @@ const AccountPage = async () => {
                     {[
                       { href: '/orders', icon: Package, label: 'My Orders', color: 'text-blue-500', bg: 'bg-blue-500/10' },
                       { href: '/wishlist', icon: Heart, label: 'Wishlist', color: 'text-rose-500', bg: 'bg-rose-500/10' },
+                      { href: '/account/addresses', icon: MapPin, label: 'My Addresses', color: 'text-amber-500', bg: 'bg-amber-500/10' },
                       { href: '/cart', icon: ShoppingCart, label: 'Shopping Cart', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
                       { href: '/products', icon: Package, label: 'Browse Products', color: 'text-violet-500', bg: 'bg-violet-500/10' },
                     ].map((item, idx) => (

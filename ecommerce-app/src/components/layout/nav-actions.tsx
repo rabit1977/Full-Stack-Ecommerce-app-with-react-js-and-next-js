@@ -21,6 +21,7 @@ import {
   Heart,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Moon,
   Package,
   ShoppingCart,
@@ -258,6 +259,13 @@ export const NavActions = ({
                   <Link href='/orders' className='flex items-center gap-2 w-full'>
                     <Package className='h-4 w-4 mr-2 text-muted-foreground' />
                     <span className="flex-1">My Orders</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-muted/50 h-10">
+                  <Link href='/account/addresses' className='flex items-center gap-2 w-full'>
+                    <MapPin className='h-4 w-4 mr-2 text-muted-foreground' />
+                    <span className="flex-1">My Addresses</span>
                   </Link>
                 </DropdownMenuItem>
                 
