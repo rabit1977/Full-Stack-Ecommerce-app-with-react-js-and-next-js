@@ -106,8 +106,8 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
     <div className='flex-col space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h2 className='text-3xl font-bold tracking-tight'>Store Settings</h2>
-          <p className='text-muted-foreground'>
+          <h2 className='text-xl md:text-2xl font-bold tracking-tight'>Store Settings</h2>
+          <p className='text-muted-foreground text-sm'>
             Manage your store preferences and configurations.
           </p>
         </div>
@@ -115,19 +115,19 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-          <Tabs defaultValue='general' className='space-y-4'>
+          <Tabs defaultValue='general' className='space-y-4 text-sm w-full'>
             <TabsList>
-              <TabsTrigger value='general'>General</TabsTrigger>
-              <TabsTrigger value='checkout'>Checkout & Inventory</TabsTrigger>
-              <TabsTrigger value='social'>Social Media</TabsTrigger>
-              <TabsTrigger value='policies'>Policies</TabsTrigger>
+              <TabsTrigger value='general' className='text-xs'>General</TabsTrigger>
+              <TabsTrigger value='checkout' className='text-xs'>Checkout & Inventory</TabsTrigger>
+              <TabsTrigger value='social' className='text-xs'>Social Media</TabsTrigger>
+              <TabsTrigger value='policies' className='text-xs'>Policies</TabsTrigger>
             </TabsList>
 
             <TabsContent value='general'>
               <Card>
                 <CardHeader>
-                  <CardTitle>General Information</CardTitle>
-                  <CardDescription>
+                  <CardTitle className='text-base'>General Information</CardTitle>
+                  <CardDescription className='text-xs'>
                     Basic details about your store.
                   </CardDescription>
                 </CardHeader>
@@ -137,9 +137,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     name='storeName'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Store Name</FormLabel>
+                        <FormLabel className='text-xs'>Store Name</FormLabel>
                         <FormControl>
-                          <Input placeholder='My Store' {...field} />
+                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='My Store' {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -151,9 +151,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='storeEmail'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Support Email</FormLabel>
+                          <FormLabel className='text-xs'>Support Email</FormLabel>
                           <FormControl>
-                            <Input placeholder='support@example.com' {...field} value={field.value || ''} />
+                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='support@example.com' {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -164,9 +164,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='storePhone'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Support Phone</FormLabel>
+                          <FormLabel className='text-xs'>Support Phone</FormLabel>
                           <FormControl>
-                            <Input placeholder='+1 (555) 000-0000' {...field} value={field.value || ''} />
+                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='+1 (555) 000-0000' {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -179,9 +179,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='currency'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Currency Code</FormLabel>
+                          <FormLabel className='text-xs'>Currency Code</FormLabel>
                           <FormControl>
-                            <Input placeholder='USD' {...field} />
+                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='USD' {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -192,9 +192,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       name='currencySymbol'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Currency Symbol</FormLabel>
+                          <FormLabel   className='text-xs'>Currency Symbol</FormLabel>
                           <FormControl>
-                            <Input placeholder='$' {...field} />
+                            <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground ' placeholder='$' {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -208,18 +208,18 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
             <TabsContent value='checkout'>
               <Card>
                 <CardHeader>
-                  <CardTitle>Checkout & Inventory</CardTitle>
-                  <CardDescription>
+                  <CardTitle className='text-base'>Checkout & Inventory</CardTitle>
+                  <CardDescription className='text-xs'>
                     Configure how customers shop and checkout.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
                   <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
                     <div className='space-y-0.5'>
-                      <FormLabel className='text-base'>
+                      <FormLabel className='text-xs'>
                         Guest Checkout
                       </FormLabel>
-                      <FormDescription>
+                      <FormDescription className='text-xs'>
                         Allow customers to checkout without creating an account.
                       </FormDescription>
                     </div>
@@ -238,10 +238,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                   </div>
                   <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
                     <div className='space-y-0.5'>
-                      <FormLabel className='text-base'>
+                      <FormLabel className='text-xs'>
                         Track Inventory
                       </FormLabel>
-                      <FormDescription>
+                      <FormDescription className='text-xs'>
                         Automatically decrease stock when orders are placed.
                       </FormDescription>
                     </div>
@@ -258,21 +258,21 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       />
                     </FormControl>
                   </div>
-                   <div className='grid grid-cols-2 gap-4'>
+                   <div className='w-full'>
                     <FormField
                       control={form.control}
                       name='taxEnabled'
                       render={({ field }) => (
-                        <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                        <FormItem className='flex flex-row items-center justify-between space-x-3 space-y-0 rounded-md border p-4 mb-2'>
                           <FormControl>
                             <Switch
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />
                           </FormControl>
-                          <div className='space-y-1 leading-none'>
-                            <FormLabel>Enable Tax</FormLabel>
-                            <FormDescription>
+                          <div className='space-y-1 leading-none w-full'>
+                            <FormLabel className='text-xs'>Enable Tax</FormLabel>
+                            <FormDescription className='text-xs'>
                                 Calculate tax on checkout
                             </FormDescription>
                           </div>
@@ -284,10 +284,11 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         name='taxRate'
                         render={({ field }) => (
                           <FormItem>
-                             <FormLabel>Tax Rate (%)</FormLabel>
+                             <FormLabel className='text-xs'>Tax Rate (%)</FormLabel>
                              <FormControl>
-                                <Input type="number" step="0.01" {...field} />
+                                <Input type="number" step="0.01" className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' {...field} />
                              </FormControl>
+                             <FormMessage />
                           </FormItem>
                         )}
                     />
@@ -296,12 +297,12 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                       control={form.control}
                       name='minOrderAmount'
                       render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Minimum Order Amount</FormLabel>
+                        <FormItem className='w-full'>
+                            <FormLabel className='text-xs'>Minimum Order Amount</FormLabel>
                             <FormControl>
-                                <Input type="number" step="1" {...field} />
+                                <Input type="number" step="1" className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' {...field} />
                             </FormControl>
-                            <FormDescription>Set to 0 to disable</FormDescription>
+                            <FormDescription className='text-xs'>Set to 0 to disable</FormDescription>
                         </FormItem>
                       )}
                    />
@@ -312,8 +313,8 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
             <TabsContent value='social'>
               <Card>
                 <CardHeader>
-                  <CardTitle>Social Media Links</CardTitle>
-                  <CardDescription>
+                  <CardTitle className='text-sm'>Social Media Links</CardTitle>
+                  <CardDescription className='text-xs'>
                     Links to your social media profiles.
                   </CardDescription>
                 </CardHeader>
@@ -322,10 +323,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     control={form.control}
                     name='facebook'
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Facebook URL</FormLabel>
+                      <FormItem className='w-full'>
+                        <FormLabel className='text-xs'>Facebook URL</FormLabel>
                         <FormControl>
-                          <Input placeholder='https://facebook.com/yourpage' {...field} value={field.value || ''} />
+                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='https://facebook.com/yourpage' {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -335,10 +336,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     control={form.control}
                     name='instagram'
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Instagram URL</FormLabel>
+                      <FormItem className='w-full'>
+                        <FormLabel className='text-xs'>Instagram URL</FormLabel>
                         <FormControl>
-                          <Input placeholder='https://instagram.com/yourhandle' {...field} value={field.value || ''} />
+                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='https://instagram.com/yourhandle' {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -348,10 +349,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                     control={form.control}
                     name='twitter'
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Twitter/X URL</FormLabel>
+                      <FormItem className='w-full'>
+                        <FormLabel className='text-xs'>Twitter/X URL</FormLabel>
                         <FormControl>
-                          <Input placeholder='https://twitter.com/yourhandle' {...field} value={field.value || ''} />
+                          <Input className='text-xs p-2 h-8 w-full rounded-md text-muted-foreground' placeholder='https://twitter.com/yourhandle' {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -364,8 +365,8 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
             <TabsContent value='policies'>
               <Card>
                 <CardHeader>
-                  <CardTitle>Store Policies</CardTitle>
-                  <CardDescription>
+                  <CardTitle className='text-sm'>Store Policies</CardTitle>
+                  <CardDescription className='text-xs'>
                     Details for your Terms, Privacy, and Returns.
                   </CardDescription>
                 </CardHeader>
@@ -374,10 +375,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         control={form.control}
                         name='termsOfService'
                         render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Terms of Service</FormLabel>
+                        <FormItem className='w-full'>
+                            <FormLabel className='text-xs'>Terms of Service</FormLabel>
                             <FormControl>
-                                <Textarea className="min-h-[150px]" placeholder='Your terms...' {...field} value={field.value || ''} />
+                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs p-2 h-8 w-full rounded-md text-muted-foreground" placeholder='Your terms...' {...field} value={field.value || ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -387,10 +388,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         control={form.control}
                         name='privacyPolicy'
                         render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Privacy Policy</FormLabel>
+                        <FormItem className='w-full'>
+                            <FormLabel className='text-xs'>Privacy Policy</FormLabel>
                             <FormControl>
-                                <Textarea className="min-h-[150px]" placeholder='Your privacy policy...' {...field} value={field.value || ''} />
+                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs p-2 h-8 w-full rounded-md text-muted-foreground" placeholder='Your privacy policy...' {...field} value={field.value || ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -400,10 +401,10 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                         control={form.control}
                         name='returnPolicy'
                         render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Return Policy</FormLabel>
+                        <FormItem className='w-full'>
+                            <FormLabel className='text-xs'>Return Policy</FormLabel>
                             <FormControl>
-                                <Textarea className="min-h-[150px]" placeholder='Your return policy...' {...field} value={field.value || ''} />
+                                <Textarea className="min-h-[100px] md:min-h-[150px] text-xs p-2 h-8 w-full rounded-md text-muted-foreground" placeholder='Your return policy...' {...field} value={field.value || ''} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -415,7 +416,7 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
           </Tabs>
 
           <div className='flex justify-end'>
-            <Button type='submit' size='lg' disabled={isPending}>
+            <Button type='submit' className="h-10 px-4 py-2 text-sm md:h-12 md:px-8 md:text-base w-full md:w-auto" disabled={isPending}>
               {isPending ? (
                 <>
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />

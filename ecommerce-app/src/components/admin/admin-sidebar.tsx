@@ -1,5 +1,6 @@
 'use client';
 
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -306,13 +307,19 @@ export const AdminMobileHeader = () => {
 /**
  * Premium Bottom Navigation - visible on mobile/tablet
  */
+/**
+ * Premium Bottom Navigation - visible on mobile/tablet
+ */
 export const AdminBottomNav = () => {
   const pathname = usePathname();
+  const mainLinks = navLinks.slice(0, 4);
+  const moreLinks = navLinks.slice(4);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <nav className='lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-2xl border-t border-border/50 shadow-2xl safe-area-pb'>
       <div className='grid grid-cols-5 h-20 items-end pb-2 max-w-md mx-auto'>
-        {navLinks.map((link) => {
+        {mainLinks.map((link) => {
           const isActive = pathname.startsWith(link.href);
           const Icon = link.icon;
 
@@ -361,6 +368,83 @@ export const AdminBottomNav = () => {
             </Link>
           );
         })}
+
+        {/* Menu Item */}
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <button
+              className={cn(
+                'relative flex flex-col items-center justify-center h-full gap-1 text-xs transition-all duration-300 text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <div className='relative z-10 flex flex-col items-center justify-center gap-1 group'>
+                <div className="p-1.5 rounded-xl group-hover:bg-secondary/50 transition-all duration-300">
+                    <div className="grid grid-cols-2 gap-[2px] p-[2px]">
+                        <div className="w-1.5 h-1.5 rounded-[1px] bg-current opacity-70" />
+                        <div className="w-1.5 h-1.5 rounded-[1px] bg-current opacity-70" />
+                        <div className="w-1.5 h-1.5 rounded-[1px] bg-current opacity-70" />
+                        <div className="w-1.5 h-1.5 rounded-[1px] bg-current opacity-70" />
+                    </div>
+                </div>
+                <span className="text-[10px] font-medium scale-90 opacity-80">
+                  Menu
+                </span>
+              </div>
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-[2rem] max-h-[85vh] overflow-y-auto">
+             <SheetTitle className="sr-only">Admin Navigation Menu</SheetTitle>
+             <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-6 opacity-50" />
+             <div className="space-y-6 pb-8">
+                <div>
+                   <h3 className="px-4 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">More Options</h3>
+                   <div className="grid grid-cols-4 gap-y-6">
+                      {moreLinks.map((link) => {
+                        const isActive = pathname.startsWith(link.href);
+                        return (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setIsOpen(false)}
+                            className={cn(
+                              'flex flex-col items-center gap-2 text-center group',
+                              isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                            )}
+                          >
+                            <div className={cn(
+                                "p-3 rounded-2xl transition-all duration-200",
+                                isActive ? "bg-primary/10 text-primary shadow-sm" : "bg-secondary/50 group-hover:bg-secondary group-hover:scale-105"
+                            )}>
+                               <link.icon className="h-6 w-6" />
+                            </div>
+                            <span className={cn(
+                                "text-[10px] font-medium leading-tight max-w-[64px]",
+                                isActive ? "font-semibold" : "opacity-80"
+                            )}>{link.label}</span>
+                          </Link>
+                        );
+                      })}
+                   </div>
+                </div>
+                
+                <div className="px-4">
+                    <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
+                        <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Quick Actions</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Link href="/admin/settings" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 p-3 rounded-xl bg-background border border-border/50 hover:border-primary/50 transition-colors shadow-sm">
+                                <Settings className="h-4 w-4" />
+                                <span className="text-xs font-semibold">Settings</span>
+                            </Link>
+                            <button onClick={() => signOut()} className="flex items-center justify-center gap-2 p-3 rounded-xl bg-background border border-border/50 hover:border-destructive/50 hover:text-destructive transition-colors shadow-sm">
+                                <LogOut className="h-4 w-4" />
+                                <span className="text-xs font-semibold">Logout</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+             </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </nav>
   );
