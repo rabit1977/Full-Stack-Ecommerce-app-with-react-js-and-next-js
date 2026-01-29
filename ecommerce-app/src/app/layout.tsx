@@ -7,6 +7,7 @@ import { Toast } from '@/components/toast';
 import { CommandPalette } from '@/components/ui/command-palette';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { Suspense } from 'react';
 import './globals.css';
 import { Providers } from './providers';
 
@@ -44,10 +45,12 @@ export default async function RootLayout({
         <Providers>
           <CommandPalette />
           <div className='min-h-screen bg-background text-foreground'>
-            <MobileSidebarWrapper
-              initialWishlistCount={initialWishlistCount}
-              initialCartItemCount={initialCartItemCount}
-            />
+            <Suspense fallback={<div className="h-16 w-full bg-background" />}>
+              <MobileSidebarWrapper
+                initialWishlistCount={initialWishlistCount}
+                initialCartItemCount={initialCartItemCount}
+              />
+            </Suspense>
             <main className='min-h-auto pb-20 lg:pb-0'>{children}</main>
             <FooterWrapper />
             <QuickViewModal/>

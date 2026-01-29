@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatOrderDate, formatPrice } from '@/lib/utils/formatters';
 import {
-    ArrowRight,
-    Check,
-    Download,
-    Mail,
-    MapPin,
-    Package,
-    ShoppingBag
+   ArrowRight,
+   Check,
+   Download,
+   Mail,
+   MapPin,
+   Package,
+   ShoppingBag
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -193,12 +193,12 @@ function OrderConfirmationContent() {
                      </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-4">
-                     <Button size="lg" className="rounded-full px-8 h-12 font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 flex-1 btn-premium" onClick={() => router.push('/products')}>
+                  <div className="flex justify-center sm:justify-start sm:flex-row gap-4">
+                     <Button size="lg" className="rounded-full flex-1 px-8 h-10 lg:h-12 font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 btn-premium" onClick={() => router.push('/products')}>
                         Continue Shopping
                         <ArrowRight className="ml-2 h-4 w-4" />
                      </Button>
-                     <Button variant="outline" size="lg" className="rounded-full px-8 h-12 font-bold border-border/60 hover:bg-secondary/50 flex-1" onClick={() => router.push('/account')}>
+                     <Button variant="outline" size="lg" className="rounded-full flex-1 px-8 h-10 lg:h-12 font-bold border-border/60 hover:bg-secondary/50" onClick={() => router.push('/account')}>
                         View Order History
                      </Button>
                   </div>
