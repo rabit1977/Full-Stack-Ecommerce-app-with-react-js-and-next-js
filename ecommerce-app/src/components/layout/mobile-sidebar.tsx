@@ -1,21 +1,37 @@
 'use client';
 
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useOnClickOutside } from '@/lib/hooks/useOnClickOutside';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Home,
-  Info,
-  LogOut,
-  Mail,
-  Package,
-  ShoppingBag,
-  User,
-  UserCircle,
-  X,
+    Briefcase,
+    Headphones,
+    Heart,
+    Home,
+    Info,
+    Laptop,
+    LayoutDashboard,
+    LogOut,
+    Mail,
+    MapPin,
+    Monitor,
+    Package,
+    ShoppingBag,
+    Smartphone,
+    User,
+    UserCircle,
+    X,
+    Zap
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -24,34 +40,35 @@ import { startTransition, useCallback, useEffect, useRef } from 'react';
 
 interface NavLinkProps {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
   isActive?: boolean;
   onClick?: () => void;
+  className?: string;
 }
 
-/**
- * Navigation link component with icon and active state
- */
 const NavLink = ({
   href,
   icon: Icon,
   children,
   isActive,
   onClick,
+  className,
 }: NavLinkProps) => (
   <Link
     href={href}
     onClick={onClick}
     className={cn(
-      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium transition-colors',
+      'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200',
       isActive
-        ? 'bg-primary text-primary-foreground'
-        : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+        ? 'bg-primary/10 text-primary'
+        : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+      className
     )}
   >
-    <Icon className='h-5 w-5 shrink-0' />
+    {Icon && <Icon className={cn('h-5 w-5 shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')} />}
     <span>{children}</span>
+    {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
   </Link>
 );
 
@@ -60,26 +77,13 @@ interface MobileSidebarProps {
   onClose: () => void;
 }
 
-// Navigation links configuration - moved outside component for stability
-const NAV_LINKS = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/products', icon: Package, label: 'All Products' },
-  { href: '/about', icon: Info, label: 'About Us' },
-  { href: '/contact', icon: Mail, label: 'Contact Us' },
+const CATEGORIES = [
+  { href: '/products?category=Laptops', icon: Laptop, label: 'Laptops & Computers' },
+  { href: '/products?category=Phones', icon: Smartphone, label: 'Phones & Tablets' },
+  { href: '/products?category=Audio', icon: Headphones, label: 'Audio & Headphones' },
+  { href: '/products?category=TVs', icon: Monitor, label: 'TVs & Displays' },
 ] as const;
 
-/**
- * Mobile Sidebar Component - React 19 Optimized
- *
- * Features:
- * - Smooth slide-in animation with Framer Motion
- * - Click outside to close
- * - Active link highlighting
- * - User profile section
- * - Body scroll lock when open
- * - Accessibility compliant (ARIA labels, focus management)
- * - Performance optimized with React 19 patterns
- */
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -87,40 +91,28 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const previousOpenState = useRef(isOpen);
 
-  /**
-   * Close menu when route changes (with startTransition for React 19)
-   */
+  // Close menu on path change
   useEffect(() => {
-    // Only close if menu was previously open
     if (previousOpenState.current && isOpen) {
-      startTransition(() => {
-        onClose();
-      });
+      startTransition(() => onClose());
     }
     previousOpenState.current = isOpen;
   }, [pathname, isOpen, onClose]);
 
-  /**
-   * Lock body scroll when menu is open
-   */
+  // Lock body scroll
   useEffect(() => {
     if (isOpen) {
-      // Save current scroll position
       const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
     } else {
-      // Restore scroll position
       const scrollY = document.body.style.top;
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
+      if (scrollY) window.scrollTo(0, parseInt(scrollY || '0') * -1);
     }
-
     return () => {
       document.body.style.position = '';
       document.body.style.top = '';
@@ -128,199 +120,202 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     };
   }, [isOpen]);
 
-  /**
-   * Handle logout with proper cleanup
-   */
   const handleLogout = useCallback(async () => {
-    startTransition(() => {
-      onClose();
-    });
+    startTransition(() => onClose());
     await signOut({ callbackUrl: '/' });
   }, [onClose]);
 
-  /**
-   * Click outside handler
-   */
   useOnClickOutside(menuRef, onClose);
 
-  /**
-   * Check if link is active
-   */
   const isActiveLink = useCallback(
-    (href: string): boolean => {
-      if (href === '/') return pathname === '/';
-      return pathname.startsWith(href);
+    (href: string) => {
+      if (href === '/' && pathname === '/') return true;
+      if (href !== '/' && pathname.startsWith(href)) return true;
+      return false;
     },
-    [pathname],
+    [pathname]
   );
 
-  /**
-   * Get user initials for avatar
-   */
   const userInitials = user?.name
-    ? user.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
     : '';
-
-  /**
-   * Handle link click with transition
-   */
-  const handleLinkClick = useCallback(() => {
-    startTransition(() => {
-      onClose();
-    });
-  }, [onClose]);
 
   return (
     <AnimatePresence mode='wait'>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            transition={{ duration: 0.2 }}
             className='fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden'
             onClick={onClose}
             aria-hidden='true'
           />
 
-          {/* Sidebar */}
           <motion.aside
             ref={menuRef}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className='fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-background shadow-2xl lg:hidden overflow-hidden'
-            role='dialog'
-            aria-modal='true'
-            aria-label='Mobile navigation menu'
+            className='fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-background shadow-2xl lg:hidden flex flex-col'
           >
-            <div className='flex h-full flex-col'>
-              {/* Header */}
-              <div className='flex items-center justify-between border-b px-6 py-4 shrink-0'>
-                <h2 className='text-lg font-semibold'>Menu</h2>
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  onClick={onClose}
-                  aria-label='Close menu'
-                  className='hover:bg-accent'
-                >
-                  <X className='h-5 w-5' />
-                </Button>
-              </div>
+            {/* Header */}
+            <div className='flex items-center justify-between px-6 py-5 border-b shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+              <Link href="/" onClick={onClose} className='flex items-center gap-3 group'>
+                <div className='relative w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-md shadow-primary/20'>
+                  <Zap className='h-5 w-5 text-white' fill="currentColor" />
+                </div>
+                <span className='font-bold text-lg tracking-tight'>Electro<span className="text-primary">.</span></span>
+              </Link>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={onClose}
+                className='h-8 w-8 rounded-full hover:bg-muted'
+              >
+                <X className='h-5 w-5' />
+              </Button>
+            </div>
 
-              {/* Scrollable Content */}
-              <div className='flex-1 overflow-y-auto overscroll-contain'>
-                <div className='flex flex-col gap-6 p-6'>
-                  {/* User Section */}
-                  {user ? (
-                    <div className='rounded-lg border bg-card p-4 shadow-sm'>
-                      <div className='flex items-center gap-3'>
-                        <Avatar className='h-12 w-12 border border-slate-200 dark:border-slate-800 shadow-sm'>
-                          <AvatarImage 
-                            src={user.image ? (user.image.startsWith('http') || user.image.startsWith('/') ? user.image : `/${user.image}`) : undefined} 
-                            alt={user.name || 'User'} 
-                            className="object-cover"
-                          />
-                          <AvatarFallback className='bg-linear-to-br from-primary to-primary/80 text-primary-foreground font-semibold text-lg'>
-                            {userInitials || <User className='h-6 w-6' />}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className='min-w-0 flex-1'>
-                          <p className='truncate font-semibold text-foreground'>
-                            {user.name}
-                          </p>
-                          <p className='truncate text-sm text-muted-foreground'>
-                            {user.email || 'User'}
-                          </p>
-                        </div>
+            <ScrollArea className='flex-1 py-6 px-4'>
+              <div className='flex flex-col gap-6'>
+                {/* User Profile Card */}
+                {user ? (
+                   <div className="bg-muted/30 rounded-2xl p-4 border border-border/50">
+                      <div className="flex items-center gap-3 mb-3">
+                         <Avatar className='h-12 w-12 border-2 border-background shadow-sm'>
+                            <AvatarImage src={user.image || undefined} />
+                            <AvatarFallback className='bg-primary/10 text-primary font-bold'>
+                               {userInitials}
+                            </AvatarFallback>
+                         </Avatar>
+                         <div className='flex-1 min-w-0'>
+                            <p className='font-semibold truncate leading-tight'>{user.name}</p>
+                            <p className='text-xs text-muted-foreground truncate'>{user.email}</p>
+                         </div>
                       </div>
+                      
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                         <Button asChild variant="outline" size="sm" className="w-full justify-start h-9 text-xs">
+                            <Link href="/account" onClick={onClose}>
+                               <UserCircle className="mr-2 h-3.5 w-3.5" />
+                               Account
+                            </Link>
+                         </Button>
+                         <Button asChild variant="outline" size="sm" className="w-full justify-start h-9 text-xs">
+                            <Link href="/orders" onClick={onClose}>
+                               <Package className="mr-2 h-3.5 w-3.5" />
+                               Orders
+                            </Link>
+                         </Button>
+                      </div>
+                   </div>
+                ) : (
+                  <div className='bg-primary/5 rounded-2xl p-6 text-center space-y-3 border border-primary/10'>
+                    <div className='w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-primary'>
+                      <User className='h-6 w-6' />
                     </div>
-                  ) : (
-                    <Button
-                      asChild
-                      size='lg'
-                      className='w-full gap-2 shadow-sm'
-                    >
-                      <Link href='/auth' onClick={handleLinkClick}>
-                        <User className='h-4 w-4' />
-                        Login / Sign Up
+                    <div>
+                      <h3 className='font-bold text-foreground'>Welcome Guest</h3>
+                      <p className='text-xs text-muted-foreground mt-1'>Sign in to access your account & orders</p>
+                    </div>
+                    <Button asChild className='w-full rounded-xl shadow-lg shadow-primary/20'>
+                      <Link href='/auth/signin' onClick={onClose}>
+                        Login / Register
                       </Link>
                     </Button>
-                  )}
+                  </div>
+                )}
 
-                  <Separator />
+                {/* Main Navigation */}
+                <div className='space-y-1'>
+                  <NavLink href='/' icon={Home} isActive={isActiveLink('/')} onClick={onClose}>
+                    Home
+                  </NavLink>
+                  <NavLink href='/products' icon={ShoppingBag} isActive={isActiveLink('/products') && !pathname.includes('category')} onClick={onClose}>
+                    Shop All Products
+                  </NavLink>
+                  
+                  {/* Categories Accordion */}
+                  <Accordion type="single" collapsible className="w-full border-none">
+                     <AccordionItem value="categories" className="border-none">
+                        <AccordionTrigger className="py-3 px-4 rounded-xl hover:bg-muted text-sm font-medium hover:no-underline text-muted-foreground">
+                           <div className="flex items-center gap-3">
+                              <Package className="h-5 w-5" />
+                              <span>Categories</span>
+                           </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-0 pt-1 px-2">
+                           {CATEGORIES.map((cat) => (
+                              <Link 
+                                 key={cat.href}
+                                 href={cat.href}
+                                 onClick={onClose}
+                                 className="flex items-center gap-3 py-2.5 px-4 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ml-4"
+                              >
+                                 <cat.icon className="h-4 w-4" />
+                                 {cat.label}
+                              </Link>
+                           ))}
+                        </AccordionContent>
+                     </AccordionItem>
+                  </Accordion>
+                </div>
 
-                  {/* Navigation Links */}
-                  <nav
-                    className='flex flex-col gap-1'
-                    aria-label='Main navigation'
-                  >
-                    {NAV_LINKS.map((link) => (
-                      <NavLink
-                        key={link.href}
-                        href={link.href}
-                        icon={link.icon}
-                        isActive={isActiveLink(link.href)}
-                        onClick={handleLinkClick}
-                      >
-                        {link.label}
-                      </NavLink>
-                    ))}
-                  </nav>
+                <Separator className="bg-border/50" />
 
-                  {/* User Links */}
+                {/* Account & Support */}
+                <div className='space-y-1'>
+                  <p className='px-4 text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider'>
+                     Account & Support
+                  </p>
+                  
                   {user && (
                     <>
-                      <Separator />
-                      <nav
-                        className='flex flex-col gap-1'
-                        aria-label='User menu'
-                      >
-                        <NavLink
-                          href='/account'
-                          icon={UserCircle}
-                          isActive={isActiveLink('/account')}
-                          onClick={handleLinkClick}
-                        >
-                          My Account
+                      <NavLink href='/wishlist' icon={Heart} isActive={isActiveLink('/wishlist')} onClick={onClose}>
+                        My Wishlist
+                      </NavLink>
+                      <NavLink href='/account/addresses' icon={MapPin} isActive={isActiveLink('/account/addresses')} onClick={onClose}>
+                        My Addresses
+                      </NavLink>
+                      
+                      {user.role === 'ADMIN' && (
+                        <NavLink href='/admin' icon={LayoutDashboard} isActive={isActiveLink('/admin')} onClick={onClose} className="text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30">
+                          Admin Dashboard
                         </NavLink>
-                        <NavLink
-                          href='/orders'
-                          icon={ShoppingBag}
-                          isActive={isActiveLink('/orders')}
-                          onClick={handleLinkClick}
-                        >
-                          My Orders
-                        </NavLink>
-                      </nav>
+                      )}
                     </>
                   )}
+
+                  <NavLink href='/services' icon={Briefcase} isActive={isActiveLink('/services')} onClick={onClose}>
+                    Services
+                  </NavLink>
+                  <NavLink href='/about' icon={Info} isActive={isActiveLink('/about')} onClick={onClose}>
+                    About Us
+                  </NavLink>
+                  <NavLink href='/contact' icon={Mail} isActive={isActiveLink('/contact')} onClick={onClose}>
+                    Contact Support
+                  </NavLink>
                 </div>
               </div>
+            </ScrollArea>
 
-              {/* Footer (Logout) */}
-              {user && (
-                <div className='border-t p-6 shrink-0 bg-muted/30 mb-20'>
-                  <Button
-                    variant='outline'
-                    className='w-full gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors'
-                    onClick={handleLogout}
+            {/* Footer */}
+            {user && (
+               <div className='p-4 border-t bg-muted/20'>
+                  <Button 
+                     variant="outline" 
+                     className='w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 h-11'
+                     onClick={handleLogout}
                   >
-                    <LogOut className='h-4 w-4' />
-                    Logout
+                     <LogOut className='mr-2 h-4 w-4' />
+                     Log Out
                   </Button>
-                </div>
-              )}
-            </div>
+               </div>
+            )}
           </motion.aside>
         </>
       )}
