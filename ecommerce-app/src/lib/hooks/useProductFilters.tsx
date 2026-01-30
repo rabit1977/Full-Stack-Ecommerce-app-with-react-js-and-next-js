@@ -53,6 +53,23 @@ export const useProductFilters = () => {
         newCategories.length > 0 ? newCategories.join(',') : null;
       const queryString = createQueryString({
         categories: categoriesStr,
+        // Reset subcategories when main category changes if needed, 
+        // or keep them if they might still be valid. 
+        // Usually, it's safer to reset subcategories when categories change significantly.
+        subCategories: null, 
+        page: 1,
+      });
+      navigateWithTransition(queryString);
+    },
+    [createQueryString, navigateWithTransition]
+  );
+
+  const handleSubCategoriesChange = useCallback(
+    (newSubCategories: string[]) => {
+      const subCategoriesStr =
+        newSubCategories.length > 0 ? newSubCategories.join(',') : null;
+      const queryString = createQueryString({
+        subCategories: subCategoriesStr,
         page: 1,
       });
       navigateWithTransition(queryString);
@@ -122,6 +139,7 @@ export const useProductFilters = () => {
     isPending,
     priceTimeoutRef,
     handleCategoriesChange,
+    handleSubCategoriesChange,
     handleBrandsChange,
     handlePriceChange,
     handleSortChange,

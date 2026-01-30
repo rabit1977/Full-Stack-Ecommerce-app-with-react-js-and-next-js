@@ -378,14 +378,40 @@ export async function getFiltersAction(selectedCategories?: string) {
       }
     }
 
-    // Run queries sequentially to respect the connection limit of 1
+    // Fetch categories and subcategories with counts
+    // We remove the 'where' clause here to always show the full category tree structure
+    // regardless of current filters, which helps users navigate out of deep filters.
+    // If you prefer "narrowing" behavior, you can add 'where' back.
     const categoriesAgg = await prisma.product.groupBy({
-      by: ['category'],
+      by: ['category', 'subCategory'],
+      _count: {
+        _all: true,
+      },
     });
+
+    // Process flat list into hierarchy
+    const categoryMap = new Map<string, Set<string>>();
+    categoriesAgg.forEach((item) => {
+        if (!item.category) return;
+        const subCats = categoryMap.get(item.category) || new Set();
+        if (item.subCategory) {
+            subCats.add(item.subCategory);
+        }
+        categoryMap.set(item.category, subCats);
+    });
+
+    const structuredCategories = Array.from(categoryMap.entries()).map(([category, subs]) => ({
+        name: category,
+        subCategories: Array.from(subs).sort()
+    })).sort((a, b) => a.name.localeCompare(b.name));
+
 
     const brandsAgg = await prisma.product.groupBy({
       by: ['brand'],
-      where,
+      where: {
+         ...where,
+         brand: { not: '' } // Filter out empty brands
+      },
     });
 
     const priceAgg = await prisma.product.aggregate({
@@ -395,8 +421,8 @@ export async function getFiltersAction(selectedCategories?: string) {
     });
 
     return {
-      categories: categoriesAgg.map((c) => c.category).sort(),
-      brands: brandsAgg.map((b) => b.brand).sort(),
+      categories: structuredCategories,
+      brands: brandsAgg.map((b) => b.brand).filter(Boolean).sort(),
       minPrice: priceAgg._min.price || 0,
       maxPrice: priceAgg._max.price || 0,
     };

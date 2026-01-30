@@ -151,6 +151,12 @@ export interface FilterState {
 /**
  * Product grid props
  */
+
+export interface CategoryHierarchy {
+  name: string;
+  subCategories: string[];
+}
+
 export interface ProductGridProps {
   title?: string;
   subtitle?: string;
@@ -158,12 +164,13 @@ export interface ProductGridProps {
   totalCount: number;
   currentPage: number;
   currentCategories: string;
+  currentSubCategories?: string;
   currentBrands: string;
   currentMinPrice?: number;
   currentMaxPrice?: number;
   currentSort: SortKey;
   pageSize?: number;
-  allCategories: string[];
+  allCategories: (string | CategoryHierarchy)[];
   allBrands: string[];
   searchQuery?: string;
 }

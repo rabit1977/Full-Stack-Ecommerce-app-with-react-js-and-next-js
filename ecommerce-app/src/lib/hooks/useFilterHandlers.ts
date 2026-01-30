@@ -3,10 +3,12 @@ import { useCallback, useTransition } from 'react';
 export const useFilterHandlers = (
   selectedBrandsSet: Set<string>,
   selectedCategoriesSet: Set<string>,
+  selectedSubCategoriesSet: Set<string>,
   currentMinPrice: number,
   currentMaxPrice: number,
   onBrandsChange: (brands: string[]) => void,
   onCategoriesChange: (categories: string[]) => void,
+  onSubCategoriesChange: (subCategories: string[]) => void,
   onPriceChange: (priceRange: [number, number]) => void
 ) => {
   const [isPending, startTransition] = useTransition();
@@ -45,6 +47,23 @@ export const useFilterHandlers = (
     [selectedCategoriesSet, onCategoriesChange]
   );
 
+  const handleSubCategoryToggle = useCallback(
+    (subCategory: string, checked: boolean) => {
+      startTransition(() => {
+        const newSelectedSubCategories = new Set(selectedSubCategoriesSet);
+
+        if (checked) {
+          newSelectedSubCategories.add(subCategory);
+        } else {
+          newSelectedSubCategories.delete(subCategory);
+        }
+
+        onSubCategoriesChange(Array.from(newSelectedSubCategories));
+      });
+    },
+    [selectedSubCategoriesSet, onSubCategoriesChange]
+  );
+
   const handlePriceValueChange = useCallback((value: number[]) => {
     return value as [number, number];
   }, []);
@@ -65,6 +84,7 @@ export const useFilterHandlers = (
     isPending,
     handleBrandToggle,
     handleCategoryToggle,
+    handleSubCategoryToggle,
     handlePriceValueChange,
     handlePriceCommit,
   };

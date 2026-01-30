@@ -65,7 +65,7 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
           <Card className="border-border/40 shadow-sm overflow-hidden">
             <CardContent className="p-6 sm:p-8">
               <div className="prose prose-neutral dark:prose-invert max-w-none">
-                <p className="text-base sm:text-lg leading-relaxed text-muted-foreground whitespace-pre-line">
+                <p className="text-sm sm:text-lg leading-relaxed text-muted-foreground whitespace-pre-line">
                   {product.description}
                 </p>
               </div>
@@ -193,7 +193,7 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
         {/* Shipping Tab */}
         <TabsContent value="shipping" className="space-y-6 mt-6">
           <Card className="border-border/40 shadow-sm">
-            <CardContent className="p-6 sm:p-8">
+            <CardContent className="p-4 sm:p-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="flex gap-4 items-start">
                   <div className="h-10 w-10 shrink-0 rounded-full bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center text-blue-600 dark:text-blue-400">

@@ -1,7 +1,7 @@
 'use client';
 
 import { Accordion } from '@/components/ui/accordion';
-import { MAX_PRICE, DEFAULT_ACCORDION_VALUES } from '@/lib/constants/filter';
+import { DEFAULT_ACCORDION_VALUES, MAX_PRICE } from '@/lib/constants/filter';
 import { useFilterHandlers } from '@/lib/hooks/useFilterHandlers';
 import { useFilterState } from '@/lib/hooks/useFilterState';
 import { FilterSidebarProps } from '@/lib/types/filter';
@@ -18,10 +18,12 @@ const FilterSidebar = React.memo<FilterSidebarProps>(
     categories,
     brands,
     currentCategories,
+    currentSubCategories,
     currentBrands,
     currentMinPrice = 0,
     currentMaxPrice = MAX_PRICE,
     onCategoriesChange,
+    onSubCategoriesChange,
     onBrandsChange,
     onPriceChange,
     className,
@@ -32,28 +34,33 @@ const FilterSidebar = React.memo<FilterSidebarProps>(
       setLocalPriceRange,
       selectedBrandsSet,
       selectedCategoriesSet,
+      selectedSubCategoriesSet,
       isPriceFilterActive,
       activeFiltersCount,
     } = useFilterState(
       currentMinPrice,
       currentMaxPrice,
       currentBrands,
-      currentCategories
+      currentCategories,
+      currentSubCategories
     );
 
     const {
       isPending,
       handleBrandToggle,
       handleCategoryToggle,
+      handleSubCategoryToggle,
       handlePriceValueChange,
       handlePriceCommit,
     } = useFilterHandlers(
       selectedBrandsSet,
       selectedCategoriesSet,
+      selectedSubCategoriesSet,
       currentMinPrice,
       currentMaxPrice,
       onBrandsChange,
       onCategoriesChange,
+      onSubCategoriesChange,
       onPriceChange
     );
 
@@ -76,7 +83,9 @@ const FilterSidebar = React.memo<FilterSidebarProps>(
           <CategoryFilter
             categories={categories}
             selectedCategories={selectedCategoriesSet}
+            selectedSubCategories={selectedSubCategoriesSet}
             onCategoryToggle={handleCategoryToggle}
+            onSubCategoryToggle={handleSubCategoryToggle}
             isPending={isPending}
             showFilterCount={showFilterCount}
           />

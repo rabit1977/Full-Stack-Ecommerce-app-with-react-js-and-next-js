@@ -13,6 +13,7 @@ interface ProductsPageProps {
   searchParams: Promise<{
     search?: string;
     categories?: string;
+    subCategories?: string;
     brands?: string;
     minPrice?: string;
     maxPrice?: string;
@@ -32,6 +33,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const query = params.search || '';
   const categories = params.categories || '';
+  const subCategories = params.subCategories || '';
   const brands = params.brands || '';
   const minPrice = params.minPrice ? Number(params.minPrice) : undefined;
   const maxPrice = params.maxPrice ? Number(params.maxPrice) : undefined;
@@ -43,12 +45,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     getProductsAction({
       query,
       categories,
+      subCategories,
       brands,
       minPrice,
       maxPrice,
       sort,
       page,
-      limit: 8,
+      limit: 12, // Increased limit for better grid feel
     }),
     getFiltersAction(categories),
   ]);
@@ -62,6 +65,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         allBrands={filtersRes.brands}
         currentPage={page}
         currentCategories={categories}
+        currentSubCategories={subCategories}
         currentBrands={brands}
         currentMinPrice={minPrice}
         currentMaxPrice={maxPrice}

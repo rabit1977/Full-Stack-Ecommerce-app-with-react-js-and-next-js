@@ -22,6 +22,7 @@ export const ProductGrid = ({
   totalCount,
   currentPage,
   currentCategories,
+  currentSubCategories,
   currentBrands,
   currentMinPrice,
   currentMaxPrice,
@@ -38,6 +39,7 @@ export const ProductGrid = ({
     isPending,
     priceTimeoutRef,
     handleCategoriesChange,
+    handleSubCategoriesChange,
     handleBrandsChange,
     handlePriceChange,
     handleSortChange,
@@ -87,16 +89,15 @@ export const ProductGrid = ({
   const filterSidebar = useMemo(
     () => (
       <FilterSidebar
-        // We now use the allCategories/allBrands passed from props
-        // Note: Ensure your parent component passes 'all' for categories if needed, 
-        // or prepend it here like: ['all', ...allCategories]
-        categories={['all', ...allCategories.filter(c => c !== 'all')]} 
+        categories={allCategories as any} 
         brands={allBrands}
         currentCategories={currentCategories}
+        currentSubCategories={currentSubCategories || ''}
         currentBrands={currentBrands}
         currentMinPrice={currentMinPrice}
         currentMaxPrice={currentMaxPrice}
         onCategoriesChange={handleCategoriesChange}
+        onSubCategoriesChange={handleSubCategoriesChange}
         onBrandsChange={handleBrandsChange}
         onPriceChange={handlePriceChange}
       />
@@ -105,10 +106,12 @@ export const ProductGrid = ({
       allCategories,
       allBrands,
       currentCategories,
+      currentSubCategories,
       currentBrands,
       currentMinPrice,
       currentMaxPrice,
       handleCategoriesChange,
+      handleSubCategoriesChange,
       handleBrandsChange,
       handlePriceChange,
     ]

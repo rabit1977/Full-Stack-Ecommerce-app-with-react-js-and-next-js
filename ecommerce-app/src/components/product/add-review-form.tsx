@@ -113,9 +113,9 @@ export const AddReviewForm = ({
   }
 
   return (
-    <div className='mt-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all'>
-      <div className='flex items-center gap-4 mb-6'>
-        <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 p-0 border border-border/50 bg-secondary/20 overflow-hidden">
+    <div className='mt-4 sm:mt-8 p-4 sm:p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all'>
+      <div className='flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6'>
+        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 sm:h-9 sm:w-9 p-0 border border-border/50 bg-secondary/20 overflow-hidden">
           <UserAvatar 
             user={user}
             className="h-full w-full"
@@ -123,10 +123,10 @@ export const AddReviewForm = ({
           />
         </Button>
         <div>
-          <h3 className='text-lg font-bold text-slate-900 dark:text-white'>
+          <h3 className='text-base sm:text-lg font-bold text-slate-900 dark:text-white'>
             {reviewToEdit ? 'Update Your Review' : 'Write a Review'}
           </h3>
-          <p className='text-sm text-slate-500 dark:text-slate-400'>
+          <p className='text-xs sm:text-sm text-slate-500 dark:text-slate-400'>
             Share your experience with others
           </p>
         </div>
@@ -138,7 +138,7 @@ export const AddReviewForm = ({
             {[1, 2, 3, 4, 5].map((starValue) => (
               <Star
                 key={starValue}
-                className={`h-6 w-6 cursor-pointer transition-colors ${ 
+                className={`h-5 w-5 sm:h-6 sm:w-6 cursor-pointer transition-colors ${ 
                   starValue <= rating
                     ? 'text-yellow-400 fill-yellow-400'
                     : 'text-slate-300 dark:text-slate-600 hover:text-yellow-200'
@@ -147,7 +147,7 @@ export const AddReviewForm = ({
               />
             ))}
             {rating > 0 && (
-              <span className='ml-2 text-sm text-slate-600 dark:text-slate-400'>
+              <span className='ml-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400'>
                 {rating} out of 5
               </span>
             )}

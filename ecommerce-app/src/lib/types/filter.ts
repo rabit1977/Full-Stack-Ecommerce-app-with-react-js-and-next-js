@@ -1,11 +1,15 @@
+import { CategoryHierarchy } from './product';
+
 export interface FilterSidebarProps {
-  categories: string[];
+  categories: (string | CategoryHierarchy)[];
   brands: string[];
   currentCategories: string; // Comma-separated string
+  currentSubCategories: string;
   currentBrands: string;
   currentMinPrice?: number;
   currentMaxPrice?: number;
   onCategoriesChange: (categories: string[]) => void;
+  onSubCategoriesChange: (subCategories: string[]) => void;
   onBrandsChange: (brands: string[]) => void;
   onPriceChange: (priceRange: [number, number]) => void;
   className?: string;
@@ -13,9 +17,11 @@ export interface FilterSidebarProps {
 }
 
 export interface CategoryFilterProps {
-  categories: string[];
+  categories: (string | CategoryHierarchy)[];
   selectedCategories: Set<string>;
+  selectedSubCategories: Set<string>;
   onCategoryToggle: (category: string, checked: boolean) => void;
+  onSubCategoryToggle: (subCategory: string, checked: boolean) => void;
   isPending: boolean;
   showFilterCount?: boolean;
 }
