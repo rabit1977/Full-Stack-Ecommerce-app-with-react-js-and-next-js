@@ -63,7 +63,8 @@ const CheckoutSteps = memo(
                     disabled={!isClickable}
                     className={cn(
                       'flex items-center gap-4 group bg-transparent border-0 p-0',
-                      isClickable && 'cursor-pointer',
+                      isClickable && 'cursor-pointer hover:opacity-80 transition-opacity',
+                      !isClickable && 'cursor-default'
                     )}
                   >
                      {/* Step Circle */}

@@ -1,7 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Package } from 'lucide-react';
+import { ProductCardSkeleton } from '@/components/ui/product-card-skeleton';
 
 /**
  * Products Page Loading Skeleton
@@ -12,12 +11,7 @@ export default function ProductsLoading() {
     <div className='page-wrapper'>
       <div className='container-wide py-8 sm:py-12 lg:py-16'>
         {/* Header Skeleton */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className='mb-8'
-        >
+        <div className='mb-8'>
           <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
             <div className='space-y-2'>
               <div className='h-10 w-56 skeleton-enhanced rounded-xl' />
@@ -28,128 +22,74 @@ export default function ProductsLoading() {
               <div className='h-11 w-40 skeleton-enhanced rounded-xl' />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         <div className='lg:grid lg:grid-cols-4 lg:gap-8 xl:gap-12'>
           {/* Filter Sidebar Skeleton */}
-          <motion.aside
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className='hidden lg:block lg:col-span-1 sticky top-24 self-start'
-          >
-            <div className='rounded-2xl border border-border bg-card p-6 space-y-6'>
-              {/* Categories */}
-              <div className='space-y-4'>
-                <div className='h-5 w-24 skeleton-enhanced rounded' />
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.15 + i * 0.05 }}
-                    className='flex items-center gap-3'
-                  >
-                    <div className='h-5 w-5 skeleton-enhanced rounded' />
-                    <div className='h-4 w-24 skeleton-enhanced rounded' />
-                  </motion.div>
-                ))}
-              </div>
+          <aside className='hidden lg:block lg:col-span-1 sticky top-24 self-start'>
+            <div className='rounded-2xl border border-border bg-card p-6 space-y-8'>
+               {/* Categories - Folder Structure Mimic */}
+               <div className='space-y-5'>
+                  <div className='flex items-center gap-2'>
+                     <div className='h-6 w-6 skeleton-enhanced rounded' />
+                     <div className='h-5 w-24 skeleton-enhanced rounded' />
+                  </div>
+                  <div className='space-y-3 pl-2'>
+                     {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className='flex items-center gap-3'>
+                           <div className='h-4 w-4 skeleton-enhanced rounded' />
+                           <div className='h-4 w-32 skeleton-enhanced rounded' />
+                        </div>
+                     ))}
+                  </div>
+               </div>
 
-              {/* Brands */}
-              <div className='space-y-4 pt-6 border-t border-border'>
-                <div className='h-5 w-20 skeleton-enhanced rounded' />
-                {[1, 2, 3, 4].map((i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 + i * 0.05 }}
-                    className='flex items-center gap-3'
-                  >
-                    <div className='h-5 w-5 skeleton-enhanced rounded' />
-                    <div className='h-4 w-20 skeleton-enhanced rounded' />
-                  </motion.div>
-                ))}
-              </div>
+               {/* Separator */}
+               <div className='h-px w-full bg-border' />
 
-              {/* Price Range */}
-              <div className='space-y-4 pt-6 border-t border-border'>
-                <div className='h-5 w-28 skeleton-enhanced rounded' />
-                <div className='h-2 w-full skeleton-enhanced rounded-full' />
-                <div className='flex justify-between'>
-                  <div className='h-4 w-14 skeleton-enhanced rounded' />
-                  <div className='h-4 w-14 skeleton-enhanced rounded' />
-                </div>
-              </div>
+               {/* Brands */}
+               <div className='space-y-4'>
+                  <div className='h-5 w-20 skeleton-enhanced rounded' />
+                  <div className='space-y-3'>
+                     {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className='flex items-center gap-3'>
+                           <div className='h-4 w-4 skeleton-enhanced rounded' />
+                           <div className='h-4 w-24 skeleton-enhanced rounded' />
+                        </div>
+                     ))}
+                  </div>
+               </div>
 
-              {/* Clear Filters Button */}
-              <div className='pt-4'>
-                <div className='h-10 w-full skeleton-enhanced rounded-xl' />
-              </div>
+               {/* Separator */}
+               <div className='h-px w-full bg-border' />
+
+               {/* Price Range */}
+               <div className='space-y-4'>
+                  <div className='h-5 w-28 skeleton-enhanced rounded' />
+                  <div className='h-12 w-full skeleton-enhanced rounded-xl' />
+               </div>
             </div>
-          </motion.aside>
+          </aside>
 
           {/* Product Grid Skeleton */}
           <main className='lg:col-span-3'>
             <div className='grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'>
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 + i * 0.04 }}
-                  className='flex flex-col rounded-2xl border border-border bg-card overflow-hidden'
-                >
-                  {/* Image Skeleton */}
-                  <div className='relative aspect-square w-full overflow-hidden'>
-                    <div className='skeleton-enhanced h-full w-full' />
-                    <div className='absolute inset-0 flex items-center justify-center'>
-                      <Package className='h-10 w-10 text-muted-foreground/20' />
-                    </div>
-                  </div>
-
-                  {/* Content Skeleton */}
-                  <div className='flex flex-1 flex-col p-5 space-y-4'>
-                    <div className='flex items-center justify-between'>
-                      <div className='h-3 w-16 skeleton-enhanced rounded' />
-                      <div className='h-3 w-12 skeleton-enhanced rounded' />
-                    </div>
-                    
-                    <div className='space-y-2'>
-                      <div className='h-5 w-full skeleton-enhanced rounded' />
-                      <div className='h-5 w-3/4 skeleton-enhanced rounded' />
-                    </div>
-                    
-                    <div className='flex items-end justify-between pt-1'>
-                      <div className='space-y-1'>
-                        <div className='h-6 w-24 skeleton-enhanced rounded' />
-                        <div className='h-3 w-16 skeleton-enhanced rounded' />
-                      </div>
-                    </div>
-                    
-                    <div className='flex-1' />
-                    
-                    <div className='h-11 w-full skeleton-enhanced rounded-xl' />
-                  </div>
-                </motion.div>
+                <div key={i}>
+                   <ProductCardSkeleton />
+                </div>
               ))}
             </div>
 
             {/* Pagination Skeleton */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className='flex justify-center mt-10 gap-2'
-            >
+            <div className='flex justify-center mt-10 gap-2'>
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
                   className='h-10 w-10 skeleton-enhanced rounded-xl'
                 />
               ))}
-            </motion.div>
+            </div>
           </main>
         </div>
       </div>

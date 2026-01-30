@@ -280,7 +280,6 @@ export function CheckoutContent({ cartItems, user }: CheckoutContentProps) {
 							{step === 1 && (
 								<div className="relative z-10 animate-in fade-in slide-in-from-right-4 duration-500">
 									<h2 className='text-2xl font-bold mb-8 flex items-center gap-3'>
-                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">1</span>
 										Shipping Information
 									</h2>
 

@@ -40,7 +40,7 @@ export const AboutSkeleton = () => {
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className='p-6 sm:p-8 bg-white rounded-xl shadow-md dark:bg-slate-800'
+              className='p-6 sm:p-8 rounded-xl border border-border/50 bg-card shadow-sm'
             >
               <Skeleton className='w-16 h-16 mx-auto rounded-full mb-6' />
               <Skeleton className='h-6 w-32 mx-auto mb-3' />
@@ -61,12 +61,14 @@ export const AboutSkeleton = () => {
           <Skeleton className='h-6 w-80 mx-auto' />
         </div>
 
-        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-12'>
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className='text-center'>
-              <Skeleton className='w-32 h-32 mx-auto rounded-full mb-4' />
-              <Skeleton className='h-5 w-24 mx-auto mb-2' />
-              <Skeleton className='h-4 w-20 mx-auto' />
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className='rounded-2xl border border-border/50 bg-card overflow-hidden'>
+               <Skeleton className='aspect-[3/4] w-full' />
+               <div className='p-4 space-y-2'>
+                  <Skeleton className='h-6 w-32' />
+                  <Skeleton className='h-4 w-24' />
+               </div>
             </div>
           ))}
         </div>

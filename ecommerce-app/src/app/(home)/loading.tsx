@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 
+import { ProductCardSkeleton } from '@/components/ui/product-card-skeleton';
+
 /**
  * Home Page Loading Skeleton
  * Consistent with other loading pages
@@ -100,32 +102,8 @@ export default function HomeLoading() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 + i * 0.04 }}
-              className='flex flex-col rounded-2xl border border-border bg-card overflow-hidden'
             >
-              {/* Image */}
-              <div className='aspect-square skeleton-enhanced' />
-              
-              {/* Content */}
-              <div className='p-5 space-y-4'>
-                <div className='flex items-center justify-between'>
-                  <div className='h-3 w-16 skeleton-enhanced rounded' />
-                  <div className='h-3 w-12 skeleton-enhanced rounded' />
-                </div>
-                
-                <div className='space-y-2'>
-                  <div className='h-5 w-full skeleton-enhanced rounded' />
-                  <div className='h-5 w-3/4 skeleton-enhanced rounded' />
-                </div>
-                
-                <div className='flex items-end justify-between pt-1'>
-                  <div className='space-y-1'>
-                    <div className='h-6 w-24 skeleton-enhanced rounded' />
-                    <div className='h-3 w-16 skeleton-enhanced rounded' />
-                  </div>
-                </div>
-                
-                <div className='h-11 w-full skeleton-enhanced rounded-xl mt-2' />
-              </div>
+              <ProductCardSkeleton />
             </motion.div>
           ))}
         </div>

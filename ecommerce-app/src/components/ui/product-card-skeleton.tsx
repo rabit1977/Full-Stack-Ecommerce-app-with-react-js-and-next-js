@@ -1,11 +1,10 @@
 // components/ui/product-card-skeleton.tsx
-import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductCardSkeleton = () => {
   return (
     <div className='w-full'>
-      <div className='group relative w-full overflow-hidden rounded-2xl border bg-white shadow-md transition-shadow hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 **animate-pulse**'>
+      <div className='group relative w-full overflow-hidden rounded-2xl border bg-white shadow-md transition-shadow hover:shadow-xl dark:border-slate-800 dark:bg-slate-900'>
         {/* Image Skeleton */}
         <Skeleton className='h-48 w-full rounded-b-none' />
 

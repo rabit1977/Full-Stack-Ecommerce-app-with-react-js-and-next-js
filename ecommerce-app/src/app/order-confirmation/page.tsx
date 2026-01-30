@@ -4,8 +4,8 @@ import { getMyOrdersAction, getOrderByIdAction } from '@/actions/order-actions';
 import AuthGuard from '@/components/auth/auth-guard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { formatOrderDate, formatPrice } from '@/lib/utils/formatters';
+import confetti from 'canvas-confetti';
 import {
    ArrowRight,
    Check,
@@ -20,21 +20,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-/* ===================== Skeleton ===================== */
-function OrderConfirmationSkeleton() {
-  return (
-    <div className='min-h-screen bg-slate-50 dark:bg-slate-950/50 flex items-center justify-center p-4'>
-      <div className='w-full max-w-3xl space-y-8 text-center'>
-        <Skeleton className='h-32 w-32 rounded-full mx-auto' />
-        <Skeleton className='h-12 w-64 mx-auto' />
-        <div className="grid md:grid-cols-2 gap-8 mt-12">
-            <Skeleton className='h-96 rounded-3xl' />
-            <Skeleton className='h-96 rounded-3xl' />
-        </div>
-      </div>
-    </div>
-  );
-}
+import OrderConfirmationLoading from './loading';
 
 /* ===================== No Order ===================== */
 function NoOrderFound() {
@@ -93,7 +79,42 @@ function OrderConfirmationContent() {
     })();
   }, [orderId]);
 
-  if (loading) return <OrderConfirmationSkeleton />;
+  // Trigger confetti on mount if order is found
+  useEffect(() => {
+    if (!order) return;
+    
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min: number, max: number) => {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: any = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, [order]);
+
+  if (loading) return <OrderConfirmationLoading />;
   if (!order) return <NoOrderFound />;
 
   return (
@@ -274,7 +295,7 @@ function OrderConfirmationContent() {
 export default function OrderConfirmationPage() {
   return (
     <AuthGuard>
-      <Suspense fallback={<OrderConfirmationSkeleton />}>
+      <Suspense fallback={<OrderConfirmationLoading />}>
         <OrderConfirmationContent />
       </Suspense>
     </AuthGuard>

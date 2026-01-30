@@ -1,12 +1,12 @@
 // app/services/ServicesSkeleton.tsx
-import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const ServicesSkeleton = () => {
   return (
@@ -23,7 +23,7 @@ export const ServicesSkeleton = () => {
         {[...Array(4)].map((_, index) => (
           <Card
             key={index}
-            className='p-6 sm:p-8 bg-white rounded-xl shadow-md dark:bg-slate-800'
+            className='p-6 sm:p-8 bg-card border border-border/50 shadow-sm rounded-xl'
           >
             <CardHeader className='flex flex-col items-center mb-4'>
               <Skeleton className='h-10 w-10 rounded-full mb-2' />
