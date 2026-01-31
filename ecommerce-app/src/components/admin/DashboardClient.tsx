@@ -24,36 +24,15 @@ import { useEffect, useMemo, useState } from 'react';
  */
 export function DashboardSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className='space-y-8'
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className='space-y-2'
-      >
+    <div className='space-y-8 animate-in fade-in duration-500'>
+      <div className='space-y-2'>
         <Skeleton className='h-10 w-56 skeleton-enhanced' />
         <Skeleton className='h-5 w-80 skeleton-enhanced' />
-      </motion.div>
+      </div>
       
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'
-      >
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
         {[1, 2, 3, 4].map((i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 + i * 0.08 }}
-          >
+          <div key={i}>
             <div className='stat-card'>
               <div className='flex items-start justify-between'>
                 <Skeleton className='h-4 w-24 skeleton-enhanced' />
@@ -62,20 +41,15 @@ export function DashboardSkeleton() {
               <Skeleton className='h-9 w-20 mt-4 skeleton-enhanced' />
               <Skeleton className='h-4 w-32 mt-2 skeleton-enhanced' />
             </div>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
       
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className='grid grid-cols-1 lg:grid-cols-2 gap-6'
-      >
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         <Skeleton className='h-96 rounded-2xl skeleton-enhanced' />
         <Skeleton className='h-96 rounded-2xl skeleton-enhanced' />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 

@@ -374,22 +374,22 @@
   /* ===== Skeleton Enhanced ===== */
   .skeleton-enhanced {
     @apply relative rounded-lg overflow-hidden;
-    background: #e2e8f0;
+    background: #e2e8f2; /* Slightly cooler/darker for better contrast against white */
   }
 
   .skeleton-enhanced::after {
     content: '';
     @apply absolute inset-0;
-    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.8) 50%, transparent 70%); /* Stronger shine */
     animation: shimmer 1.5s infinite;
   }
 
   .dark .skeleton-enhanced {
-    background: #2a2a3a;
+    background: #272733; /* Slightly lighter than card */
   }
 
   .dark .skeleton-enhanced::after {
-    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%); /* More visible shine */
   }
 
   /* ===== Premium Hover Effects ===== */
