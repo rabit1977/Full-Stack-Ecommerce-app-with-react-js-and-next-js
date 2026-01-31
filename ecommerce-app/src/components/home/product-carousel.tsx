@@ -134,7 +134,7 @@ export const ProductCarousel = ({
 
 	return (
 		<div
-			className='relative w-full aspect-video sm:aspect-21/9 max-h-150 overflow-hidden bg-black focus:outline-none'
+			className='relative group w-full aspect-video sm:aspect-21/9 max-h-150 overflow-hidden bg-black focus:outline-none'
 			onMouseEnter={() => setIsPaused(true)}
 			onMouseLeave={() => setIsPaused(false)}
 			onKeyDown={handleKeyDown}
@@ -175,76 +175,77 @@ export const ProductCarousel = ({
 							sizes='100vw'
 							quality={90}
 						/>
-						<div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent' />
+						<div className='absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 sm:opacity-60 transition-opacity duration-300' />
 
-						<div className='absolute inset-0 flex flex-col justify-end p-6  sm:p-8 lg:p-12'>
-							<div className='max-w-4xl space-y-3 sm:space-y-4'>
-								{currentProduct.category && (
-									<div className='w-fit  backdrop-blur-sm bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wide'>
-										{currentProduct.category}
-									</div>
-								)}
+						<div className='absolute inset-0 flex flex-col justify-end p-4 sm:p-10 lg:p-16'>
+							<div className='max-w-3xl w-full space-y-3 sm:space-y-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100'>
+								
+                                <div className="flex items-center gap-3">
+                                    {currentProduct.category && (
+                                        <span className='backdrop-blur-md bg-white/10 border border-white/20 text-white px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-sm'>
+                                            {currentProduct.category}
+                                        </span>
+                                    )}
+                                    {currentProduct.rating > 0 && (
+										<div className='flex items-center gap-1 bg-black/20 backdrop-blur-md rounded-full px-2 py-1 border border-white/10'>
+											<Star className='h-3 w-3 fill-yellow-400 text-yellow-400' />
+											<span className='text-[10px] sm:text-xs font-bold text-white'>
+												{currentProduct.rating.toFixed(1)}
+											</span>
+										</div>
+									)}
+                                </div>
 
-								<h2 className='text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight drop-shadow-lg'>
+								<h2 className='text-3xl sm:text-5xl lg:text-7xl font-black text-white leading-[0.9] tracking-tight drop-shadow-xl'>
 									{currentProduct.title}
 								</h2>
 
-								<p className='text-sm sm:text-base lg:text-lg text-slate-200 max-w-2xl line-clamp-2 drop-shadow-md'>
-									{currentProduct.description}
-								</p>
-
-								<div className='flex items-center gap-3 sm:gap-4 flex-wrap'>
+								<div className='flex items-center gap-3 sm:gap-4'>
 									{currentProduct.discount > 0 ? (
-										<>
-											<span className='text-2xl sm:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg'>
+										<div className="flex items-baseline gap-2">
+											<span className='text-2xl sm:text-4xl font-bold text-white drop-shadow-md'>
 												{formatPrice(
 													currentProduct.price *
 														(1 - currentProduct.discount / 100)
 												)}
 											</span>
-											<span className='text-base sm:text-lg lg:text-xl text-slate-300 line-through drop-shadow-md'>
+											<span className='text-sm sm:text-lg text-white/50 line-through font-medium'>
 												{formatPrice(currentProduct.price)}
 											</span>
-											<div className='text-xs sm:text-sm font-bold bg-red-500 text-white px-2.5 py-1.5 rounded-lg shadow-lg'>
-												{currentProduct.discount}% OFF
-											</div>
-										</>
+                                            <span className='text-[10px] sm:text-xs font-bold bg-red-500/90 backdrop-blur-sm text-white px-2 py-0.5 rounded-full'>
+												-{currentProduct.discount}%
+											</span>
+										</div>
 									) : (
-										<span className='text-2xl sm:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg'>
+										<span className='text-2xl sm:text-4xl font-bold text-white drop-shadow-md'>
 											{formatPrice(currentProduct.price)}
 										</span>
 									)}
-
-									{currentProduct.rating > 0 && (
-										<div className='flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg'>
-											<Star className='h-4 w-4 fill-yellow-400 text-yellow-400' />
-											<span className='text-sm font-semibold text-white'>
-												{currentProduct.rating.toFixed(1)}
-											</span>
-										</div>
-									)}
 								</div>
 
-								<div className='flex items-center gap-4 mt-2'>
+                                <p className='text-sm sm:text-lg text-white/75 font-medium max-w-xl line-clamp-2 leading-relaxed drop-shadow-sm hidden xs:block'>
+									{currentProduct.description}
+								</p>
+
+								<div className='w-full sm:w-auto pt-2 sm:pt-4 pb-6 sm:pb-8 grid grid-cols-2 sm:flex gap-3 sm:gap-4'>
 									<Button
-										size='lg'
+										size='default'
 										onClick={(e) => {
 											e.stopPropagation();
 											navigateToProduct(currentProduct.id);
 										}}
-										className='w-fit gap-2 shadow-xl hover:shadow-2xl transition-shadow'
+										className='w-full sm:w-auto h-10 sm:h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs sm:text-sm shadow-xl border-0'
 									>
-										View Product
-										<ChevronRight className='h-4 w-4' />
+										View Details
 									</Button>
 									<Button
-										size='lg'
-										variant='secondary'
+										size='default'
+										variant='outline'
 										onClick={handleAddToCart}
 										disabled={isPending}
-										className='w-fit gap-2 shadow-xl hover:shadow-2xl transition-shadow'
+										className='w-full sm:w-auto h-10 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md font-bold text-xs sm:text-sm hover:text-white hover:border-white/40'
 									>
-										<ShoppingCart className='h-4 w-4' />
+										<ShoppingCart className='h-3.5 w-3.5 mr-2' />
 										{isPending ? 'Adding...' : 'Add to Cart'}
 									</Button>
 								</div>
@@ -257,19 +258,25 @@ export const ProductCarousel = ({
 			{carouselProducts.length > 1 && (
 				<>
 					<button
-						onClick={() => paginate(-1)}
-						className='absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full transparent  text-white hover:bg-black/70 transition-all duration-200 z-10 focus:outline-none focus:ring-2 focus:ring-white/50 group group-hover:opacity-100'
+						onClick={(e) => {
+                            e.stopPropagation();
+                            paginate(-1);
+                        }}
+						className='absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md border border-white/10 transition-all duration-300 z-10 focus:outline-none focus:ring-2 focus:ring-white/50 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0'
 						aria-label='Previous product'
 					>
-						<ChevronLeft className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform opacity-0 group-hover:opacity-100' />
+						<ChevronLeft className='h-6 w-6' />
 					</button>
 
 					<button
-						onClick={() => paginate(1)}
-						className='absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full transparent text-white hover:bg-black/70 transition-all duration-200 z-10 group focus:outline-none focus:ring-2 focus:ring-white/50'
+						onClick={(e) => {
+                            e.stopPropagation();
+                            paginate(1);
+                        }}
+						className='absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md border border-white/10 transition-all duration-300 z-10 focus:outline-none focus:ring-2 focus:ring-white/50 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0'
 						aria-label='Next product'
 					>
-						<ChevronRight className='h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform opacity-0 group-hover:opacity-100' />
+						<ChevronRight className='h-6 w-6' />
 					</button>
 
 					<div className='absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10'>
