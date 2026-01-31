@@ -27,87 +27,87 @@ export function AccountStats({
     <div className='grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6'>
       <button
         onClick={() => handleNavigate('/orders')}
-        className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700 hover:shadow-md transition-shadow text-left group'
+        className='glass-card p-6 border-blue-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-left group relative overflow-hidden'
       >
         <div className='flex items-center justify-between'>
           <div>
-            <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
+            <p className='text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1'>
               Total Orders
             </p>
-            <p className='text-3xl font-bold mt-2 dark:text-white'>
+            <p className='text-2xl sm:text-3xl font-black tracking-tight text-foreground'>
               {totalOrders}
             </p>
           </div>
-          <div className='w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-            <Package className='h-6 w-6 text-orange-600 dark:text-orange-400' />
+          <div className='w-12 h-12 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform ring-1 ring-inset ring-white/10'>
+            <Package className='h-6 w-6' />
           </div>
         </div>
-        <p className='text-xs text-slate-500 dark:text-slate-400 mt-3 hover:underline hover:cursor-pointer hover:text-blue-600 transition-colors'>
-          Click to view orders
-        </p>
+        <div className='mt-4 flex items-center text-[10px] sm:text-xs font-bold text-blue-500 group-hover:underline'>
+           VIEW ALL ORDERS
+        </div>
       </button>
 
-      <div className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700'>
+      <div className='glass-card p-6 border-violet-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group'>
         <div className='flex items-center justify-between'>
           <div>
-            <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
+            <p className='text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1'>
               Total Spent
             </p>
-            <p className='text-3xl font-bold mt-2 dark:text-white'>
+            <p className='text-2xl sm:text-3xl font-black tracking-tight text-foreground'>
               {formatPrice(totalSpent)}
             </p>
           </div>
-          <div className='w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center'>
-            <span className='text-2xl'>💰</span>
+          <div className='w-12 h-12 bg-violet-500/10 text-violet-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform ring-1 ring-inset ring-white/10'>
+            <span className='text-2xl font-black'>$</span>
           </div>
         </div>
-        <p className='text-xs text-slate-500 dark:text-slate-400 mt-3'>
-          Lifetime purchases
-        </p>
+        <div className='mt-4 flex items-center text-[10px] sm:text-xs font-bold text-muted-foreground'>
+           LIFETIME PURCHASES
+        </div>
       </div>
 
       <button
         onClick={() => handleNavigate('/cart')}
-        className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700 hover:shadow-md transition-shadow text-left group'
+        className='glass-card p-6 border-pink-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-left group relative overflow-hidden'
       >
         <div className='flex items-center justify-between'>
           <div>
-            <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
+            <p className='text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1'>
               Cart Items
             </p>
-            <p className='text-3xl font-bold mt-2 dark:text-white'>
+            <p className='text-2xl sm:text-3xl font-black tracking-tight text-foreground'>
               {cartItems}
             </p>
           </div>
-          <div className='w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-            <ShoppingCart className='h-6 w-6 text-orange-600 dark:text-orange-400' />
+          <div className='w-12 h-12 bg-pink-500/10 text-pink-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform ring-1 ring-inset ring-white/10'>
+            <ShoppingCart className='h-6 w-6' />
           </div>
         </div>
-        <p className='text-xs text-slate-500 dark:text-slate-400 mt-3 hover:underline hover:cursor-pointer hover:text-orange-600 transition-colors'>
-          Click to view cart
-        </p>
+        <div className='mt-4 flex items-center text-[10px] sm:text-xs font-bold text-pink-500 group-hover:underline'>
+           CHECKOUT NOW
+        </div>
       </button>
 
       <button
         onClick={() => handleNavigate('/wishlist')}
-        className='bg-white rounded-lg p-6 shadow-sm dark:bg-slate-800 border dark:border-slate-700 hover:shadow-md transition-shadow text-left group'
+        className='glass-card p-6 border-orange-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-left group relative overflow-hidden'
       >
         <div className='flex items-center justify-between'>
           <div>
-            <p className='text-sm font-medium text-slate-600 dark:text-slate-400'>
+            <p className='text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1'>
               Wishlist
             </p>
-            <p className='text-3xl font-bold mt-2 dark:text-white'>
+            <p className='text-2xl sm:text-3xl font-black tracking-tight text-foreground'>
               {wishlistItems}
             </p>
           </div>
-          <div className='w-12 h-12 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-            <Heart className='h-6 w-6 text-pink-600 dark:text-pink-400' />
+          <div className='w-12 h-12 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform ring-1 ring-inset ring-white/10'>
+            <Heart className='h-6 w-6' />
           </div>
         </div>
-        <p className='text-xs text-slate-500 dark:text-slate-400 mt-3 hover:underline hover:cursor-pointer hover:text-pink-600 transition-colors'>
-          Click to view wishlist
-        </p>
+        <div className='mt-4 flex items-center text-[10px] sm:text-xs font-bold text-orange-500 group-hover:underline'>
+           VIEW SAVED ITEMS
+        </div>
       </button>
     </div>
   );

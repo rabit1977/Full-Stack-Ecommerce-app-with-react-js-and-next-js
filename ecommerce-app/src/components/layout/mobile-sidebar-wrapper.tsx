@@ -20,7 +20,7 @@ export function MobileSidebarWrapper({
 }: MobileSidebarWrapperProps) {
   const sidebar = useMobileSidebar();
   const pathname = usePathname();
-  const isAdminRoute = pathname?.startsWith('/admin');
+  const isAdminRoute = pathname?.startsWith('/admin/dashboard');
 
   if (isAdminRoute) {
     return null;

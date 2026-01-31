@@ -78,11 +78,15 @@ const AccountPage = async () => {
 
   return (
     <AuthGuard>
-      <div className='min-h-screen bg-slate-50 dark:bg-slate-950/50'>
-        <div className='container-wide py-10 sm:py-16'>
+      <div className='min-h-screen relative overflow-hidden'>
+        {/* Background Pattern - Matching Admin Layout */}
+        <div className='fixed inset-0 -z-10 bg-gradient-to-br from-muted/30 via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10' />
+        <div className='fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.05),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.1),transparent)]' />
+
+        <div className='container-wide py-10 sm:py-16 relative z-10'>
           {/* Profile Header */}
-          <header className='mb-10 sm:mb-16 rounded-3xl p-8 sm:p-12 glass-card relative overflow-hidden'>
-             <div className='absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-primary/5 opacity-50' />
+          <header className='mb-10 sm:mb-16 rounded-[2.5rem] p-8 sm:p-12 glass-card relative overflow-hidden border-border/60 shadow-xl shadow-black/5'>
+             <div className='absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50' />
              
              <div className='relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-8'>
                {/* Avatar */}
@@ -173,17 +177,15 @@ const AccountPage = async () => {
             {/* Left Column - Main Content */}
             <div className='lg:col-span-8 space-y-8'>
               {/* Account Statistics */}
-              <div className="rounded-3xl p-1 border border-border/50 bg-card/30 backdrop-blur-sm">
-                 <AccountStats
-                   totalOrders={stats.totalOrders}
-                   totalSpent={stats.totalSpent}
-                   cartItems={stats.cartItemsCount}
-                   wishlistItems={stats.wishlistItemsCount}
-                 />
-              </div>
+              <AccountStats
+                totalOrders={stats.totalOrders}
+                totalSpent={stats.totalSpent}
+                cartItems={stats.cartItemsCount}
+                wishlistItems={stats.wishlistItemsCount}
+              />
 
               {/* Account Details Card */}
-              <div className='glass-card p-8 rounded-3xl'>
+              <div className='glass-card p-8 sm:p-10 rounded-[2.5rem] border-border/60 shadow-xl shadow-black/5'>
                   <div className='flex items-center justify-between mb-8'>
                     <h2 className='text-2xl font-bold flex items-center gap-3'>
                       <span className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary'>
@@ -199,7 +201,7 @@ const AccountPage = async () => {
                       { label: 'Account Type', value: user?.role, default: 'User', capitalize: true },
                       { label: 'Member Since', value: memberSince },
                     ].map((item, i) => (
-                      <div key={i} className='space-y-2 p-4 rounded-2xl bg-secondary/30 border border-border/50'>
+                      <div key={i} className='space-y-2 p-4 rounded-2xl bg-secondary/30 border border-border/50 hover:bg-secondary/50 transition-colors'>
                         <p className='text-xs font-bold text-muted-foreground uppercase tracking-widest'>
                           {item.label}
                         </p>
@@ -215,7 +217,7 @@ const AccountPage = async () => {
             {/* Right Column - Sidebar */}
             <div className='lg:col-span-4 space-y-8'>
               {/* Quick Actions Card */}
-              <div className='glass-card p-6 rounded-3xl space-y-6'>
+              <div className='glass-card p-6 sm:p-8 rounded-[2.5rem] border-border/60 shadow-xl shadow-black/5 space-y-6'>
                   <h3 className='text-xl font-bold px-2'>Quick Actions</h3>
                   
                   <nav className='space-y-3' aria-label='Quick navigation'>
@@ -227,11 +229,11 @@ const AccountPage = async () => {
                       { href: '/products', icon: Package, label: 'Browse Products', color: 'text-violet-500', bg: 'bg-violet-500/10' },
                     ].map((item, idx) => (
                       <Link href={item.href} key={idx} className='block group'>
-                        <div className='flex items-center p-4 rounded-2xl bg-secondary/30 border border-transparent hover:border-primary/20 hover:bg-secondary/60 transition-all duration-300'>
-                           <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center ${item.color} mr-4 group-hover:scale-110 transition-transform`}>
+                        <div className='flex items-center p-3 sm:p-4 rounded-2xl bg-secondary/30 border border-transparent hover:border-primary/20 hover:bg-secondary/60 transition-all duration-300'>
+                           <div className={`w-10 h-10 shrink-0 rounded-xl ${item.bg} flex items-center justify-center ${item.color} mr-4 group-hover:scale-110 transition-transform`}>
                               <item.icon className="h-5 w-5" />
                            </div>
-                           <span className='font-bold text-foreground group-hover:text-primary transition-colors'>{item.label}</span>
+                           <span className='font-bold text-foreground group-hover:text-primary transition-colors text-sm sm:text-base'>{item.label}</span>
                         </div>
                       </Link>
                     ))}

@@ -327,7 +327,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                       </NavLink>
                       
                       {user.role === 'ADMIN' && (
-                        <NavLink href='/admin' icon={LayoutDashboard} isActive={isActiveLink('/admin')} onClick={onClose} className="text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30">
+                        <NavLink href='/admin/dashboard' icon={LayoutDashboard} isActive={isActiveLink('/admin/dashboard')} onClick={onClose} className="text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30">
                           Admin Dashboard
                         </NavLink>
                       )}
