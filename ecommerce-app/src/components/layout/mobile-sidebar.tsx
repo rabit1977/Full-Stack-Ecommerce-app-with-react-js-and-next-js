@@ -91,7 +91,7 @@ const CATEGORIES = [
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const user = session?.user;
   const menuRef = useRef<HTMLDivElement>(null);
   const previousOpenState = useRef(isOpen);
@@ -207,7 +207,21 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
             <ScrollArea className='flex-1 py-6 px-4'>
               <div className='flex flex-col gap-6'>
                 {/* User Profile Card */}
-                {user ? (
+                {status === 'loading' ? (
+                   <div className="bg-muted/30 rounded-2xl p-4 border border-border/50 space-y-4">
+                      <div className="flex items-center gap-3">
+                         <div className='h-12 w-12 rounded-full skeleton-enhanced' />
+                         <div className='flex-1 space-y-2'>
+                            <div className='h-4 w-24 skeleton-enhanced rounded' />
+                            <div className='h-3 w-32 skeleton-enhanced rounded' />
+                         </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                         <div className="h-9 w-full skeleton-enhanced rounded-md" />
+                         <div className="h-9 w-full skeleton-enhanced rounded-md" />
+                      </div>
+                   </div>
+                ) : user ? (
                    <div className="bg-muted/30 rounded-2xl p-4 border border-border/50">
                       <div className="flex items-center gap-3 mb-3">
                          <Avatar className='h-12 w-12 border-2 border-background shadow-sm'>
@@ -297,7 +311,13 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                      Account & Support
                   </p>
                   
-                  {user && (
+                  {status === 'loading' ? (
+                     <div className='space-y-1 px-4'>
+                        {[1, 2, 3].map(i => (
+                           <div key={i} className='h-10 w-full skeleton-enhanced rounded-xl' />
+                        ))}
+                     </div>
+                  ) : user ? (
                     <>
                       <NavLink href='/wishlist' icon={Heart} isActive={isActiveLink('/wishlist')} onClick={onClose}>
                         My Wishlist
@@ -312,7 +332,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                         </NavLink>
                       )}
                     </>
-                  )}
+                  ) : null}
 
                   <NavLink href='/services' icon={Briefcase} isActive={isActiveLink('/services')} onClick={onClose}>
                     Services

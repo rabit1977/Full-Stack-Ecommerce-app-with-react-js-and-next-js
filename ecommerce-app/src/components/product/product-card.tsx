@@ -7,7 +7,7 @@ import { ProductWithRelations } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle, Eye, Heart, Package, ShoppingBag, Star, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Eye, Heart, Package, ShoppingCart, Star, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { memo, useCallback, useMemo, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -298,7 +298,7 @@ export const ProductCard = memo(
                         className='h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full'
                     />
                 ) : (
-                    <ShoppingBag className='h-4 w-4' />
+                    <ShoppingCart className='h-4 w-4' />
                 )}
             </Button>
           </div>
