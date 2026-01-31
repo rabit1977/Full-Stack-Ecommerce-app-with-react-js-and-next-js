@@ -1,4 +1,5 @@
 import { auth } from '@/auth';
+import { AdminProductFilters } from '@/components/admin/admin-product-filters';
 import { BulkDiscountModal } from '@/components/admin/bulk-discount-modal';
 import { ProductsClient } from '@/components/admin/products-client';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,10 @@ interface AdminProductsPageProps {
   searchParams: Promise<{
     page?: string;
     limit?: string;
+    category?: string;
+    brand?: string;
+    stock?: string;
+    q?: string;
   }>;
 }
 
@@ -33,19 +38,60 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
   const limit = Number(searchParams?.limit) || 12;
   const skip = (page - 1) * limit;
 
-  const [rawProducts, totalCount, categories, brands] = await Promise.all([
+  const { category, brand, stock, q } = searchParams;
+
+  // Build dynamic where clause
+  const where: Prisma.ProductWhereInput = {};
+
+  if (category && category !== 'all') {
+    where.category = category;
+  }
+
+  if (brand && brand !== 'all') {
+    where.brand = brand;
+  }
+
+  if (q) {
+    where.OR = [
+      { title: { contains: q, mode: 'insensitive' } },
+      { description: { contains: q, mode: 'insensitive' } },
+      { category: { contains: q, mode: 'insensitive' } },
+      { brand: { contains: q, mode: 'insensitive' } },
+    ];
+  }
+
+  if (stock && stock !== 'all') {
+    if (stock === 'out') {
+      where.stock = 0;
+    } else if (stock === 'low') {
+      where.stock = { gt: 0, lt: 10 };
+    } else if (stock === 'in') {
+      where.stock = { gte: 10 };
+    }
+  }
+
+  const [rawProducts, totalCount, categoriesRaw, brandsRaw] = await Promise.all([
     prisma.product.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       skip,
       take: limit,
     }),
-    prisma.product.count(),
+    prisma.product.count({ where }),
     prisma.product.findMany({
       distinct: ['category'],
       select: { category: true },
+      where: { category: { not: "" } }
     }),
-    prisma.product.findMany({ distinct: ['brand'], select: { brand: true } }),
+    prisma.product.findMany({ 
+      distinct: ['brand'], 
+      select: { brand: true },
+      where: { brand: { not: "" } }
+    }),
   ]);
+
+  const categories = categoriesRaw.map(c => c.category).filter(Boolean) as string[];
+  const brands = brandsRaw.map(b => b.brand).filter(Boolean) as string[];
 
   const products = rawProducts.map((product) => ({
     ...product,
@@ -172,8 +218,8 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
         {/* Action Buttons - Stack on mobile */}
         <div className='flex  gap-2 sm:gap-3'>
           <BulkDiscountModal
-            categories={categories.map((c) => c.category)}
-            brands={brands.map((b) => b.brand)}
+            categories={categories}
+            brands={brands}
             applyBulkDiscountAction={applyBulkDiscountAction}
           />
           <Button 
@@ -188,6 +234,9 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
           </Button>
         </div>
       </div>
+
+      {/* Filters */}
+      <AdminProductFilters categories={categories} brands={brands} />
 
       {/* Stats Grid - 2 columns on mobile, 4 on desktop */}
       <div className='grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5'>

@@ -2,6 +2,7 @@
 
 import { useMobileSidebar } from '@/lib/hooks/useMobileSidebar';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Header } from './header';
 import { MobileSidebar } from './mobile-sidebar';
 
@@ -20,9 +21,17 @@ export function MobileSidebarWrapper({
 }: MobileSidebarWrapperProps) {
   const sidebar = useMobileSidebar();
   const pathname = usePathname();
-  const isAdminRoute = pathname?.startsWith('/admin/dashboard');
+  const [mounted, setMounted] = useState(false);
 
-  if (isAdminRoute) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isAdminRoute = pathname?.startsWith('/admin');
+
+  // Avoid hydration mismatch by not rendering anything that depends on client state/pathname
+  // until the component has mounted on the client.
+  if (!mounted || isAdminRoute) {
     return null;
   }
 
@@ -35,7 +44,6 @@ export function MobileSidebarWrapper({
         initialCartItemCount={initialCartItemCount}
       />
       <MobileSidebar isOpen={sidebar.isOpen} onClose={sidebar.close} />
-
     </>
   );
 }

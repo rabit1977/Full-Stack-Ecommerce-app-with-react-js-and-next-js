@@ -298,7 +298,7 @@ export function CategoriesClient({ initialCategories = [] }: CategoriesClientPro
                         <TableRow key={category.id}>
                         <TableCell className='font-medium text-xs sm:text-sm md:text-base lg:text-lg'>{category.name}</TableCell>
                         <TableCell className='text-xs sm:text-sm md:text-base lg:text-lg'>{category.slug}</TableCell>
-                        <TableCell className='text-xs sm:text-sm md:text-base lg:text-lg'>-</TableCell> {/* Placeholder for product count if expensive to join */}
+                        <TableCell className='text-xs sm:text-sm md:text-base lg:text-lg'>-</TableCell>
                         <TableCell className='text-xs sm:text-sm md:text-base lg:text-lg'>
                             {category.isActive ? (
                             <span className='inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-500/15 text-green-700 dark:text-green-400 hover:bg-green-500/25'>
