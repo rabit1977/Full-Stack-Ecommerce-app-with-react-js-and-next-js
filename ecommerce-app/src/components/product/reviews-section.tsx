@@ -49,14 +49,14 @@ const ReviewsSection = ({
     return reviews.find((review) => review.userId === user.id) || null;
   }, [reviews, user]);
 
-  const [editingReview, setEditingReview] = useState<any | null>(null);
+  const [editingReview, setEditingReview] = useState<NonNullable<ProductWithRelations['reviews']>[number] | null>(null);
   const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
   const [reviewIdToDelete, setReviewIdToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!product) return null;
 
-  const handleEditClick = (review: any) => {
+  const handleEditClick = (review: NonNullable<ProductWithRelations['reviews']>[number]) => {
     setEditingReview(review);
     // Scroll to form
     const formElement = document.getElementById('review-form-anchor');
@@ -298,7 +298,7 @@ const ReviewsSection = ({
                           <Button
                             variant='ghost'
                             size='sm'
-                            onClick={() => handleEditClick(review as any)}
+                            onClick={() => handleEditClick(review)}
                             className='h-6 w-6 p-0 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary'
                           >
                             <Pencil className='h-3 w-3' />
