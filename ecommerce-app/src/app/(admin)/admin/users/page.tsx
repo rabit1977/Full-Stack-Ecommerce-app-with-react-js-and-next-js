@@ -65,21 +65,21 @@ export default async function AdminUsersPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className='grid gap-5 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100'>
+      <div className='grid gap-3 sm:gap-5 grid-cols-2 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100'>
         {[
             { label: 'Total Users', value: users.length, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
             { label: 'Administrators', value: adminCount, icon: Shield, color: 'text-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20' },
             { label: 'Regular Customers', value: userCount, icon: UserIcon, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
         ].map((stat, i) => (
-             <div key={i} className={`glass-card p-6 rounded-3xl flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group border ${stat.border}`}>
+             <div key={i} className={`glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center justify-between hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group border gap-2 flex-row-reverse ${stat.border}`}>
                 <div className='flex justify-between items-start mb-2'>
-                    <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} ring-1 ring-inset ring-white/10 group-hover:scale-110 transition-transform`}>
-                       <stat.icon className='h-6 w-6' />
+                    <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl ${stat.bg} ${stat.color} ring-1 ring-inset ring-white/10 group-hover:scale-110 transition-transform`}>
+                       <stat.icon className='h-4 w-4 sm:h-6 sm:w-6' />
                     </div>
                 </div>
-                <div>
-                   <h3 className='text-3xl font-black mt-2 tracking-tight text-foreground'>{stat.value}</h3>
-                   <p className='text-sm font-bold text-muted-foreground uppercase tracking-wider mt-1'>{stat.label}</p>
+                <div className='flex flex-col items-start min-w-24'>
+                   <h3 className='text-xl sm:text-3xl font-black tracking-tight text-foreground'>{stat.value}</h3>
+                   <p className='text-[10px] sm:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-0.5 sm:mt-1'>{stat.label}</p>
                 </div>
              </div>
         ))}
